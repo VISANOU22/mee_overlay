@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mee Sport · ຄວບຄຸມ Overlay</title>
+<style>
+  :root { --bg:#0f1116; --panel:#181b22; --line:#2a2f3a; --ink:#eef0f4; --muted:#9aa0ad; --accent:#d6281e; --ok:#2ecc71; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 'Noto Sans Lao','Phetsarath OT',system-ui,sans-serif; padding:16px; }
+  .wrap { max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  h1 { margin:4px 0 0; font-size:22px; }
+  .muted { color:var(--muted); font-size:14px; margin:0; }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; }
+  h2 { margin:0; font-size:16px; }
+  input, textarea { font:inherit; color:var(--ink); background:#0b0d12; border:1px solid var(--line); border-radius:10px; padding:10px 12px; width:100%; }
+  textarea { min-height:80px; resize:vertical; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  button { font:inherit; font-weight:600; border:0; border-radius:10px; padding:12px 16px; cursor:pointer; background:#2a2f3a; color:var(--ink); flex:1 1 auto; min-height:48px; }
+  button.primary { background:var(--accent); color:#fff; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .url { font-family:ui-monospace,monospace; font-size:13px; word-break:break-all; background:#0b0d12; border:1px dashed var(--line); border-radius:10px; padding:10px; user-select:all; }
+  .swatches { display:flex; gap:8px; }
+  .swatches button { flex:0 0 48px; height:48px; border-radius:50%; border:3px solid transparent; }
+  .swatches button[aria-pressed="true"] { border-color:#fff; }
+  .status { font-size:14px; color:var(--muted); min-height:1.5em; }
+  .status.ok { color:var(--ok); } .status.err { color:#ff6b61; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>ຄວບຄຸມ Overlay</h1>
+    <p class="muted">ໜ້າທົດສອບ: ສົ່ງຂໍ້ຄວາມຈາກໜ້ານີ້ ໄປຂຶ້ນເທິງ live ຜ່ານປຸ່ມ Web ຂອງ Live Now.</p>
+  </div>
+
+  <section>
+    <h2>1. ລິ້ງສຳລັບໃສ່ປຸ່ມ Web ໃນ Live Now</h2>
+    <div class="url" id="url"></div>
+    <div class="row">
+      <button type="button" id="copy">ສຳເນົາລິ້ງ</button>
+      <button type="button" id="newtopic">ສ້າງລະຫັດຊ່ອງໃໝ່</button>
+    </div>
+    <p class="muted">ລະຫັດຊ່ອງຖືກຈື່ໄວ້ໃນເຄື່ອງນີ້. ຢ່າແຈກລິ້ງໃຫ້ຄົນອື່ນ ເພາະໃຜມີລະຫັດກໍສົ່ງຂໍ້ຄວາມຂຶ້ນ live ໄດ້.</p>
+  </section>
+
+  <section>
+    <h2>2. ຂໍ້ຄວາມເທິງ live</h2>
+    <label for="text" class="muted">ຂໍ້ຄວາມ</label>
+    <textarea id="text">ຍິນດີຕ້ອນຮັບສູ່ Mee Sport Live</textarea>
+    <div class="swatches" role="group" aria-label="ສີເນັ້ນ">
+      <button type="button" data-c="#f5c518" style="background:#f5c518" aria-label="ເຫຼືອງ" aria-pressed="true"></button>
+      <button type="button" data-c="#d6281e" style="background:#d6281e" aria-label="ແດງ" aria-pressed="false"></button>
+      <button type="button" data-c="#2ecc71" style="background:#2ecc71" aria-label="ຂຽວ" aria-pressed="false"></button>
+      <button type="button" data-c="#3aa0ff" style="background:#3aa0ff" aria-label="ຟ້າ" aria-pressed="false"></button>
+    </div>
+    <div class="row">
+      <button type="button" class="primary" id="show">ສະແດງຂໍ້ຄວາມ</button>
+      <button type="button" id="hide">ເຊື່ອງຂໍ້ຄວາມ</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. ກອບທົດສອບ</h2>
+    <p class="muted">ກອບເຫຼືອງ ແລະ ກ່ອງຄຳອະທິບາຍກາງຈໍ ໃຊ້ກວດຂະໜາດ ແລະ ຄວາມໂປ່ງໃສ. ປິດໄດ້ເມື່ອທົດສອບແລ້ວ.</p>
+    <div class="row">
+      <button type="button" id="teston">ເປີດກອບທົດສອບ</button>
+      <button type="button" id="testoff">ປິດກອບທົດສອບ</button>
+    </div>
+  </section>
+
+  <div class="status" id="status" role="status"></div>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const KEY = 'mee-overlay-topic';
+  const makeTopic = () => 'mee-' + Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join('');
+  let topic = '';
+  try { topic = localStorage.getItem(KEY) || ''; } catch (e) {}
+  if (!topic) { topic = makeTopic(); try { localStorage.setItem(KEY, topic); } catch (e) {} }
+
+  const overlayUrl = () => new URL('overlay.html?t=' + topic, location.href).href;
+  const showUrl = () => { $('url').textContent = overlayUrl(); };
+  showUrl();
+
+  let accent = '#f5c518';
+  const setStatus = (t, k) => { const s = $('status'); s.textContent = t; s.className = 'status' + (k ? ' ' + k : ''); };
+
+  const send = async (state, label) => {
+    try {
+      const r = await fetch('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', body: JSON.stringify(state) });
+      if (!r.ok) throw new Error(r.status);
+      setStatus('ສົ່ງແລ້ວ: ' + label + ' · ' + new Date().toLocaleTimeString(), 'ok');
+    } catch (e) {
+      setStatus('ສົ່ງບໍ່ສຳເລັດ. ກວດເນັດ ແລ້ວລອງໃໝ່', 'err');
+    }
+  };
+
+  $('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(overlayUrl()); setStatus('ສຳເນົາລິ້ງແລ້ວ', 'ok'); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($('url')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); setStatus('ກົດຄ້າງເພື່ອສຳເນົາລິ້ງທີ່ເລືອກໄວ້'); }
+  };
+  $('newtopic').onclick = () => {
+    topic = makeTopic(); try { localStorage.setItem(KEY, topic); } catch (e) {}
+    showUrl(); setStatus('ສ້າງລະຫັດໃໝ່ແລ້ວ. ຕ້ອງເອົາລິ້ງໃໝ່ໄປໃສ່ໃນ Live Now ອີກຄັ້ງ');
+  };
+  document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => {
+    accent = b.dataset.c;
+    document.querySelectorAll('.swatches button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    send({ accent }, 'ປ່ຽນສີ');
+  });
+  $('show').onclick = () => send({ text: $('text').value.trim(), accent, show: true }, 'ສະແດງຂໍ້ຄວາມ');
+  $('hide').onclick = () => send({ show: false }, 'ເຊື່ອງຂໍ້ຄວາມ');
+  $('teston').onclick = () => send({ test: true }, 'ເປີດກອບທົດສອບ');
+  $('testoff').onclick = () => send({ test: false }, 'ປິດກອບທົດສອບ');
+})();
+</script>
+</body>
+</html>
