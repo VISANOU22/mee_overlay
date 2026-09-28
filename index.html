@@ -2,119 +2,212 @@
 <html lang="lo">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mee Sport · ຄວບຄຸມ Overlay</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mee Overlay · Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="fontcss" rel="stylesheet" href="">
+<link rel="stylesheet" href="render.css">
 <style>
-  :root { --bg:#0f1116; --panel:#181b22; --line:#2a2f3a; --ink:#eef0f4; --muted:#9aa0ad; --accent:#d6281e; --ok:#2ecc71; }
+  :root {
+    --bg:#0e1015; --panel:#161a22; --panel2:#1d222c; --line:#2b313d; --ink:#eef0f4; --muted:#98a0ae;
+    --accent:#ff4d3d; --accent2:#ffb020; --ok:#34c77b; --sel:#3aa0ff;
+    color-scheme:dark;
+  }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 'Noto Sans Lao','Phetsarath OT',system-ui,sans-serif; padding:16px; }
-  .wrap { max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
-  h1 { margin:4px 0 0; font-size:22px; }
-  .muted { color:var(--muted); font-size:14px; margin:0; }
-  section { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; }
-  h2 { margin:0; font-size:16px; }
-  input, textarea { font:inherit; color:var(--ink); background:#0b0d12; border:1px solid var(--line); border-radius:10px; padding:10px 12px; width:100%; }
-  textarea { min-height:80px; resize:vertical; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; }
-  button { font:inherit; font-weight:600; border:0; border-radius:10px; padding:12px 16px; cursor:pointer; background:#2a2f3a; color:var(--ink); flex:1 1 auto; min-height:48px; }
-  button.primary { background:var(--accent); color:#fff; }
-  button:focus-visible, input:focus-visible, textarea:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-  .url { font-family:ui-monospace,monospace; font-size:13px; word-break:break-all; background:#0b0d12; border:1px dashed var(--line); border-radius:10px; padding:10px; user-select:all; }
-  .swatches { display:flex; gap:8px; }
-  .swatches button { flex:0 0 48px; height:48px; border-radius:50%; border:3px solid transparent; }
-  .swatches button[aria-pressed="true"] { border-color:#fff; }
-  .status { font-size:14px; color:var(--muted); min-height:1.5em; }
-  .status.ok { color:var(--ok); } .status.err { color:#ff6b61; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 'Noto Sans Lao','Phetsarath OT',system-ui,sans-serif; }
+  button, input, select, textarea { font:inherit; color:inherit; }
+  button { cursor:pointer; }
+  [hidden] { display:none !important; }
+
+  /* ---------- login ---------- */
+  .login { max-width:380px; margin:10vh auto; padding:0 16px; display:flex; flex-direction:column; gap:12px; }
+  .login h1 { margin:0; font-size:26px; }
+  .login p { margin:0; color:var(--muted); }
+
+  /* ---------- app shell ---------- */
+  .app { height:100%; display:grid; grid-template-rows:auto 1fr; }
+  .top { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 12px; padding-top:calc(8px + env(safe-area-inset-top,0px));
+    background:var(--panel); border-bottom:1px solid var(--line); }
+  .brand { font-weight:700; letter-spacing:.02em; margin-right:6px; white-space:nowrap; }
+  .brand b { color:var(--accent); }
+  .grow { flex:1 1 auto; }
+  .main { display:grid; grid-template-columns:1fr 360px; min-height:0; }
+  .previewWrap { position:relative; min-height:0; display:flex; flex-direction:column; }
+  .addbar { display:flex; gap:8px; padding:8px 12px; border-bottom:1px solid var(--line); flex-wrap:wrap; align-items:center; }
+  .preview { position:relative; flex:1 1 auto; min-height:260px; overflow:hidden; touch-action:none;
+    background:#0a0c10; }
+  .canvasBg { position:absolute; background-color:#2a2f38;
+    background-image:linear-gradient(45deg,#323843 25%,transparent 25%,transparent 75%,#323843 75%),linear-gradient(45deg,#323843 25%,transparent 25%,transparent 75%,#323843 75%);
+    background-size:40px 40px; background-position:0 0,20px 20px; box-shadow:0 0 0 1px #3a4150; }
+  .preview .mee-stage { overflow:visible; }
+  .mee-editor .ml { cursor:move; }
+  .mee-editor .ml.ed-hidden { opacity:.28 !important; outline:3px dashed rgba(255,255,255,.5); }
+  .guide { position:absolute; background:#ff3bd4; pointer-events:none; z-index:9998; }
+  .sel { position:absolute; border:3px solid var(--sel); pointer-events:none; z-index:9999; transform-origin:50% 50%; }
+  .sel .h { position:absolute; width:28px; height:28px; margin:-14px 0 0 -14px; background:#fff; border:3px solid var(--sel); border-radius:50%;
+    pointer-events:auto; touch-action:none; transform:scale(var(--inv,1)); }
+  .sel .h.tl { left:0; top:0; cursor:nwse-resize; } .sel .h.tr { left:100%; top:0; cursor:nesw-resize; }
+  .sel .h.bl { left:0; top:100%; cursor:nesw-resize; } .sel .h.br { left:100%; top:100%; cursor:nwse-resize; }
+  .sel .h.rot { left:50%; top:0; margin-top:calc(-14px - 60px * var(--inv,1)); background:var(--sel); cursor:grab; }
+  .sel .stem { position:absolute; left:50%; top:calc(-60px * var(--inv,1)); width:3px; height:calc(60px * var(--inv,1)); margin-left:-1.5px; background:var(--sel); }
+  .sel.locked { border-style:dashed; border-color:#888; }
+  .sel.locked .h { display:none; }
+  .sel.locked .stem { display:none; }
+  .zoomInfo { position:absolute; right:10px; bottom:8px; font-size:12px; color:var(--muted); pointer-events:none; }
+
+  /* ---------- side panel ---------- */
+  .side { border-left:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; min-height:0; }
+  .tabs { display:flex; border-bottom:1px solid var(--line); }
+  .tabs button { flex:1; padding:12px 6px; background:none; border:0; border-bottom:3px solid transparent; color:var(--muted); font-weight:600; }
+  .tabs button[aria-selected="true"] { color:var(--ink); border-bottom-color:var(--accent); }
+  .pane { overflow:auto; padding:12px; display:flex; flex-direction:column; gap:12px; flex:1 1 auto; }
+  .grp { background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+  .grp h3 { margin:0; font-size:13px; color:var(--muted); font-weight:600; letter-spacing:.02em; }
+  .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .row > label { min-width:84px; color:var(--muted); font-size:13px; }
+  .row input[type=range] { flex:1 1 120px; accent-color:var(--accent); }
+  .row output { min-width:40px; text-align:right; font-variant-numeric:tabular-nums; font-size:13px; }
+  .num4 { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .num4 label { display:flex; flex-direction:column; font-size:11px; color:var(--muted); gap:2px; }
+  input[type=text], input[type=email], input[type=password], input[type=number], select, textarea {
+    background:#0b0d12; border:1px solid var(--line); border-radius:9px; padding:9px 10px; width:100%; min-width:0; }
+  textarea { min-height:84px; resize:vertical; }
+  input[type=color] { width:44px; height:36px; border:1px solid var(--line); border-radius:8px; background:#0b0d12; padding:2px; }
+  .btn { background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:9px 14px; min-height:40px; font-weight:600; }
+  .btn:hover { border-color:#4a5263; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.live { background:#e0261b; border-color:#e0261b; color:#fff; }
+  .btn.on { background:#243b2e; border-color:var(--ok); color:#bff0d3; }
+  .btn.warn { color:#ff8a80; }
+  .btn.sm { min-height:34px; padding:6px 10px; font-size:13px; }
+  .btn:focus-visible, .tabs button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:2px solid var(--sel); outline-offset:1px; }
+  .seg { display:flex; flex-wrap:wrap; gap:4px; }
+  .seg button { background:#0b0d12; border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:13px; }
+  .seg button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .muted { color:var(--muted); font-size:13px; }
+  .pill { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:4px 10px; border-radius:999px; background:#0b0d12; border:1px solid var(--line); white-space:nowrap; }
+  .dot { width:9px; height:9px; border-radius:50%; background:#777; }
+  .dot.ok { background:var(--ok); } .dot.bad { background:#ff5a4f; }
+  .livebadge { background:#e0261b; color:#fff; font-weight:700; }
+  .livebadge .dot { background:#fff; animation:bl 1s steps(1) infinite; }
+  @keyframes bl { 50% { opacity:0; } }
+
+  /* layer list */
+  .layers { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .layers li { display:grid; grid-template-columns:44px 1fr auto; align-items:center; gap:8px; padding:6px 8px; border:1px solid var(--line);
+    border-radius:10px; background:var(--panel2); cursor:pointer; }
+  .layers li.sel { border-color:var(--sel); box-shadow:0 0 0 1px var(--sel) inset; }
+  .layers .nm { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .layers .nm small { display:block; color:var(--muted); font-size:12px; }
+  .eye { width:44px; height:36px; border-radius:8px; border:1px solid var(--line); background:#0b0d12; font-size:16px; }
+  .eye.on { background:#243b2e; border-color:var(--ok); }
+  .thumbs { display:flex; flex-wrap:wrap; gap:6px; }
+  .thumbs .t { position:relative; width:64px; height:64px; border-radius:8px; background:#0b0d12 center/contain no-repeat; border:1px solid var(--line); }
+  .thumbs .t button { position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; border:0; background:#e0261b; color:#fff; font-size:12px; line-height:1; }
+  .thumbs .t .mv { right:auto; left:-6px; background:#3a4150; }
+
+  /* live tab */
+  .liveList { display:flex; flex-direction:column; gap:8px; }
+  .liveItem { display:flex; flex-direction:column; gap:6px; border:1px solid var(--line); background:var(--panel2); border-radius:12px; padding:10px; }
+  .liveItem .hd { display:flex; align-items:center; gap:10px; }
+  .liveItem .hd .nm { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; }
+  .switch { width:74px; height:40px; border-radius:999px; border:1px solid var(--line); background:#0b0d12; position:relative; flex:0 0 auto; }
+  .switch::after { content:''; position:absolute; top:4px; left:4px; width:30px; height:30px; border-radius:50%; background:#6b7280; transition:left .15s ease, background .15s ease; }
+  .switch[aria-checked="true"] { background:#1f3b2b; border-color:var(--ok); }
+  .switch[aria-checked="true"]::after { left:38px; background:var(--ok); }
+  .sceneBtns { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:6px; }
+  .sceneBtns .btn[aria-pressed="true"] { background:#e0261b; border-color:#e0261b; color:#fff; }
+
+  .toast { position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:#222834; border:1px solid var(--line);
+    padding:10px 16px; border-radius:10px; font-size:14px; z-index:100000; opacity:0; transition:opacity .2s ease; pointer-events:none; max-width:90vw; }
+  .toast.on { opacity:1; }
+  .confirm { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns:1fr; grid-template-rows:minmax(300px,48vh) 1fr; }
+    .side { border-left:0; border-top:1px solid var(--line); }
+  }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script src="common.js"></script>
 </head>
 <body>
-<div class="wrap">
-  <div>
-    <h1>ຄວບຄຸມ Overlay</h1>
-    <p class="muted">ໜ້າທົດສອບ: ສົ່ງຂໍ້ຄວາມຈາກໜ້ານີ້ ໄປຂຶ້ນເທິງ live ຜ່ານປຸ່ມ Web ຂອງ Live Now.</p>
+
+<!-- ============ login ============ -->
+<form class="login" id="login" hidden>
+  <h1>Mee Overlay Studio</h1>
+  <p>ເຂົ້າສູ່ລະບົບເພື່ອແກ້ໄຂ ແລະ ຄວບຄຸມ overlay.</p>
+  <label class="muted" for="lg-email">ອີເມວ</label>
+  <input type="email" id="lg-email" autocomplete="username" required>
+  <label class="muted" for="lg-pass">ລະຫັດຜ່ານ (ຢ່າງໜ້ອຍ 6 ຕົວ)</label>
+  <input type="password" id="lg-pass" autocomplete="current-password" minlength="6" required>
+  <button class="btn primary" type="submit" id="lg-in">ເຂົ້າສູ່ລະບົບ</button>
+  <button class="btn" type="button" id="lg-up">ສ້າງບັນຊີໃໝ່</button>
+  <p id="lg-msg" class="muted" role="status"></p>
+</form>
+
+<!-- ============ app ============ -->
+<div class="app" id="app" hidden>
+  <div class="top">
+    <span class="brand"><b>Mee</b> Overlay</span>
+    <select id="sceneSel" aria-label="ເລືອກໜ້າຈໍ" style="width:auto;min-width:150px"></select>
+    <button class="btn sm" id="sceneNew" type="button">＋ ໜ້າຈໍ</button>
+    <button class="btn sm" id="sceneMore" type="button" aria-expanded="false">⋯</button>
+    <div class="seg" role="group" aria-label="ທິດທາງ">
+      <button type="button" data-or="land" aria-pressed="true">▭ ແນວນອນ</button>
+      <button type="button" data-or="port" aria-pressed="false">▯ ແນວຕັ້ງ</button>
+    </div>
+    <span class="grow"></span>
+    <span class="pill" id="netPill"><span class="dot" id="netDot"></span><span id="netTxt">…</span></span>
+    <button class="btn sm" id="liveBtn" type="button">ຂຶ້ນ live</button>
+    <button class="btn sm" id="hideAllBtn" type="button">ເຊື່ອງທັງໝົດ</button>
+    <button class="btn sm" id="linkBtn" type="button">ລິ້ງ overlay</button>
+    <button class="btn sm" id="outBtn" type="button" title="ອອກຈາກລະບົບ">ອອກ</button>
+  </div>
+  <div class="top" id="sceneMenu" hidden>
+    <label class="muted" for="sceneName">ຊື່ໜ້າຈໍ</label>
+    <input type="text" id="sceneName" style="max-width:240px">
+    <button class="btn sm" id="sceneDup" type="button">ສຳເນົາໜ້າຈໍ</button>
+    <span class="confirm" id="sceneDelWrap"><button class="btn sm warn" id="sceneDel" type="button">ລຶບໜ້າຈໍນີ້</button></span>
+    <span class="grow"></span>
+    <span class="muted" id="linkShow" style="word-break:break-all;user-select:all"></span>
   </div>
 
-  <section>
-    <h2>1. ລິ້ງສຳລັບໃສ່ປຸ່ມ Web ໃນ Live Now</h2>
-    <div class="url" id="url"></div>
-    <div class="row">
-      <button type="button" id="copy">ສຳເນົາລິ້ງ</button>
-      <button type="button" id="newtopic">ສ້າງລະຫັດຊ່ອງໃໝ່</button>
+  <div class="main">
+    <div class="previewWrap">
+      <div class="addbar">
+        <button class="btn primary" id="addText" type="button">＋ ຂໍ້ຄວາມ</button>
+        <button class="btn primary" id="addImage" type="button">＋ ຮູບ</button>
+        <input type="file" id="fileImg" accept="image/*" multiple hidden>
+        <span class="grow"></span>
+        <span class="muted">ລາກເພື່ອຍ້າຍ · ຈຸດມຸມ = ປັບຂະໜາດ · ຈຸດເທິງ = ໝຸນ</span>
+      </div>
+      <div class="preview" id="preview">
+        <div class="canvasBg" id="canvasBg"></div>
+        <div class="mee-stage mee-editor" id="stage"></div>
+        <span class="zoomInfo" id="zoomInfo"></span>
+      </div>
     </div>
-    <p class="muted">ລະຫັດຊ່ອງຖືກຈື່ໄວ້ໃນເຄື່ອງນີ້. ຢ່າແຈກລິ້ງໃຫ້ຄົນອື່ນ ເພາະໃຜມີລະຫັດກໍສົ່ງຂໍ້ຄວາມຂຶ້ນ live ໄດ້.</p>
-  </section>
 
-  <section>
-    <h2>2. ຂໍ້ຄວາມເທິງ live</h2>
-    <label for="text" class="muted">ຂໍ້ຄວາມ</label>
-    <textarea id="text">ຍິນດີຕ້ອນຮັບສູ່ Mee Sport Live</textarea>
-    <div class="swatches" role="group" aria-label="ສີເນັ້ນ">
-      <button type="button" data-c="#f5c518" style="background:#f5c518" aria-label="ເຫຼືອງ" aria-pressed="true"></button>
-      <button type="button" data-c="#d6281e" style="background:#d6281e" aria-label="ແດງ" aria-pressed="false"></button>
-      <button type="button" data-c="#2ecc71" style="background:#2ecc71" aria-label="ຂຽວ" aria-pressed="false"></button>
-      <button type="button" data-c="#3aa0ff" style="background:#3aa0ff" aria-label="ຟ້າ" aria-pressed="false"></button>
-    </div>
-    <div class="row">
-      <button type="button" class="primary" id="show">ສະແດງຂໍ້ຄວາມ</button>
-      <button type="button" id="hide">ເຊື່ອງຂໍ້ຄວາມ</button>
-    </div>
-  </section>
-
-  <section>
-    <h2>3. ກອບທົດສອບ</h2>
-    <p class="muted">ກອບເຫຼືອງ ແລະ ກ່ອງຄຳອະທິບາຍກາງຈໍ ໃຊ້ກວດຂະໜາດ ແລະ ຄວາມໂປ່ງໃສ. ປິດໄດ້ເມື່ອທົດສອບແລ້ວ.</p>
-    <div class="row">
-      <button type="button" id="teston">ເປີດກອບທົດສອບ</button>
-      <button type="button" id="testoff">ປິດກອບທົດສອບ</button>
-    </div>
-  </section>
-
-  <div class="status" id="status" role="status"></div>
+    <aside class="side">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-layers" aria-selected="true" type="button">ຊັ້ນ</button>
+        <button role="tab" id="tab-props" aria-selected="false" type="button">ປັບແຕ່ງ</button>
+        <button role="tab" id="tab-live" aria-selected="false" type="button">ຄວບຄຸມ Live</button>
+      </div>
+      <div class="pane" id="pane-layers" role="tabpanel"></div>
+      <div class="pane" id="pane-props" role="tabpanel" hidden></div>
+      <div class="pane" id="pane-live" role="tabpanel" hidden></div>
+    </aside>
+  </div>
 </div>
-<script>
-(() => {
-  const $ = (id) => document.getElementById(id);
-  const KEY = 'mee-overlay-topic';
-  const makeTopic = () => 'mee-' + Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join('');
-  let topic = '';
-  try { topic = localStorage.getItem(KEY) || ''; } catch (e) {}
-  if (!topic) { topic = makeTopic(); try { localStorage.setItem(KEY, topic); } catch (e) {} }
 
-  const overlayUrl = () => new URL('overlay.html?t=' + topic, location.href).href;
-  const showUrl = () => { $('url').textContent = overlayUrl(); };
-  showUrl();
-
-  let accent = '#f5c518';
-  const setStatus = (t, k) => { const s = $('status'); s.textContent = t; s.className = 'status' + (k ? ' ' + k : ''); };
-
-  const send = async (state, label) => {
-    try {
-      const r = await fetch('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', body: JSON.stringify(state) });
-      if (!r.ok) throw new Error(r.status);
-      setStatus('ສົ່ງແລ້ວ: ' + label + ' · ' + new Date().toLocaleTimeString(), 'ok');
-    } catch (e) {
-      setStatus('ສົ່ງບໍ່ສຳເລັດ. ກວດເນັດ ແລ້ວລອງໃໝ່', 'err');
-    }
-  };
-
-  $('copy').onclick = async () => {
-    try { await navigator.clipboard.writeText(overlayUrl()); setStatus('ສຳເນົາລິ້ງແລ້ວ', 'ok'); }
-    catch (e) { const r = document.createRange(); r.selectNodeContents($('url')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); setStatus('ກົດຄ້າງເພື່ອສຳເນົາລິ້ງທີ່ເລືອກໄວ້'); }
-  };
-  $('newtopic').onclick = () => {
-    topic = makeTopic(); try { localStorage.setItem(KEY, topic); } catch (e) {}
-    showUrl(); setStatus('ສ້າງລະຫັດໃໝ່ແລ້ວ. ຕ້ອງເອົາລິ້ງໃໝ່ໄປໃສ່ໃນ Live Now ອີກຄັ້ງ');
-  };
-  document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => {
-    accent = b.dataset.c;
-    document.querySelectorAll('.swatches button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    send({ accent }, 'ປ່ຽນສີ');
-  });
-  $('show').onclick = () => send({ text: $('text').value.trim(), accent, show: true }, 'ສະແດງຂໍ້ຄວາມ');
-  $('hide').onclick = () => send({ show: false }, 'ເຊື່ອງຂໍ້ຄວາມ');
-  $('teston').onclick = () => send({ test: true }, 'ເປີດກອບທົດສອບ');
-  $('testoff').onclick = () => send({ test: false }, 'ປິດກອບທົດສອບ');
-})();
-</script>
+<div class="toast" id="toast" role="status"></div>
+<script src="editor.js"></script>
 </body>
 </html>

@@ -1,0 +1,95 @@
+/* ===== Mee Overlay — shared render styles (overlay + editor preview) ===== */
+.mee-stage { position:absolute; left:0; top:0; transform-origin:0 0; overflow:hidden; transition:opacity .35s ease; }
+.mee-stage.hide-all { opacity:0; }
+.ml { position:absolute; box-sizing:border-box; transform-origin:50% 50%; }
+.ml-enter, .ml-fx { position:absolute; inset:0; }
+.ml.off { display:none; }
+
+/* ---------- text ---------- */
+.mt { position:absolute; inset:0; box-sizing:border-box; display:flex; align-items:center; overflow:hidden;
+  line-height:1.25; word-break:break-word; overflow-wrap:anywhere; }
+.mt.al-left { justify-content:flex-start; text-align:left; }
+.mt.al-center { justify-content:center; text-align:center; }
+.mt.al-right { justify-content:flex-end; text-align:right; }
+.mt .tx { display:block; max-width:100%; white-space:pre-wrap; paint-order:stroke fill; }
+.mt.scroll-h .tx { max-width:none; white-space:nowrap; display:inline-flex; gap:0; }
+.mt.scroll-h { justify-content:flex-start; }
+.mt.scroll-h .seg { display:inline-block; padding-right:var(--gap, 80px); white-space:pre; }
+.mt.scroll-l .tx { animation: mee-scroll-l var(--dur,10s) linear infinite; }
+.mt.scroll-r .tx { animation: mee-scroll-l var(--dur,10s) linear infinite reverse; }
+.mt.scroll-u { align-items:flex-start; }
+.mt.scroll-u .tx { animation: mee-scroll-u var(--dur,10s) linear infinite; }
+.mt.scroll-u .seg { display:block; padding-bottom:var(--gap, 60px); }
+@keyframes mee-scroll-l { from { transform:translate3d(0,0,0); } to { transform:translate3d(calc(-1 * var(--set,0px)),0,0); } }
+@keyframes mee-scroll-u { from { transform:translate3d(0,0,0); } to { transform:translate3d(0,calc(-1 * var(--set,0px)),0); } }
+.mt .g { display:inline-block; white-space:pre; }
+.fx-wave .g { animation: mee-wave var(--dur,1.2s) ease-in-out infinite; animation-delay:calc(var(--i) * 0.07s); }
+@keyframes mee-wave { 0%,100% { transform:translateY(0); } 30% { transform:translateY(-0.28em); } }
+.fx-typing .g { visibility:hidden; }
+.fx-typing .g.on { visibility:visible; }
+.fx-rainbow .tx { background:linear-gradient(90deg,#ff3b30,#ff9500,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff3b30);
+  background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent !important;
+  animation: mee-rainbow var(--dur,4s) linear infinite; }
+@keyframes mee-rainbow { to { background-position:300% 0; } }
+.fx-glow .tx { animation: mee-glow var(--dur,1.6s) ease-in-out infinite; }
+@keyframes mee-glow { 50% { text-shadow:0 0 .25em var(--glow,#fff), 0 0 .6em var(--glow,#fff); } }
+
+/* ---------- loop effects on the fx wrapper (text + image) ---------- */
+.fx-shake  { animation: mee-shake var(--dur,.5s) linear infinite; }
+.fx-wiggle { animation: mee-wiggle var(--dur,1s) ease-in-out infinite; }
+.fx-pulse  { animation: mee-pulse var(--dur,1.2s) ease-in-out infinite; }
+.fx-float  { animation: mee-float var(--dur,2.4s) ease-in-out infinite; }
+.fx-blink  { animation: mee-blink var(--dur,1s) steps(1) infinite; }
+.fx-spin   { animation: mee-spin var(--dur,4s) linear infinite; }
+.fx-swing  { animation: mee-swing var(--dur,2s) ease-in-out infinite; transform-origin:50% 0; }
+.fx-heart  { animation: mee-heart var(--dur,1.4s) ease-in-out infinite; }
+@keyframes mee-shake { 0%,100% { transform:translate(0,0); } 20% { transform:translate(-3%,1%); } 40% { transform:translate(3%,-1%); } 60% { transform:translate(-2%,-1%); } 80% { transform:translate(2%,1%); } }
+@keyframes mee-wiggle { 0%,100% { transform:rotate(0); } 25% { transform:rotate(-4deg); } 75% { transform:rotate(4deg); } }
+@keyframes mee-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.08); } }
+@keyframes mee-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6%); } }
+@keyframes mee-blink { 50% { opacity:0; } }
+@keyframes mee-spin { to { transform:rotate(360deg); } }
+@keyframes mee-swing { 0%,100% { transform:rotate(-6deg); } 50% { transform:rotate(6deg); } }
+@keyframes mee-heart { 0%,40%,100% { transform:scale(1); } 20% { transform:scale(1.12); } 30% { transform:scale(.97); } }
+
+/* ---------- image ---------- */
+.mi { position:absolute; inset:0; overflow:hidden; box-sizing:border-box; }
+.mi img { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.mi.fit-contain img { object-fit:contain; }
+.mi.fit-cover img { object-fit:cover; }
+.mi.slide img { opacity:0; transition:opacity var(--xf,.8s) ease, transform var(--xf,.8s) ease; transform:scale(1.06); }
+.mi.slide img.on { opacity:1; transform:scale(1); }
+.mi.marquee { display:flex; align-items:stretch; }
+.mi.marquee .trk { display:flex; align-items:stretch; gap:var(--gap,16px); padding-right:var(--gap,16px); height:100%; flex:0 0 auto;
+  animation: mee-scroll-l var(--dur,20s) linear infinite; }
+.mi.marquee.rev .trk { animation-direction:reverse; }
+.mi.marquee .trk img { position:static; height:100%; width:auto; max-width:none; flex:0 0 auto; }
+.mi .sheen { position:absolute; top:-10%; bottom:-10%; width:30%; left:-45%; pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg);
+  animation: mee-sheen var(--dur,2.8s) ease-in-out infinite; }
+@keyframes mee-sheen { 0% { left:-45%; } 60%,100% { left:120%; } }
+
+/* ---------- enter / exit ---------- */
+.en-fade    { animation: mee-in-fade .45s ease both; }
+.en-left    { animation: mee-in-left .55s cubic-bezier(.2,.8,.2,1) both; }
+.en-right   { animation: mee-in-right .55s cubic-bezier(.2,.8,.2,1) both; }
+.en-up      { animation: mee-in-up .55s cubic-bezier(.2,.8,.2,1) both; }
+.en-down    { animation: mee-in-down .55s cubic-bezier(.2,.8,.2,1) both; }
+.en-zoom    { animation: mee-in-zoom .45s cubic-bezier(.2,.8,.2,1) both; }
+.en-bounce  { animation: mee-in-bounce .7s cubic-bezier(.3,1.6,.5,1) both; }
+.ex-fade    { animation: mee-in-fade .35s ease reverse both; }
+.ex-left    { animation: mee-in-left .4s ease-in reverse both; }
+.ex-right   { animation: mee-in-right .4s ease-in reverse both; }
+.ex-up      { animation: mee-in-up .4s ease-in reverse both; }
+.ex-down    { animation: mee-in-down .4s ease-in reverse both; }
+.ex-zoom    { animation: mee-in-zoom .35s ease-in reverse both; }
+.ex-bounce  { animation: mee-in-zoom .35s ease-in reverse both; }
+@keyframes mee-in-fade { from { opacity:0; } to { opacity:1; } }
+@keyframes mee-in-left { from { opacity:0; transform:translateX(-60%); } to { opacity:1; transform:none; } }
+@keyframes mee-in-right { from { opacity:0; transform:translateX(60%); } to { opacity:1; transform:none; } }
+@keyframes mee-in-up { from { opacity:0; transform:translateY(60%); } to { opacity:1; transform:none; } }
+@keyframes mee-in-down { from { opacity:0; transform:translateY(-60%); } to { opacity:1; transform:none; } }
+@keyframes mee-in-zoom { from { opacity:0; transform:scale(.4); } to { opacity:1; transform:none; } }
+@keyframes mee-in-bounce { from { opacity:0; transform:scale(.3); } to { opacity:1; transform:none; } }
+
+@media (prefers-reduced-motion: reduce) { .mee-editor .ml-fx, .mee-editor .tx { animation-duration:0s !important; } }
