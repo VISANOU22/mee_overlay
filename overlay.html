@@ -69,6 +69,16 @@
   });
   if (db.onConnection && q.get('test') === '1') db.onConnection((ok) => { if (!ok) say('ຂາດການເຊື່ອມຕໍ່…'); else if ($('msg').textContent === 'ຂາດການເຊື່ອມຕໍ່…') say(''); });
   fit();
+
+  // Tell the host app (Live Now webview) we animate continuously, so it renders at full frame rate.
+  const tellHost = (payload) => {
+    try { if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.native) window.webkit.messageHandlers.native.postMessage(payload); } catch (e) {}
+    try { if (window.Android && window.Android.postMessage) window.Android.postMessage(JSON.stringify(payload)); } catch (e) {}
+    try { if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*'); } catch (e) {}
+  };
+  tellHost({ type: 'ready' });
+  tellHost({ type: 'fps', value: 30 });
+  setInterval(() => tellHost({ type: 'fps', value: 30 }), 10000);
 })();
 </script>
 </body>

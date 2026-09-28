@@ -57,8 +57,8 @@
 .mi img { position:absolute; inset:0; width:100%; height:100%; display:block; }
 .mi.fit-contain img { object-fit:contain; }
 .mi.fit-cover img { object-fit:cover; }
-.mi.slide img { opacity:0; transition:opacity var(--xf,.8s) ease, transform var(--xf,.8s) ease; transform:scale(1.06); }
-.mi.slide img.on { opacity:1; transform:scale(1); }
+.mi.slide img { opacity:0; visibility:hidden; transition:none; }
+.mi.slide img.on { opacity:1; visibility:visible; animation: mee-in-fade var(--xf,.6s) ease both; }
 .mi.marquee { display:flex; align-items:stretch; }
 .mi.marquee .trk { display:flex; align-items:stretch; gap:var(--gap,16px); padding-right:var(--gap,16px); height:100%; flex:0 0 auto;
   animation: mee-scroll-l var(--dur,20s) linear infinite; }
