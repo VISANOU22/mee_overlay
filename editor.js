@@ -194,6 +194,7 @@
     if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
     const L = selLayer(); if (!L) return;
     const step = e.shiftKey ? 10 : 1;
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !L.locked) { e.preventDefault(); askDelete(); return; }
     const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
     if (mv && !L.locked) { e.preventDefault(); L.x += mv[0]; L.y += mv[1]; changed(L, { delay: 300 }); if (curTab === 'props') refreshBoxInputs(); }
   });
@@ -209,7 +210,9 @@
   tabs.forEach((t) => $('tab-' + t).addEventListener('click', () => showTab(t)));
 
   function select(id) {
+    if (id !== selId) resetDelBtn();
     selId = id;
+    $('delSel').hidden = !id;
     drawSelection(); renderLayerList();
     if (curTab === 'props') renderProps();
   }
@@ -235,7 +238,9 @@
         (L.type === 'image' ? '🖼 ' : 'T  ') + (L.name || ''),
         el('small', { text: L.type === 'text' ? String((L.text || {}).content || '').slice(0, 40) : Mee.asArray((L.image || {}).assets).length + ' ຮູບ' + (fxName && fxName !== 'ບໍ່ມີ' ? ' · ' + fxName : '') }),
       ]);
-      const li = el('li', { class: L.id === selId ? 'sel' : '', onclick: () => { select(L.id); showTab('props'); } }, [eye, name, lock]);
+      const trash = el('button', { class: 'btn sm warn', type: 'button', 'aria-label': 'ລຶບ ' + (L.name || ''), text: '🗑',
+        onclick: (e) => { e.stopPropagation(); select(L.id); askDelete(); } });
+      const li = el('li', { class: L.id === selId ? 'cur' : '', onclick: () => { select(L.id); showTab('props'); } }, [eye, name, el('div', { class: 'acts' }, [lock, trash])]);
       ul.appendChild(li);
     });
     pane.appendChild(ul);
@@ -453,10 +458,21 @@
     if (a && a.w) { L.h = Math.round(L.w * a.h / a.w); L.y = Math.round((size().h - L.h) / 2); }
     putLayer(L); showTab('props');
   });
+  let delTimer = 0;
+  function resetDelBtn() { clearTimeout(delTimer); const b = $('delSel'); b.dataset.arm = ''; b.textContent = '🗑 ລຶບຊັ້ນທີ່ເລືອກ'; b.classList.remove('live'); }
+  function askDelete() {
+    const b = $('delSel');
+    if (b.dataset.arm === '1') { resetDelBtn(); removeSel(); return; }
+    b.dataset.arm = '1'; b.textContent = 'ແຕະອີກເທື່ອ ເພື່ອຢືນຢັນການລຶບ'; b.classList.add('live');
+    toast('ແຕະປຸ່ມລຶບອີກເທື່ອ ເພື່ອຢືນຢັນ');
+    clearTimeout(delTimer); delTimer = setTimeout(resetDelBtn, 4000);
+  }
+  $('delSel').addEventListener('click', askDelete);
   function removeSel() {
     const s = scene(); const L = selLayer(); if (!s || !L) return;
     clearTimeout(pending.get(L.id)); pending.delete(L.id);
-    delete s.layers[L.id]; selId = null;
+    delete s.layers[L.id]; selId = null; $('delSel').hidden = true;
+    toast('ລຶບ "' + (L.name || '') + '" ແລ້ວ');
     db.remove('scenes/' + curId + '/layers/' + L.id);
     renderStage(); renderLayerList(); renderProps();
   }

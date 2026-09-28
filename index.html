@@ -98,7 +98,8 @@
   .layers { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
   .layers li { display:grid; grid-template-columns:44px 1fr auto; align-items:center; gap:8px; padding:6px 8px; border:1px solid var(--line);
     border-radius:10px; background:var(--panel2); cursor:pointer; }
-  .layers li.sel { border-color:var(--sel); box-shadow:0 0 0 1px var(--sel) inset; }
+  .layers li.cur { border-color:var(--sel); box-shadow:0 0 0 1px var(--sel) inset; }
+  .layers .acts { display:flex; gap:6px; }
   .layers .nm { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .layers .nm small { display:block; color:var(--muted); font-size:12px; }
   .eye { width:44px; height:36px; border-radius:8px; border:1px solid var(--line); background:#0b0d12; font-size:16px; }
@@ -183,6 +184,7 @@
       <div class="addbar">
         <button class="btn primary" id="addText" type="button">＋ ຂໍ້ຄວາມ</button>
         <button class="btn primary" id="addImage" type="button">＋ ຮູບ</button>
+        <button class="btn warn" id="delSel" type="button" hidden>🗑 ລຶບຊັ້ນທີ່ເລືອກ</button>
         <input type="file" id="fileImg" accept="image/*" multiple hidden>
         <span class="grow"></span>
         <span class="muted">ລາກເພື່ອຍ້າຍ · ຈຸດມຸມ = ປັບຂະໜາດ · ຈຸດເທິງ = ໝຸນ</span>
