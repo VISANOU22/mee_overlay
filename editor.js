@@ -709,6 +709,7 @@
     catch (err) { $('lg-msg').textContent = 'ສ້າງບັນຊີບໍ່ໄດ້: ' + (err.code || err.message); }
   });
   db.onAuth((u, info) => {
+    const boot = $('boot'); if (boot) boot.style.display = 'none';
     if (!u) { $('app').hidden = true; $('login').hidden = false; return; }
     user = u; userEmail = (info && info.email) || ''; start();
   });

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link id="fontcss" rel="stylesheet" href="">
-<link rel="stylesheet" href="render.css">
+<link rel="stylesheet" href="render.css?v=3">
 <style>
   :root {
     --bg:#0c0e13; --surface:#14171e; --raised:#1b1f28; --field:#0a0c10; --line:#272c37; --line2:#353b48;
@@ -241,10 +241,24 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="config.js"></script>
-<script src="common.js"></script>
+<script src="config.js?v=3"></script>
+<script src="common.js?v=3"></script>
 </head>
 <body>
+<div id="boot" style="position:fixed;inset:0;display:grid;place-items:center;color:#9097a5;font-size:15px;text-align:center;padding:16px">
+  <div id="bootMsg">ກຳລັງໂຫຼດ Mee Overlay…</div>
+</div>
+<script>
+  window.addEventListener('error', function (e) {
+    var b = document.getElementById('boot'); if (!b) return;
+    b.style.display = 'grid';
+    document.getElementById('bootMsg').innerHTML = 'ໂຫຼດບໍ່ສຳເລັດ 😕<br><small>' + (e.message || 'error') + '</small><br><br>ລອງ refresh ໜ້ານີ້ ຫຼື ລໍຖ້າ 5–10 ນາທີ';
+  });
+  setTimeout(function () {
+    var b = document.getElementById('boot');
+    if (b && b.style.display !== 'none') document.getElementById('bootMsg').innerHTML += '<br><small>ຍັງໂຫຼດຢູ່… ກວດເບິ່ງອິນເຕີເນັດ</small>';
+  }, 8000);
+</script>
 
 <!-- ================= login ================= -->
 <div class="login" id="login" hidden>
@@ -328,6 +342,6 @@
 
 <div class="scrim" id="dlg" hidden><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" id="dlgBody"></div></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="editor.js"></script>
+<script src="editor.js?v=3"></script>
 </body>
 </html>
