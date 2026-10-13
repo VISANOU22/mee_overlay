@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mee Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="fontcss" rel="stylesheet" href="">
+<link rel="stylesheet" href="render.css?v=3">
+<style>
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:transparent !important; }
+  #wrap { position:absolute; inset:0; }
+  .msg { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.7); color:#fff;
+    font:600 18px/1.5 'Noto Sans Lao',system-ui,sans-serif; padding:14px 22px; border-radius:12px; text-align:center; display:none; }
+  .msg.on { display:block; }
+  .testframe { position:absolute; inset:0; border:6px dashed rgba(255,214,0,.9); pointer-events:none; box-sizing:border-box; display:none; }
+  .testframe.on { display:block; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js?v=3"></script>
+<script src="common.js?v=3"></script>
+<script src="petanque-bug.js?v=1"></script>
+</head>
+<body>
+<div id="wrap"><div id="stage" class="mee-stage"></div></div>
+<div class="msg" id="msg"></div>
+<div class="testframe" id="tf"></div>
+<script>
+(() => {
+  document.getElementById('fontcss').href = Mee.FONT_CSS;
+  const q = new URLSearchParams(location.search);
+  const user = q.get('u') || 'local';
+  const $ = (id) => document.getElementById(id);
+  const say = (t) => { $('msg').textContent = t || ''; $('msg').classList.toggle('on', !!t); };
+  if (q.get('test') === '1') $('tf').classList.add('on');
+
+  let db;
+  try { db = Mee.createDB(); } catch (e) { say('ເປີດຖານຂໍ້ມູນບໍ່ໄດ້: ' + e.message); return; }
+  db.setUser(user);
+  // ສະກໍເປຕັ່ງ (ຄວບຄຸມຈາກ petanque.html) — ຂຶ້ນທັບໜ້າຈໍອື່ນເມື່ອເປີດສະແດງ
+  try { if (window.MeePetanque) MeePetanque.mount(db); } catch (e) { console.warn('petanque', e); }
+
+  const cache = new Map();
+  const getAsset = (id) => {
+    if (!cache.has(id)) cache.set(id, db.get('assets/' + id + '/data').catch(() => null));
+    return cache.get(id);
+  };
+  const stage = $('stage');
+  const r = Mee.createRenderer(stage, { editor: false, getAsset });
+
+  const fit = () => {
+    const s = r.size();
+    const k = Math.min(innerWidth / s.w, innerHeight / s.h);
+    stage.style.transform = 'scale(' + k + ')';
+    stage.style.left = ((innerWidth - s.w * k) / 2) + 'px';
+    stage.style.top = ((innerHeight - s.h * k) / 2) + 'px';
+  };
+  addEventListener('resize', fit);
+
+  let unScene = null, activeId = null;
+  db.watch('meta', (meta) => {
+    meta = meta || {};
+    stage.classList.toggle('hide-all', !!meta.hideAll);
+    if (meta.active === activeId) return;
+    activeId = meta.active || null;
+    if (unScene) { unScene(); unScene = null; }
+    if (!activeId) { r.clear(); say(q.get('test') === '1' ? 'ຍັງບໍ່ໄດ້ເລືອກໜ້າຈໍທີ່ຈະສະແດງ' : ''); return; }
+    say('');
+    unScene = db.watch('scenes/' + activeId, (scene) => { r.setScene(scene || {}, activeId); fit(); });
+  });
+  if (db.onConnection && q.get('test') === '1') db.onConnection((ok) => { if (!ok) say('ຂາດການເຊື່ອມຕໍ່…'); else if ($('msg').textContent === 'ຂາດການເຊື່ອມຕໍ່…') say(''); });
+  fit();
+
+  // Tell the host app (Live Now webview) we animate continuously, so it renders at full frame rate.
+  const tellHost = (payload) => {
+    try { if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.native) window.webkit.messageHandlers.native.postMessage(payload); } catch (e) {}
+    try { if (window.Android && window.Android.postMessage) window.Android.postMessage(JSON.stringify(payload)); } catch (e) {}
+    try { if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*'); } catch (e) {}
+  };
+  tellHost({ type: 'ready' });
+  tellHost({ type: 'fps', value: 30 });
+  setInterval(() => tellHost({ type: 'fps', value: 30 }), 10000);
+})();
+</script>
+</body>
+</html>

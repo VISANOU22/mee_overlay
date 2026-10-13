@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mee Overlay · ສະກໍເປຕັ່ງ</title>
+<!-- ໜ້ານີ້ສະແດງສະກໍເປຕັ່ງຢ່າງດຽວ. ປົກກະຕິໃຊ້ overlay.html ແທນ ເພາະມັນສະແດງສະກໍນີ້ພ້ອມກັບໜ້າຈໍອື່ນ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="fontcss" rel="stylesheet" href="">
+<style>
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:transparent !important; }
+  .msg { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,.7); color:#fff;
+    font:600 18px/1.5 'Noto Sans Lao',system-ui,sans-serif; padding:14px 22px; border-radius:12px; text-align:center; display:none; }
+  .msg.on { display:block; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js?v=3"></script>
+<script src="common.js?v=3"></script>
+<script src="petanque-bug.js?v=1"></script>
+</head>
+<body>
+<div class="msg" id="msg"></div>
+<script>
+(() => {
+  document.getElementById('fontcss').href = Mee.FONT_CSS;
+  const q = new URLSearchParams(location.search);
+  const say = (t) => { const m = document.getElementById('msg'); m.textContent = t || ''; m.classList.toggle('on', !!t); };
+  let db;
+  try { db = Mee.createDB(); } catch (e) { say('ເປີດຖານຂໍ້ມູນບໍ່ໄດ້: ' + e.message); return; }
+  db.setUser(q.get('u') || 'local');
+  MeePetanque.mount(db, { onState: (s) => say(!s && q.get('test') === '1' ? 'ຍັງບໍ່ມີເກມ. ເປີດ petanque.html ເພື່ອເລີ່ມ' : '') });
+})();
+</script>
+</body>
+</html>
