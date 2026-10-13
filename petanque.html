@@ -128,6 +128,7 @@
     <label for="lg-email">ອີເມວ</label><input type="email" id="lg-email" autocomplete="username" required>
     <label for="lg-pass">ລະຫັດຜ່ານ</label><input type="password" id="lg-pass" autocomplete="current-password" minlength="6" required>
     <button class="btn primary" type="submit">ເຂົ້າສູ່ລະບົບ</button>
+    <button class="btn" type="button" id="lg-reset" style="background:transparent;border-color:transparent;text-decoration:underline">ລືມລະຫັດຜ່ານ?</button>
     <p id="lg-msg" class="muted" role="status"></p>
   </form>
 </div>
@@ -341,6 +342,30 @@
   });
   $('out').onclick = () => db.signOut().then(() => location.reload());
   db.onAuth((u) => { if (!u) { $('app').hidden = true; $('login').hidden = false; return; } user = u; start(); });
+})();
+</script>
+<script>
+// ລືມລະຫັດຜ່ານ: Firebase ສົ່ງລິ້ງຕັ້ງລະຫັດໃໝ່ໄປທາງອີເມວ
+(() => {
+  const btn = document.getElementById('lg-reset'); if (!btn) return;
+  const msg = (t) => { document.getElementById('lg-msg').textContent = t; };
+  btn.addEventListener('click', async () => {
+    const box = document.getElementById('lg-email'), em = box.value.trim();
+    if (!em) { msg('ພິມອີເມວຂອງບັນຊີກ່ອນ ແລ້ວກົດ "ລືມລະຫັດຜ່ານ" ອີກຄັ້ງ'); box.focus(); return; }
+    if (!window.firebase || !firebase.auth || !firebase.apps.length) { msg('ໂໝດທົດລອງບໍ່ມີລະຫັດຜ່ານ'); return; }
+    btn.disabled = true; msg('ກຳລັງສົ່ງ…');
+    try {
+      firebase.auth().languageCode = 'lo';
+      await firebase.auth().sendPasswordResetEmail(em);
+      msg('ສົ່ງແລ້ວ. ຖ້າ ' + em + ' ມີບັນຊີ ຈະໄດ້ຮັບອີເມວທີ່ມີລິ້ງຕັ້ງລະຫັດໃໝ່ (ກວດໃນ Spam ນຳ). ຕັ້ງແລ້ວກັບມາເຂົ້າສູ່ລະບົບດ້ວຍລະຫັດໃໝ່.');
+    } catch (e) {
+      const c = e.code || '';
+      msg(c === 'auth/invalid-email' ? 'ອີເມວບໍ່ຖືກຮູບແບບ'
+        : c === 'auth/user-not-found' ? 'ບໍ່ມີບັນຊີສຳລັບອີເມວນີ້'
+        : c === 'auth/too-many-requests' ? 'ຂໍຫຼາຍເທື່ອເກີນໄປ, ລໍສັກຄູ່ແລ້ວລອງໃໝ່'
+        : 'ສົ່ງບໍ່ໄດ້: ' + (c || e.message));
+    } finally { btn.disabled = false; }
+  });
 })();
 </script>
 </body>
