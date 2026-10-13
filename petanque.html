@@ -48,6 +48,21 @@
 
   /* ======== live screen ======== */
   .live { max-width:720px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(24px + env(safe-area-inset-bottom,0px)); display:grid; gap:10px; }
+  .ctl { display:grid; gap:10px; min-width:0; }
+  /* ໜ້າຈໍໄລ້ (ຕົວຢ່າງສົດ) */
+  details.scr { background:var(--surface); border:1px solid var(--line); border-radius:12px; min-width:0; }
+  details.scr summary { padding:10px 12px; font-weight:700; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; }
+  details.scr summary::-webkit-details-marker { display:none; }
+  details.scr summary::after { content:"▾"; color:var(--muted); margin-left:auto; }
+  details.scr[open] summary::after { content:"▴"; }
+  details.scr .rec { width:9px; height:9px; border-radius:50%; background:var(--onair); flex:none; }
+  details.scr .off { color:var(--warn); font-size:12.5px; font-weight:600; }
+  details.scr .preview { margin:0 10px 10px; }
+  @media (min-width:960px) {
+    .live { max-width:1360px; grid-template-columns:minmax(0,1fr) 620px; align-items:start; column-gap:14px; }
+    .live > .bar { grid-column:1 / -1; }
+    details.scr { position:sticky; top:10px; }
+  }
   .bar { display:flex; align-items:center; gap:8px; }
   .bar .ttl { margin-right:auto; min-width:0; }
   .bar .ttl b { display:block; font-size:16px; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -179,6 +194,12 @@
     <button class="btn gear" id="openSet" aria-label="ຕັ້ງຄ່າ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9h.1a2 2 0 1 1 0 4h-.1z"/></svg></button>
   </header>
 
+  <details class="scr" id="scrBox" open>
+    <summary><i class="rec"></i>ໜ້າຈໍໄລ້ <span class="off" id="scrOff" hidden>· ສະກໍຖືກເຊື່ອງ</span></summary>
+    <div class="preview"><iframe id="pvLive" title="ໜ້າຈໍໄລ້ສົດ"></iframe></div>
+  </details>
+
+  <div class="ctl">
   <div class="status"><span id="sEnd">ຮອບທີ 1</span><span class="jk" id="sJack"><i></i><span></span></span></div>
 
   <div class="pick" id="pick" hidden>
@@ -209,6 +230,7 @@
   </div>
 
   <details class="hist" id="histBox"><summary>ປະຫວັດແຕ່ລະຮອບ <span class="muted" id="hc"></span></summary><ul id="hist"></ul></details>
+  </div>
 </main>
 
 <!-- ================= ຕັ້ງຄ່າ: ຕັ້ງເທື່ອດຽວກ່ອນແຂ່ງ ================= -->
@@ -304,6 +326,7 @@
     // live screen
     $('hTitle').textContent = S.title || 'ເປຕັ່ງ';
     tog('tgShow', S.show !== false, 'ສະກໍ: ');
+    $('scrOff').hidden = S.show !== false;
     $('sEnd').textContent = w === null ? 'ຮອບທີ ' + (ends.length + 1) + ' · ເກມ ' + S.target : 'ຈົບເກມ';
     const jOk = w === null && (jt === 0 || jt === 1);
     $('sJack').hidden = !jOk;
@@ -463,6 +486,10 @@
     $('login').hidden = true; $('app').hidden = false;
     db.setUser(user);
     $('url').value = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
+    const loadLive = () => { if ($('scrBox').open && !$('pvLive').src) $('pvLive').src = $('url').value; };
+    try { if (localStorage.getItem('pq-scr') === '0') $('scrBox').open = false; } catch (e) {}
+    $('scrBox').addEventListener('toggle', () => { try { localStorage.setItem('pq-scr', $('scrBox').open ? '1' : '0'); } catch (e) {} loadLive(); });
+    loadLive();
     if (db.mode === 'local') { $('netDot').className = 'dot demo'; $('netTxt').textContent = 'ໂໝດທົດລອງ'; $('out').hidden = true; }
     else db.onConnection((ok) => { $('netDot').className = 'dot ' + (ok ? 'ok' : 'bad'); $('netTxt').textContent = ok ? 'ເຊື່ອມຕໍ່ແລ້ວ' : 'ຂາດການເຊື່ອມຕໍ່'; });
     let first = true;
