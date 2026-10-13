@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mee Overlay · ຄວບຄຸມສະກໍເປຕັ່ງ</title>
+<link rel="manifest" href="petanque.webmanifest">
+<meta name="theme-color" content="#0c0e13">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ສະກໍເປຕັ່ງ">
+<link rel="apple-touch-icon" href="petanque-icon-192.png">
+<link rel="icon" href="petanque-icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700;900&family=Oswald:wght@500;700&display=swap">
@@ -134,7 +142,7 @@
   .preview { position:relative; aspect-ratio:16/9; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--line);
     background:repeating-conic-gradient(#20252e 0 25%, #171b22 0 50%) 0 0/24px 24px; }
   .preview iframe { position:absolute; inset:0; width:100%; height:100%; border:0; color-scheme:light; }
-  .link { display:flex; gap:6px; } .link input { font-size:13px; }
+  .link { display:flex; gap:6px; } .link input { font-size:13px; } .link .btn { white-space:nowrap; flex:none; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .done { position:sticky; bottom:0; padding:10px 0 0; background:linear-gradient(transparent, var(--bg) 30%); }
   .done .btn { width:100%; min-height:52px; font-size:17px; }
@@ -244,6 +252,13 @@
       <h3><span class="n">4</span>ລິ້ງ Web ຂອງ Live Now</h3>
       <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
       <p class="muted" style="margin:0;font-size:13px">ລິ້ງດຽວກັບ Studio. ຖ້າໃສ່ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນ.</p>
+    </section>
+
+    <section class="card" id="installCard">
+      <h3>ຕິດຕັ້ງເປັນແອັບ</h3>
+      <p class="muted" style="margin:0;font-size:13.5px">ເປີດເຕັມຈໍ ບໍ່ມີແຖບ URL, ມີໄອຄອນຢູ່ໜ້າຈໍຫຼັກຄືແອັບທົ່ວໄປ.</p>
+      <button class="btn primary" id="installBtn" hidden>ຕິດຕັ້ງແອັບ</button>
+      <p class="muted" id="installHelp" style="margin:0;font-size:13.5px"></p>
     </section>
 
     <section class="card">
@@ -424,6 +439,23 @@
     const fallback = () => { $('url').select(); toast('ເລືອກລິ້ງແລ້ວ, ກົດກັອບປີ້ເອງ'); };
     try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), fallback); } catch (e) { fallback(); }
   };
+
+  // ---------- ຕິດຕັ້ງເປັນແອັບ (PWA)
+  const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  let deferred = null;
+  function installUI() {
+    if (standalone()) { $('installCard').hidden = true; return; }
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    $('installBtn').hidden = !deferred;
+    $('installHelp').textContent = deferred ? ''
+      : ios ? 'iPhone: ເປີດໃນ Safari → ກົດປຸ່ມແບ່ງປັນ (ກ່ອງມີລູກສອນຂຶ້ນ) → "ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ"'
+      : 'Android: ກົດ ⋮ ຂອງ Chrome (ມຸມຂວາເທິງ) → "ຕິດຕັ້ງແອັບ" ຫຼື "ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ"';
+  }
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; installUI(); });
+  addEventListener('appinstalled', () => { deferred = null; installUI(); toast('ຕິດຕັ້ງແລ້ວ, ເປີດຈາກໄອຄອນໜ້າຈໍຫຼັກໄດ້ເລີຍ'); });
+  $('installBtn').onclick = async () => { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (e) {} deferred = null; installUI(); };
+  installUI();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('petanque-sw.js').catch(() => {});
 
   // ---------- boot
   function start() {
