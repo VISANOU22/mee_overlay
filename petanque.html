@@ -16,103 +16,133 @@
     color-scheme:dark;
   }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--lao);
-    padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px)); }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--lao); -webkit-tap-highlight-color:transparent; }
   button, input { font:inherit; color:inherit; }
-  button { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  button { cursor:pointer; }
   [hidden] { display:none !important; }
   :focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  .wrap { max-width:880px; margin:0 auto; display:grid; gap:14px; }
+  .muted { color:var(--muted); }
 
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 14px; border-radius:10px;
-    border:1px solid var(--line2); background:var(--raised); font-weight:600; }
-  .btn:hover { border-color:#4a5263; }
-  .btn:disabled { opacity:.4; cursor:not-allowed; }
+    border:1px solid var(--line2); background:var(--raised); font-weight:600; text-decoration:none; color:inherit; }
+  .btn:disabled { opacity:.35; cursor:not-allowed; }
   .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
   .btn.danger { color:var(--warn); }
   .btn.danger.arm { background:var(--onair); border-color:var(--onair); color:#fff; }
-  .btn svg { width:18px; height:18px; }
-  input[type=text], input[type=email], input[type=password] { height:44px; border-radius:10px; border:1px solid var(--line2); background:var(--field); padding:0 12px; width:100%; }
-  label, .lab { font-size:13px; color:var(--muted); }
-  .muted { color:var(--muted); }
+  .btn svg { width:20px; height:20px; flex:none; }
+  input[type=text], input[type=email], input[type=password] { height:46px; border-radius:10px; border:1px solid var(--line2); background:var(--field); padding:0 12px; width:100%; min-width:0; }
 
   /* login */
-  .login { min-height:80vh; display:grid; place-items:center; }
+  .login { min-height:100vh; display:grid; place-items:center; padding:24px 16px; }
   .login form { width:100%; max-width:380px; display:flex; flex-direction:column; gap:10px; }
   .login h1 { margin:0; font-size:26px; } .login h1 b { color:var(--accent); }
+  .login label { font-size:13px; color:var(--muted); }
 
-  /* top */
-  .top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .top h1 { margin:0 auto 0 0; font-size:19px; font-weight:900; line-height:1.3; }
-  .top h1 b { color:var(--accent); }
-  .net { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); }
-  .dot { width:9px; height:9px; border-radius:50%; background:var(--muted); }
+  /* ======== live screen ======== */
+  .live { max-width:720px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(24px + env(safe-area-inset-bottom,0px)); display:grid; gap:10px; }
+  .bar { display:flex; align-items:center; gap:8px; }
+  .bar .ttl { margin-right:auto; min-width:0; }
+  .bar .ttl b { display:block; font-size:16px; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar .ttl small { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:12.5px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--muted); flex:none; }
   .dot.ok { background:var(--ok); } .dot.bad { background:var(--warn); } .dot.demo { background:var(--gold); }
+  .onbtn { min-width:118px; }
+  .onbtn[aria-pressed="true"] { background:var(--onair); border-color:var(--onair); color:#fff; }
+  .gear { width:46px; padding:0; }
 
+  .status { display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:8px 12px; font-weight:700; }
+  .status .jk { display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color:var(--muted); min-width:0; }
+  .status .jk i { width:12px; height:12px; border-radius:50%; background:var(--gold); flex:none; }
+  .status .jk span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .pick { background:color-mix(in srgb,var(--gold) 12%,var(--surface)); border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line)); border-radius:12px; padding:10px; display:grid; gap:8px; }
+  .pick p { margin:0; font-weight:700; }
+  .pick .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pick .btn { min-height:48px; border-color:var(--tc); color:#fff; background:color-mix(in srgb,var(--tc) 35%,var(--raised)); min-width:0; }
+  .pick .btn span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .board { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .team { border-radius:14px; overflow:hidden; border:1px solid var(--line); background:var(--surface); min-width:0; display:flex; flex-direction:column; }
+  .ta { --tc:var(--a); } .tb { --tc:var(--b); }
+  .hd { background:var(--tc); padding:8px 10px 10px; display:grid; grid-template-columns:auto 1fr; column-gap:8px; align-items:center; position:relative; }
+  .lg { grid-row:1 / span 2; width:40px; height:40px; border-radius:50%; background:#fff center/cover no-repeat; box-shadow:0 0 0 2px #fff; }
+  .lg.none { display:none; }
+  .hd .nm { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .hd .sc { font-family:var(--num); font-weight:700; font-size:clamp(52px,15vw,88px); line-height:1; font-variant-numeric:tabular-nums; }
+  .hd .jkdot { position:absolute; right:10px; top:10px; width:16px; height:16px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 2px #fff; }
+  .throw { padding:10px 8px 0; display:grid; gap:8px; }
+  .bd { display:flex; gap:5px; align-items:center; flex-wrap:wrap; font-size:12.5px; color:var(--muted); min-height:18px; }
+  .bd i { width:15px; height:15px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--tc) 45%,#000 130%); }
+  .bd i.used { opacity:.2; transform:scale(.75); }
+  .bd span { margin-left:auto; }
+  .trow { display:grid; grid-template-columns:44px 1fr; gap:6px; }
+  .trow .btn { min-height:54px; padding:0 6px; }
+  .trow .big { font-size:16px; font-weight:700; background:color-mix(in srgb,var(--tc) 25%,var(--raised)); border-color:color-mix(in srgb,var(--tc) 60%,var(--line2)); }
+  .keys { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:8px; margin-top:auto; }
+  .keys .lbl { grid-column:1 / -1; font-size:12px; color:var(--muted); }
+  .key { height:52px; border-radius:10px; border:1px solid var(--line2); background:var(--raised); font-family:var(--num); font-size:24px; font-weight:700; color:var(--tc); }
+  .key:active, .trow .btn:active { transform:scale(.95); }
+  .key:disabled { opacity:.3; }
+
+  .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .actions .btn { min-height:50px; line-height:1.3; text-align:center; padding:4px 10px; }
+
+  .win { border-radius:14px; padding:14px; text-align:center; background:color-mix(in srgb,var(--tc) 30%,var(--surface)); border:1px solid var(--tc); display:grid; gap:8px; }
+  .win b { font-size:22px; } .win .fs { font-family:var(--num); font-size:44px; font-weight:700; line-height:1; }
+  .win .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  details.hist { background:var(--surface); border:1px solid var(--line); border-radius:12px; }
+  details.hist summary { padding:10px 12px; font-weight:700; cursor:pointer; list-style:none; display:flex; justify-content:space-between; }
+  details.hist summary::-webkit-details-marker { display:none; }
+  details.hist summary::after { content:"▾"; color:var(--muted); }
+  details.hist[open] summary::after { content:"▴"; }
+  .hist ul { list-style:none; margin:0; padding:0 12px 8px; }
+  .hist li { display:grid; grid-template-columns:60px 1fr auto; gap:10px; padding:7px 0; border-top:1px solid var(--line); align-items:center; }
+  .hist .who { display:flex; gap:8px; align-items:center; min-width:0; }
+  .hist .who span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hist li i { width:10px; height:10px; border-radius:50%; background:var(--tc); flex:none; }
+  .hist b, .hist .run { font-family:var(--num); font-size:18px; font-variant-numeric:tabular-nums; }
+  .hist b { color:var(--tc); }
+
+  /* ======== settings sheet ======== */
+  .sheet { position:fixed; inset:0; z-index:20; background:var(--bg); overflow-y:auto; overscroll-behavior:contain; }
+  .sheet .top { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:10px; background:var(--bg); border-bottom:1px solid var(--line);
+    padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px; }
+  .sheet .top h2 { margin:0 auto 0 0; font-size:19px; }
+  .sheet .body { max-width:720px; margin:0 auto; padding:14px 16px calc(40px + env(safe-area-inset-bottom,0px)); display:grid; gap:14px; }
   .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; display:grid; gap:12px; min-width:0; }
-  .card h2 { margin:0; font-size:15px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-
-  /* preview */
+  .card h3 { margin:0; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .card h3 .n { width:22px; height:22px; border-radius:50%; background:var(--raised); border:1px solid var(--line2); display:grid; place-items:center; font-size:12px; flex:none; }
+  .field { display:grid; gap:5px; min-width:0; }
+  .lab { font-size:13px; color:var(--muted); }
+  .teamset { display:grid; gap:8px; padding:10px; border-radius:12px; border:1px solid var(--line); border-left:5px solid var(--tc); }
+  .namerow { display:flex; gap:6px; }
+  .namerow input[type=color] { width:50px; height:46px; padding:2px; border-radius:10px; border:1px solid var(--line2); background:var(--field); flex:none; }
+  .logorow { display:flex; gap:8px; align-items:center; }
+  .logorow .pv { width:44px; height:44px; border-radius:50%; background:var(--field) center/cover no-repeat; border:1px solid var(--line2); flex:none; }
+  .logorow .btn { min-height:40px; font-size:13.5px; padding:0 12px; }
+  .seg { display:flex; gap:6px; flex-wrap:wrap; }
+  .seg button { flex:1 1 auto; min-height:42px; padding:4px 10px; border-radius:9px; border:1px solid var(--line2); background:var(--raised); font-size:13.5px; font-weight:600; }
+  .seg button[aria-pressed="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .tgl { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:46px; padding:0 2px; background:none; border:0; width:100%; text-align:left; font-weight:600; }
+  .tgl .sw { width:42px; height:24px; border-radius:999px; background:var(--line2); position:relative; flex:none; transition:background .2s; }
+  .tgl .sw::after { content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .2s; }
+  .tgl[aria-pressed="true"] .sw { background:var(--ok); }
+  .tgl[aria-pressed="true"] .sw::after { transform:translateX(18px); }
+  .tgl + .tgl { border-top:1px solid var(--line); }
   .preview { position:relative; aspect-ratio:16/9; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--line);
     background:repeating-conic-gradient(#20252e 0 25%, #171b22 0 50%) 0 0/24px 24px; }
   .preview iframe { position:absolute; inset:0; width:100%; height:100%; border:0; color-scheme:light; }
-  .onair { display:flex; gap:8px; flex-wrap:wrap; }
-  .tog { flex:1 1 150px; justify-content:flex-start; }
-  .tog .sw { width:38px; height:22px; border-radius:999px; background:var(--line2); position:relative; flex:none; transition:background .2s; }
-  .tog .sw::after { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform .2s; }
-  .tog[aria-pressed="true"] .sw { background:var(--onair); }
-  .tog[aria-pressed="true"] .sw::after { transform:translateX(16px); }
-
-  /* score pads */
-  .board { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .team { border-radius:14px; overflow:hidden; border:1px solid var(--line); background:var(--surface); min-width:0; }
-  .team .hd { background:var(--tc); padding:10px 12px; }
-  .team .nm { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .team .sc { font-family:var(--num); font-weight:700; font-size:clamp(56px,16vw,96px); line-height:1; font-variant-numeric:tabular-nums; }
-  .team .jk { font-size:12px; font-weight:700; background:rgba(0,0,0,.3); border-radius:999px; padding:1px 9px; display:inline-block; }
-  .keys { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:10px; }
-  .key { height:52px; border-radius:10px; border:1px solid var(--line2); background:var(--raised); font-family:var(--num); font-size:24px; font-weight:700; color:var(--tc); }
-  .key:active { transform:scale(.95); }
-  .key:disabled { opacity:.35; }
-  .ta { --tc:var(--a); } .tb { --tc:var(--b); }
-  .team .hd { display:grid; grid-template-columns:auto 1fr; column-gap:10px; align-items:center; }
-  .team .hd > :not(.lg) { grid-column:2; }
-  .lg { grid-row:1 / span 3; width:44px; height:44px; border-radius:50%; background:#fff center/cover no-repeat; box-shadow:0 0 0 2px #fff; }
-  .lg.none { display:none; }
-  .throw { padding:10px 10px 0; display:grid; gap:8px; }
-  .bd { display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:12.5px; color:var(--muted); }
-  .bd i { width:16px; height:16px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--tc) 45%,#000 130%); }
-  .bd i.used { opacity:.2; transform:scale(.75); }
-  .trow { display:grid; grid-template-columns:52px 1fr; gap:6px; }
-  .trow .btn { min-height:48px; padding:0 8px; }
-  .trow .big { background:color-mix(in srgb,var(--tc) 22%,var(--raised)); border-color:color-mix(in srgb,var(--tc) 55%,var(--line2)); }
-  .logorow { display:flex; gap:6px; align-items:center; }
-  .logorow .pv { width:40px; height:40px; border-radius:50%; background:var(--field) center/cover no-repeat; border:1px solid var(--line2); flex:none; }
-  .logorow .btn { min-height:40px; font-size:13.5px; padding:0 12px; }
-  .actions { display:flex; gap:8px; flex-wrap:wrap; }
-  .actions .btn { flex:1 1 150px; }
-
-  /* settings */
+  .link { display:flex; gap:6px; } .link input { font-size:13px; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .field { display:grid; gap:4px; min-width:0; }
-  .namerow { display:flex; gap:6px; }
-  .namerow input[type=color] { width:48px; height:44px; padding:2px; border-radius:10px; border:1px solid var(--line2); background:var(--field); flex:none; }
-  .seg { display:flex; gap:6px; flex-wrap:wrap; }
-  .seg button { flex:1 1 auto; min-height:40px; padding:4px 10px; border-radius:9px; border:1px solid var(--line2); background:var(--raised); font-size:13.5px; font-weight:600; }
-  .seg button[aria-pressed="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
-  .link { display:flex; gap:6px; }
-  .link input { font-size:13px; }
+  .done { position:sticky; bottom:0; padding:10px 0 0; background:linear-gradient(transparent, var(--bg) 30%); }
+  .done .btn { width:100%; min-height:52px; font-size:17px; }
 
-  .hist { list-style:none; margin:0; padding:0; }
-  .hist li { display:grid; grid-template-columns:64px 1fr auto; gap:10px; padding:7px 0; border-top:1px solid var(--line); align-items:center; }
-  .hist .who { display:flex; gap:8px; align-items:center; min-width:0; }
-  .hist .who span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .hist i { width:10px; height:10px; border-radius:50%; background:var(--tc); flex:none; }
-  .hist b, .hist .run { font-family:var(--num); font-size:18px; font-variant-numeric:tabular-nums; }
-  .hist b { color:var(--tc); }
   .toast { position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg);
-    padding:8px 16px; border-radius:999px; font-weight:700; z-index:9; }
-  @media (max-width:520px) { body { padding-inline:12px; } .grid2 { grid-template-columns:1fr; } .keys { padding:8px; gap:5px; } .key { height:48px; } }
+    padding:8px 16px; border-radius:999px; font-weight:700; z-index:30; max-width:90vw; text-align:center; }
+  @media (max-width:520px) { .grid2 { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -133,63 +163,97 @@
   </form>
 </div>
 
-<div class="wrap" id="app" hidden>
-  <header class="top">
-    <h1>ສະກໍ<b>ເປຕັ່ງ</b> · ໄລ້ສົດ</h1>
-    <span class="net"><span class="dot" id="netDot"></span><span id="netTxt">ກຳລັງເຊື່ອມ…</span></span>
-    <a class="btn" href="index.html" style="text-decoration:none;color:inherit">← Studio</a>
-    <button class="btn" id="out">ອອກ</button>
+<!-- ================= ໜ້າຫຼັກ: ໃຊ້ຕອນແຂ່ງ ================= -->
+<main class="live" id="app" hidden>
+  <header class="bar">
+    <div class="ttl"><b id="hTitle">ເປຕັ່ງ</b><small><span class="dot" id="netDot"></span><span id="netTxt">ກຳລັງເຊື່ອມ…</span></small></div>
+    <button class="btn onbtn" id="tgShow" aria-pressed="true">ສະກໍ: ເປີດ</button>
+    <button class="btn gear" id="openSet" aria-label="ຕັ້ງຄ່າ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9h.1a2 2 0 1 1 0 4h-.1z"/></svg></button>
   </header>
 
-  <section class="card">
-    <div class="preview"><iframe id="pv" title="ຕົວຢ່າງ overlay"></iframe></div>
-    <div class="onair">
-      <button class="btn tog" id="tgShow" aria-pressed="true"><span class="sw"></span>ສະແດງສະກໍເທິງໄລ້</button>
-      <button class="btn tog" id="tgWin" aria-pressed="true"><span class="sw"></span>ປ້າຍຜູ້ຊະນະຕອນຈົບ</button>
-      <button class="btn tog" id="tgLogo" aria-pressed="true"><span class="sw"></span>ສະແດງໂລໂກ້</button>
-      <button class="btn tog" id="tgBalls" aria-pressed="true"><span class="sw"></span>ສະແດງລູກທີ່ເຫຼືອ</button>
-    </div>
-  </section>
+  <div class="status"><span id="sEnd">ຮອບທີ 1</span><span class="jk" id="sJack"><i></i><span></span></span></div>
 
-  <section class="board">
-    <article class="team ta"><div class="hd"><span class="lg none" id="lg0"></span><div class="nm" id="n0"></div><div class="sc" id="c0">0</div><span class="jk" id="j0" hidden>ໂຍນລູກໝູ</span></div><div class="throw"><div class="bd" id="bd0"></div><div class="trow"><button class="btn" data-th="0" data-d="-1" aria-label="ລົບ 1 ລູກ">−1</button><button class="btn big" data-th="0" data-d="1">ໂຍນ 1 ລູກ</button></div></div><div class="keys" id="k0"></div></article>
-    <article class="team tb"><div class="hd"><span class="lg none" id="lg1"></span><div class="nm" id="n1"></div><div class="sc" id="c1">0</div><span class="jk" id="j1" hidden>ໂຍນລູກໝູ</span></div><div class="throw"><div class="bd" id="bd1"></div><div class="trow"><button class="btn" data-th="1" data-d="-1" aria-label="ລົບ 1 ລູກ">−1</button><button class="btn big" data-th="1" data-d="1">ໂຍນ 1 ລູກ</button></div></div><div class="keys" id="k1"></div></article>
-  </section>
-  <div class="actions">
-    <button class="btn" id="undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>ຍົກເລີກຮອບລ່າສຸດ</button>
-    <button class="btn" id="nullEnd" title="ສະເໝີ ຫຼື ລູກໝູອອກນອກເດີ່ນ: ບໍ່ມີໃຜໄດ້ຄະແນນ">ຮອບໂມຄະ (ສະເໝີ / ລູກໝູອອກ)</button>
-    <button class="btn" id="toss">ສຸ່ມຜູ້ໂຍນລູກໝູກ່ອນ</button>
+  <div class="pick" id="pick" hidden>
+    <p>ຮອບທີ 1: ທີມໃດໂຍນລູກໝູກ່ອນ?</p>
+    <div class="row"><button class="btn ta" data-jack="0"><span id="pk0"></span></button><button class="btn tb" data-jack="1"><span id="pk1"></span></button></div>
   </div>
 
-  <section class="card">
-    <h2>ຕັ້ງຄ່າເກມ</h2>
-    <div class="field"><label for="fTitle">ຫົວຂໍ້ເທິງສະກໍ</label><input type="text" id="fTitle" maxlength="40" placeholder="ເຊັ່ນ ງານແຂ່ງເປຕັ່ງ ບ້ານ…"></div>
-    <div class="grid2">
-      <div class="field"><label for="fA">ທີມທີ 1</label><div class="namerow"><input type="text" id="fA" maxlength="24"><input type="color" id="cA" aria-label="ສີທີມທີ 1"></div>
-        <div class="logorow"><span class="pv" id="pv0"></span><label class="btn" for="up0">ເລືອກໂລໂກ້</label><input type="file" id="up0" accept="image/*" hidden><button class="btn" id="rm0" type="button">ລຶບ</button></div></div>
-      <div class="field"><label for="fB">ທີມທີ 2</label><div class="namerow"><input type="text" id="fB" maxlength="24"><input type="color" id="cB" aria-label="ສີທີມທີ 2"></div>
-        <div class="logorow"><span class="pv" id="pv1"></span><label class="btn" for="up1">ເລືອກໂລໂກ້</label><input type="file" id="up1" accept="image/*" hidden><button class="btn" id="rm1" type="button">ລຶບ</button></div></div>
+  <div class="win" id="win" hidden>
+    <span class="muted">ຈົບເກມ · ຜູ້ຊະນະ</span><b id="wName"></b><span class="fs" id="wScore"></span>
+    <div class="row">
+      <button class="btn" id="tgWin">ປ້າຍຜູ້ຊະນະ: ເປີດ</button>
+      <button class="btn primary" id="nextGame">ນັດຕໍ່ໄປ</button>
     </div>
-    <div class="field"><span class="lab">ຮູບແບບ</span><div class="seg" id="segF"><button data-v="single">ດ່ຽວ (3 ລູກ)</button><button data-v="double">ຄູ່</button><button data-v="triple">ທີມ 3 ຄົນ</button></div></div>
-    <div class="field"><span class="lab">ຄະແນນຊະນະ</span><div class="seg" id="segT"><button data-v="11">11</button><button data-v="13">13</button><button data-v="15">15</button><button data-v="21">21</button></div></div>
-    <div class="grid2">
-      <div class="field"><span class="lab">ຕຳແໜ່ງສະກໍ</span><div class="seg" id="segP"><button data-v="tl">ຊ້າຍເທິງ</button><button data-v="tc">ກາງເທິງ</button><button data-v="tr">ຂວາເທິງ</button><button data-v="bl">ຊ້າຍລຸ່ມ</button><button data-v="bc">ກາງລຸ່ມ</button><button data-v="br">ຂວາລຸ່ມ</button></div></div>
+  </div>
+
+  <section class="board">
+    <article class="team ta"><div class="hd"><span class="lg none" id="lg0"></span><div class="nm" id="n0"></div><div class="sc" id="c0">0</div><i class="jkdot" id="j0" hidden></i></div>
+      <div class="throw"><div class="bd" id="bd0"></div><div class="trow"><button class="btn" data-th="0" data-d="-1" aria-label="ຄືນ 1 ລູກ">−1</button><button class="btn big" data-th="0" data-d="1">ໂຍນ 1 ລູກ</button></div></div>
+      <div class="keys" id="k0"></div></article>
+    <article class="team tb"><div class="hd"><span class="lg none" id="lg1"></span><div class="nm" id="n1"></div><div class="sc" id="c1">0</div><i class="jkdot" id="j1" hidden></i></div>
+      <div class="throw"><div class="bd" id="bd1"></div><div class="trow"><button class="btn" data-th="1" data-d="-1" aria-label="ຄືນ 1 ລູກ">−1</button><button class="btn big" data-th="1" data-d="1">ໂຍນ 1 ລູກ</button></div></div>
+      <div class="keys" id="k1"></div></article>
+  </section>
+
+  <div class="actions">
+    <button class="btn" id="nullEnd" style="flex-direction:column;gap:0">ຮອບໂມຄະ<small class="muted" style="font-weight:500">ສະເໝີ / ລູກໝູອອກ</small></button>
+    <button class="btn" id="undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>ຍົກເລີກຮອບລ່າສຸດ</button>
+  </div>
+
+  <details class="hist" id="histBox"><summary>ປະຫວັດແຕ່ລະຮອບ <span class="muted" id="hc"></span></summary><ul id="hist"></ul></details>
+</main>
+
+<!-- ================= ຕັ້ງຄ່າ: ຕັ້ງເທື່ອດຽວກ່ອນແຂ່ງ ================= -->
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="setH">
+  <div class="top"><h2 id="setH">ຕັ້ງຄ່າ</h2><button class="btn primary" id="closeSet">ແລ້ວ ✓</button></div>
+  <div class="body">
+    <section class="card">
+      <h3><span class="n">1</span>ນັດແຂ່ງ</h3>
+      <div class="field"><label class="lab" for="fTitle">ຫົວຂໍ້ເທິງສະກໍ (ປະຫວ່າງໄດ້)</label><input type="text" id="fTitle" maxlength="40" placeholder="ເຊັ່ນ ຊິງຊະນະເລີດ ແຂວງອຸດົມໄຊ"></div>
+      <div class="field"><span class="lab">ຮູບແບບ</span><div class="seg" id="segF"><button data-v="single">ດ່ຽວ (3 ລູກ)</button><button data-v="double">ຄູ່ (6 ລູກ)</button><button data-v="triple">ທີມ 3 ຄົນ (6 ລູກ)</button></div></div>
+      <div class="field"><span class="lab">ຄະແນນຊະນະ</span><div class="seg" id="segT"><button data-v="11">11</button><button data-v="13">13</button><button data-v="15">15</button><button data-v="21">21</button></div></div>
+    </section>
+
+    <section class="card">
+      <h3><span class="n">2</span>ທີມ</h3>
+      <div class="teamset ta">
+        <div class="field"><label class="lab" for="fA">ທີມທີ 1 · ຊື່ ແລະ ສີ</label><div class="namerow"><input type="text" id="fA" maxlength="24"><input type="color" id="cA" aria-label="ສີທີມທີ 1"></div></div>
+        <div class="logorow"><span class="pv" id="pv0"></span><label class="btn" for="up0">ເລືອກໂລໂກ້</label><input type="file" id="up0" accept="image/*" hidden><button class="btn" id="rm0" type="button">ລຶບ</button></div>
+      </div>
+      <div class="teamset tb">
+        <div class="field"><label class="lab" for="fB">ທີມທີ 2 · ຊື່ ແລະ ສີ</label><div class="namerow"><input type="text" id="fB" maxlength="24"><input type="color" id="cB" aria-label="ສີທີມທີ 2"></div></div>
+        <div class="logorow"><span class="pv" id="pv1"></span><label class="btn" for="up1">ເລືອກໂລໂກ້</label><input type="file" id="up1" accept="image/*" hidden><button class="btn" id="rm1" type="button">ລຶບ</button></div>
+      </div>
+      <div class="field"><span class="lab">ຮອບທີ 1: ທີມທີ່ໂຍນລູກໝູກ່ອນ (ຕາມຜົນໂຍນຫຼຽນ)</span><div class="seg" id="segJ"><button data-v="0" id="sj0">ທີມ A</button><button data-v="1" id="sj1">ທີມ B</button><button data-v="">ຍັງບໍ່ຮູ້</button></div></div>
+    </section>
+
+    <section class="card">
+      <h3><span class="n">3</span>ສະກໍເທິງໄລ້</h3>
+      <div class="preview"><iframe id="pv" title="ຕົວຢ່າງ overlay"></iframe></div>
+      <div class="field"><span class="lab">ຕຳແໜ່ງ</span><div class="seg" id="segP"><button data-v="tl">ຊ້າຍເທິງ</button><button data-v="tc">ກາງເທິງ</button><button data-v="tr">ຂວາເທິງ</button><button data-v="bl">ຊ້າຍລຸ່ມ</button><button data-v="bc">ກາງລຸ່ມ</button><button data-v="br">ຂວາລຸ່ມ</button></div></div>
       <div class="field"><span class="lab">ຂະໜາດ</span><div class="seg" id="segS"><button data-v="0.8">ນ້ອຍ</button><button data-v="1">ກາງ</button><button data-v="1.25">ໃຫຍ່</button></div></div>
-    </div>
-    <div class="field"><span class="lab">ໂມງນັບເວລາ</span><div class="seg" id="segC"><button data-v="1">ສະແດງ</button><button data-v="0">ເຊື່ອງ</button></div></div>
-    <button class="btn danger" id="newGame">ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)</button>
-  </section>
+      <div>
+        <button class="tgl" id="tgLogo" aria-pressed="true">ສະແດງໂລໂກ້<span class="sw"></span></button>
+        <button class="tgl" id="tgBalls" aria-pressed="true">ສະແດງລູກທີ່ເຫຼືອ<span class="sw"></span></button>
+        <button class="tgl" id="tgClock" aria-pressed="true">ສະແດງໂມງນັບເວລາ<span class="sw"></span></button>
+        <button class="tgl" id="tgWin2" aria-pressed="true">ປ້າຍຜູ້ຊະນະຕອນຈົບເກມ<span class="sw"></span></button>
+      </div>
+    </section>
 
-  <section class="card">
-    <h2>ລິ້ງ Web ຂອງ Live Now (ລິ້ງດຽວກັບ Studio)</h2>
-    <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
-    <p class="muted" style="margin:0;font-size:13px">ຖ້າໃສ່ລິ້ງ overlay ຂອງ Studio ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນຫຍັງ. ສະກໍເປຕັ່ງຈະຂຶ້ນທັບໜ້າຈໍທີ່ເປີດຢູ່ ເມື່ອເປີດ "ສະແດງສະກໍເທິງໄລ້".</p>
-  </section>
+    <section class="card">
+      <h3><span class="n">4</span>ລິ້ງ Web ຂອງ Live Now</h3>
+      <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
+      <p class="muted" style="margin:0;font-size:13px">ລິ້ງດຽວກັບ Studio. ຖ້າໃສ່ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນ.</p>
+    </section>
 
-  <section class="card">
-    <h2>ປະຫວັດແຕ່ລະຮອບ <span class="muted" id="hc" style="font-size:13px;font-weight:400"></span></h2>
-    <ul class="hist" id="hist"></ul>
-  </section>
+    <section class="card">
+      <h3>ອື່ນໆ</h3>
+      <button class="btn danger" id="newGame">ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)</button>
+      <div class="grid2"><a class="btn" href="index.html">← ກັບ Studio</a><button class="btn" id="out">ອອກຈາກລະບົບ</button></div>
+    </section>
+
+    <div class="done"><button class="btn primary" id="closeSet2">ແລ້ວ ✓ ກັບໄປໜ້າແຂ່ງ</button></div>
+  </div>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -204,86 +268,127 @@
   const fresh = (p) => ({
     title: p ? p.title : 'ເປຕັ່ງ', format: p ? p.format : 'triple', target: p ? p.target : 13,
     teams: p ? p.teams : [{ name:'ທີມ A', color:'#1c5cd0' }, { name:'ທີມ B', color:'#d6281e' }],
-    pos: p ? p.pos : 'tl', size: p ? p.size : 1, clock: p ? p.clock : true, show: p ? p.show : true, showWin: true, logos: p ? p.logos !== false : true, balls: p ? p.balls !== false : true, thrown: [0, 0],
+    pos: p ? p.pos : 'tl', size: p ? p.size : 1, clock: p ? p.clock : true, show: p ? p.show : true, showWin: true,
+    logos: p ? p.logos !== false : true, balls: p ? p.balls !== false : true, thrown: [0, 0],
     ends: [], firstJack: null, startedAt: null, finishedAt: null, lastEvent: null });
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
   const toast = (m) => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 1600); };
   const scores = () => { const s = [0, 0]; list(S.ends).forEach((e) => { if (!e.n) s[e.t] += e.p; }); return s; };
   const winner = () => { const s = scores(); return s[0] >= S.target ? 0 : s[1] >= S.target ? 1 : null; };
+  const jackTeam = () => { const ends = list(S.ends); return ends.length ? ends[ends.length - 1].t : S.firstJack; };
   const save = () => db.set('petanque', S).catch((e) => toast('ບັນທຶກບໍ່ໄດ້: ' + (e.code || e.message)));
+  const tog = (id, on, label) => { $(id).setAttribute('aria-pressed', String(on)); if (label) $(id).textContent = label + (on ? 'ເປີດ' : 'ປິດ'); };
+  function seg(id, v) { document.querySelectorAll('#' + id + ' button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(v)))); }
 
   function render() {
-    const ends = list(S.ends), sc = scores(), w = winner(), max = MAX[S.format] || 6;
-    const jt = ends.length ? ends[ends.length - 1].t : S.firstJack;
+    const ends = list(S.ends), sc = scores(), w = winner(), nb = MAX[S.format] || 6, jt = jackTeam(), th = S.thrown || {};
+    const name = (i) => S.teams[i].name;
     document.documentElement.style.setProperty('--a', S.teams[0].color);
     document.documentElement.style.setProperty('--b', S.teams[1].color);
-    [0, 1].forEach((i) => {
-      $('n' + i).textContent = S.teams[i].name; $('c' + i).textContent = sc[i];
-      $('j' + i).hidden = !(w === null && jt === i);
-      $('k' + i).innerHTML = Array.from({ length:max }, (_, n) => `<button class="key" data-t="${i}" data-p="${n + 1}" ${w !== null ? 'disabled' : ''}>+${n + 1}</button>`).join('');
-    });
-    $('undo').disabled = !ends.length; $('nullEnd').disabled = w !== null; $('toss').hidden = ends.length > 0;
-    $('tgShow').setAttribute('aria-pressed', String(S.show !== false));
-    $('tgWin').setAttribute('aria-pressed', String(S.showWin !== false));
-    $('tgLogo').setAttribute('aria-pressed', String(S.logos !== false));
-    $('tgBalls').setAttribute('aria-pressed', String(S.balls !== false));
-    const nb = max, th = S.thrown || {};
+
+    // live screen
+    $('hTitle').textContent = S.title || 'ເປຕັ່ງ';
+    tog('tgShow', S.show !== false, 'ສະກໍ: ');
+    $('sEnd').textContent = w === null ? 'ຮອບທີ ' + (ends.length + 1) + ' · ເກມ ' + S.target : 'ຈົບເກມ';
+    const jOk = w === null && (jt === 0 || jt === 1);
+    $('sJack').hidden = !jOk;
+    if (jOk) $('sJack').querySelector('span').textContent = 'ໂຍນລູກໝູ: ' + name(jt);
+    $('pick').hidden = !(w === null && !ends.length && (S.firstJack == null));
+    $('pk0').textContent = name(0); $('pk1').textContent = name(1);
+    $('win').hidden = w === null;
+    if (w !== null) {
+      $('win').className = 'win ' + (w ? 'tb' : 'ta');
+      $('wName').textContent = name(w); $('wScore').textContent = sc[w] + ' – ' + sc[1 - w];
+      tog('tgWin', S.showWin !== false, 'ປ້າຍຜູ້ຊະນະ: ');
+    }
     [0, 1].forEach((i) => {
       const lg = S.teams[i].logo || '';
+      $('n' + i).textContent = name(i); $('c' + i).textContent = sc[i];
+      $('j' + i).hidden = !(jOk && jt === i);
       $('lg' + i).style.backgroundImage = lg ? 'url("' + lg + '")' : 'none';
       $('lg' + i).classList.toggle('none', !lg || S.logos === false);
-      $('pv' + i).style.backgroundImage = lg ? 'url("' + lg + '")' : 'none';
-      $('rm' + i).hidden = !lg;
       const used = Math.min(nb, +th[i] || 0);
-      $('bd' + i).innerHTML = Array.from({ length:nb }, (_, n) => `<i class="${n >= nb - used ? 'used' : ''}"></i>`).join('') + `<span>ເຫຼືອ ${nb - used}/${nb}</span>`;
+      $('bd' + i).innerHTML = Array.from({ length:nb }, (_, n) => `<i class="${n >= nb - used ? 'used' : ''}"></i>`).join('') + `<span>ເຫຼືອ ${nb - used}</span>`;
       document.querySelectorAll('[data-th="' + i + '"]').forEach((b) => { b.disabled = w !== null || (b.dataset.d === '1' ? used >= nb : used <= 0); });
+      $('k' + i).innerHTML = '<span class="lbl">ຊະນະຮອບ ໄດ້:</span>' + Array.from({ length:nb }, (_, n) => `<button class="key" data-t="${i}" data-p="${n + 1}" ${w !== null ? 'disabled' : ''}>+${n + 1}</button>`).join('');
     });
-    // settings (don't clobber the field being typed in)
-    const setVal = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
-    setVal('fTitle', S.title || ''); setVal('fA', S.teams[0].name); setVal('fB', S.teams[1].name);
-    setVal('cA', S.teams[0].color); setVal('cB', S.teams[1].color);
-    seg('segF', S.format); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1); seg('segC', S.clock === false ? 0 : 1);
-    // history
+    $('undo').disabled = !ends.length; $('nullEnd').disabled = w !== null;
     $('hc').textContent = ends.length ? ends.length + ' ຮອບ' : '';
     const run = [0, 0];
     const rows = ends.map((e, i) => {
-      if (e.n) return `<li><span class="muted">ຮອບ ${i + 1}</span><span class="who muted">ໂມຄະ (ສະເໝີ / ລູກໝູອອກ)</span><span class="run">${run[0]}–${run[1]}</span></li>`;
-      run[e.t] += e.p; return `<li class="${e.t ? 'tb' : 'ta'}"><span class="muted">ຮອບ ${i + 1}</span><span class="who"><i></i><span>${esc(S.teams[e.t].name)}</span><b>+${e.p}</b></span><span class="run">${run[0]}–${run[1]}</span></li>`; });
-    $('hist').innerHTML = rows.reverse().join('') || '<li class="muted" style="display:block">ກົດ +1 ຫາ +' + max + ' ໃຕ້ທີມທີ່ຊະນະແຕ່ລະຮອບ</li>';
-  }
-  function seg(id, v) { document.querySelectorAll('#' + id + ' button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(v)))); }
+      if (e.n) return `<li><span class="muted">ຮອບ ${i + 1}</span><span class="who muted">ໂມຄະ</span><span class="run">${run[0]}–${run[1]}</span></li>`;
+      run[e.t] += e.p; return `<li class="${e.t ? 'tb' : 'ta'}"><span class="muted">ຮອບ ${i + 1}</span><span class="who"><i></i><span>${esc(name(e.t))}</span><b>+${e.p}</b></span><span class="run">${run[0]}–${run[1]}</span></li>`; });
+    $('hist').innerHTML = rows.reverse().join('') || '<li class="muted" style="display:block">ຍັງບໍ່ມີຮອບ</li>';
 
-  // scoring
+    // settings (don't clobber the field being typed in)
+    const setVal = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
+    setVal('fTitle', S.title || ''); setVal('fA', name(0)); setVal('fB', name(1));
+    setVal('cA', S.teams[0].color); setVal('cB', S.teams[1].color);
+    [0, 1].forEach((i) => { const lg = S.teams[i].logo || ''; $('pv' + i).style.backgroundImage = lg ? 'url("' + lg + '")' : 'none'; $('rm' + i).hidden = !lg; $('sj' + i).textContent = name(i); });
+    seg('segF', S.format); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1);
+    seg('segJ', S.firstJack == null ? '' : S.firstJack);
+    tog('tgLogo', S.logos !== false); tog('tgBalls', S.balls !== false); tog('tgClock', S.clock !== false); tog('tgWin2', S.showWin !== false);
+  }
+
+  // ---------- live actions
   document.addEventListener('click', (e) => {
-    const k = e.target.closest('.key'); if (!k || winner() !== null) return;
-    const t = +k.dataset.t, p = +k.dataset.p, ends = list(S.ends);
-    if (!S.startedAt) S.startedAt = Date.now();
-    ends.push({ t, p }); S.ends = ends; S.lastEvent = { t, p, at: Date.now() }; S.thrown = [0, 0];
-    if (winner() !== null) { S.finishedAt = Date.now(); S.showWin = true; }
-    save(); render(); toast(S.teams[t].name + ' +' + p);
+    const k = e.target.closest('.key');
+    if (k && winner() === null) {
+      const t = +k.dataset.t, p = +k.dataset.p, ends = list(S.ends);
+      if (!S.startedAt) S.startedAt = Date.now();
+      ends.push({ t, p }); S.ends = ends; S.lastEvent = { t, p, at: Date.now() }; S.thrown = [0, 0];
+      if (winner() !== null) { S.finishedAt = Date.now(); S.showWin = true; }
+      save(); render(); toast(S.teams[t].name + ' +' + p); return;
+    }
+    const b = e.target.closest('[data-th]');
+    if (b && !b.disabled) {
+      const i = +b.dataset.th, nb = MAX[S.format] || 6, th = S.thrown || {}, t = [+th[0] || 0, +th[1] || 0];
+      t[i] = Math.max(0, Math.min(nb, t[i] + +b.dataset.d)); S.thrown = t; save(); render(); return;
+    }
+    const j = e.target.closest('[data-jack]');
+    if (j) { S.firstJack = +j.dataset.jack; save(); render(); toast(S.teams[S.firstJack].name + ' ໂຍນລູກໝູກ່ອນ'); }
   });
   $('undo').onclick = () => { const ends = list(S.ends); if (!ends.length) return; const e = ends.pop(); S.ends = ends; S.finishedAt = null; S.lastEvent = null; S.thrown = [0, 0]; save(); render(); toast(e.n ? 'ຍົກເລີກຮອບໂມຄະ' : 'ຍົກເລີກ: ' + S.teams[e.t].name + ' +' + e.p); };
   // ຮອບໂມຄະ: ບໍ່ມີໃຜໄດ້ຄະແນນ, ທີມທີ່ໂຍນລູກໝູຮອບນີ້ ໂຍນອີກໃນຮອບໜ້າ
   $('nullEnd').onclick = () => {
     if (winner() !== null) return;
-    const ends = list(S.ends), jt = ends.length ? ends[ends.length - 1].t : S.firstJack;
+    const ends = list(S.ends), jt = jackTeam();
     if (!S.startedAt) S.startedAt = Date.now();
     ends.push({ t: jt == null ? -1 : jt, p: 0, n: 1 }); S.ends = ends;
     S.lastEvent = { t: -1, p: 0, n: 1, at: Date.now() }; S.thrown = [0, 0];
     save(); render(); toast('ບັນທຶກຮອບໂມຄະ');
   };
-  $('toss').onclick = () => { S.firstJack = Math.random() < .5 ? 0 : 1; save(); render(); toast(S.teams[S.firstJack].name + ' ໂຍນລູກໝູກ່ອນ'); };
-  $('tgShow').onclick = () => { S.show = S.show === false; save(); render(); };
+  $('tgShow').onclick = () => { S.show = S.show === false; save(); render(); toast(S.show ? 'ສະກໍຂຶ້ນເທິງໄລ້ແລ້ວ' : 'ເຊື່ອງສະກໍແລ້ວ'); };
   $('tgWin').onclick = () => { S.showWin = S.showWin === false; save(); render(); };
+  let nextArmed = false;
+  $('nextGame').onclick = () => {
+    if (!nextArmed) { nextArmed = true; $('nextGame').textContent = 'ກົດອີກຄັ້ງ ເພື່ອຢືນຢັນ'; setTimeout(() => { nextArmed = false; $('nextGame').textContent = 'ນັດຕໍ່ໄປ'; }, 4000); return; }
+    nextArmed = false; $('nextGame').textContent = 'ນັດຕໍ່ໄປ';
+    S = fresh(S); save(); render(); openSheet(); toast('ຕັ້ງທີມສຳລັບນັດຕໍ່ໄປ');
+  };
+
+  // ---------- settings sheet
+  function openSheet() { $('sheet').hidden = false; if (!$('pv').src) $('pv').src = $('url').value; }
+  function closeSheet() { $('sheet').hidden = true; window.scrollTo(0, 0); }
+  $('openSet').onclick = openSheet; $('closeSet').onclick = closeSheet; $('closeSet2').onclick = closeSheet;
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
+
+  const onText = (id, fn) => $(id).addEventListener('change', () => { fn($(id).value.trim()); save(); render(); });
+  onText('fTitle', (v) => S.title = v);
+  onText('fA', (v) => S.teams[0].name = v || 'ທີມ A');
+  onText('fB', (v) => S.teams[1].name = v || 'ທີມ B');
+  ['cA', 'cB'].forEach((id, i) => $(id).addEventListener('input', () => { S.teams[i].color = $(id).value; clearTimeout(save.h); save.h = setTimeout(save, 250); render(); }));
+  const onSeg = (id, fn) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; if (fn(b.dataset.v) === false) return; save(); render(); });
+  onSeg('segF', (v) => { if (list(S.ends).some((e) => e.p > MAX[v])) { toast('ມີຮອບທີ່ໄດ້ເກີນ ' + MAX[v] + ' ຄະແນນ'); return false; } S.format = v; });
+  onSeg('segT', (v) => { S.target = +v; S.finishedAt = winner() === null ? null : (S.finishedAt || Date.now()); });
+  onSeg('segP', (v) => S.pos = v);
+  onSeg('segS', (v) => S.size = +v);
+  onSeg('segJ', (v) => S.firstJack = v === '' ? null : +v);
   $('tgLogo').onclick = () => { S.logos = S.logos === false; save(); render(); };
   $('tgBalls').onclick = () => { S.balls = S.balls === false; save(); render(); };
-  document.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-th]'); if (!b || b.disabled) return;
-    const i = +b.dataset.th, nb = MAX[S.format] || 6, th = S.thrown || {};
-    const t = [+th[0] || 0, +th[1] || 0];
-    t[i] = Math.max(0, Math.min(nb, t[i] + +b.dataset.d));
-    S.thrown = t; save(); render();
-  });
+  $('tgClock').onclick = () => { S.clock = S.clock === false; save(); render(); };
+  $('tgWin2').onclick = () => { S.showWin = S.showWin === false; save(); render(); };
+
   // logo: crop to a square and shrink to 128px so it stays small in the database
   function loadLogo(file) {
     return new Promise((ok, bad) => {
@@ -307,22 +412,11 @@
     $('rm' + i).onclick = () => { delete S.teams[i].logo; save(); render(); };
   });
 
-  // settings
-  const onText = (id, fn) => $(id).addEventListener('change', () => { fn($(id).value.trim()); save(); render(); });
-  onText('fTitle', (v) => S.title = v);
-  onText('fA', (v) => S.teams[0].name = v || 'ທີມ A');
-  onText('fB', (v) => S.teams[1].name = v || 'ທີມ B');
-  ['cA', 'cB'].forEach((id, i) => $(id).addEventListener('input', () => { S.teams[i].color = $(id).value; clearTimeout(save.h); save.h = setTimeout(save, 250); render(); }));
-  const onSeg = (id, fn) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; if (fn(b.dataset.v) === false) return; save(); render(); });
-  onSeg('segF', (v) => { if (list(S.ends).some((e) => e.p > MAX[v])) { toast('ມີຮອບທີ່ໄດ້ເກີນ ' + MAX[v] + ' ຄະແນນ'); return false; } S.format = v; });
-  onSeg('segT', (v) => { S.target = +v; S.finishedAt = winner() === null ? null : (S.finishedAt || Date.now()); });
-  onSeg('segP', (v) => S.pos = v);
-  onSeg('segS', (v) => S.size = +v);
-  onSeg('segC', (v) => S.clock = v === '1');
   let armed = false;
   $('newGame').onclick = () => {
     if (!armed) { armed = true; $('newGame').classList.add('arm'); $('newGame').textContent = 'ກົດອີກຄັ້ງ ເພື່ອລຶບຄະແນນທັງໝົດ';
       setTimeout(() => { armed = false; $('newGame').classList.remove('arm'); $('newGame').textContent = 'ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)'; }, 4000); return; }
+    armed = false; $('newGame').classList.remove('arm'); $('newGame').textContent = 'ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)';
     S = fresh(S); save(); render(); toast('ເລີ່ມເກມໃໝ່ແລ້ວ');
   };
   $('copy').onclick = () => {
@@ -331,19 +425,18 @@
     try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), fallback); } catch (e) { fallback(); }
   };
 
-  // boot
+  // ---------- boot
   function start() {
     if (started) return; started = true;
     $('login').hidden = true; $('app').hidden = false;
     db.setUser(user);
-    const url = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
-    $('url').value = url; $('pv').src = url;
+    $('url').value = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
     if (db.mode === 'local') { $('netDot').className = 'dot demo'; $('netTxt').textContent = 'ໂໝດທົດລອງ'; $('out').hidden = true; }
     else db.onConnection((ok) => { $('netDot').className = 'dot ' + (ok ? 'ok' : 'bad'); $('netTxt').textContent = ok ? 'ເຊື່ອມຕໍ່ແລ້ວ' : 'ຂາດການເຊື່ອມຕໍ່'; });
     let first = true;
     db.watch('petanque', (v) => {
       if (v) { S = v; S.ends = list(v.ends); S.teams = list(v.teams); if (S.teams.length < 2) S.teams = fresh().teams; }
-      else if (first) { S = fresh(); save(); }
+      else if (first) { S = fresh(); save(); openSheet(); }
       first = false; if (S) render();
     });
   }
