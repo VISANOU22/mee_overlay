@@ -21,6 +21,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
+<script src="petanque-bug.js?v=1"></script>
 </head>
 <body>
 <div id="wrap"><div id="stage" class="mee-stage"></div></div>
@@ -38,6 +39,8 @@
   let db;
   try { db = Mee.createDB(); } catch (e) { say('ເປີດຖານຂໍ້ມູນບໍ່ໄດ້: ' + e.message); return; }
   db.setUser(user);
+  // ສະກໍເປຕັ່ງ (ຄວບຄຸມຈາກ petanque.html) — ຂຶ້ນທັບໜ້າຈໍອື່ນເມື່ອເປີດສະແດງ
+  try { if (window.MeePetanque) MeePetanque.mount(db); } catch (e) { console.warn('petanque', e); }
 
   const cache = new Map();
   const getAsset = (id) => {

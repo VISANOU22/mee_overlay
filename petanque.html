@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mee Overlay · ຄວບຄຸມສະກໍເປຕັ່ງ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700;900&family=Oswald:wght@500;700&display=swap">
+<style>
+  :root {
+    --bg:#0c0e13; --surface:#14171e; --raised:#1b1f28; --field:#0a0c10; --line:#272c37; --line2:#353b48;
+    --ink:#eef0f4; --muted:#9097a5; --accent:#ff4d3d; --onair:#e0261b; --ok:#34c77b; --gold:#ffc21a; --warn:#ff7a70;
+    --a:#1c5cd0; --b:#d6281e;
+    --lao:'Noto Sans Lao','Phetsarath OT',system-ui,sans-serif; --num:'Oswald','Arial Narrow',sans-serif;
+    color-scheme:dark;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--lao);
+    padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px)); }
+  button, input { font:inherit; color:inherit; }
+  button { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  [hidden] { display:none !important; }
+  :focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .wrap { max-width:880px; margin:0 auto; display:grid; gap:14px; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 14px; border-radius:10px;
+    border:1px solid var(--line2); background:var(--raised); font-weight:600; }
+  .btn:hover { border-color:#4a5263; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.danger { color:var(--warn); }
+  .btn.danger.arm { background:var(--onair); border-color:var(--onair); color:#fff; }
+  .btn svg { width:18px; height:18px; }
+  input[type=text], input[type=email], input[type=password] { height:44px; border-radius:10px; border:1px solid var(--line2); background:var(--field); padding:0 12px; width:100%; }
+  label, .lab { font-size:13px; color:var(--muted); }
+  .muted { color:var(--muted); }
+
+  /* login */
+  .login { min-height:80vh; display:grid; place-items:center; }
+  .login form { width:100%; max-width:380px; display:flex; flex-direction:column; gap:10px; }
+  .login h1 { margin:0; font-size:26px; } .login h1 b { color:var(--accent); }
+
+  /* top */
+  .top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .top h1 { margin:0 auto 0 0; font-size:19px; font-weight:900; line-height:1.3; }
+  .top h1 b { color:var(--accent); }
+  .net { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--muted); }
+  .dot.ok { background:var(--ok); } .dot.bad { background:var(--warn); } .dot.demo { background:var(--gold); }
+
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; display:grid; gap:12px; min-width:0; }
+  .card h2 { margin:0; font-size:15px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+
+  /* preview */
+  .preview { position:relative; aspect-ratio:16/9; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--line);
+    background:repeating-conic-gradient(#20252e 0 25%, #171b22 0 50%) 0 0/24px 24px; }
+  .preview iframe { position:absolute; inset:0; width:100%; height:100%; border:0; color-scheme:light; }
+  .onair { display:flex; gap:8px; flex-wrap:wrap; }
+  .tog { flex:1 1 150px; justify-content:flex-start; }
+  .tog .sw { width:38px; height:22px; border-radius:999px; background:var(--line2); position:relative; flex:none; transition:background .2s; }
+  .tog .sw::after { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform .2s; }
+  .tog[aria-pressed="true"] .sw { background:var(--onair); }
+  .tog[aria-pressed="true"] .sw::after { transform:translateX(16px); }
+
+  /* score pads */
+  .board { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .team { border-radius:14px; overflow:hidden; border:1px solid var(--line); background:var(--surface); min-width:0; }
+  .team .hd { background:var(--tc); padding:10px 12px; }
+  .team .nm { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .team .sc { font-family:var(--num); font-weight:700; font-size:clamp(56px,16vw,96px); line-height:1; font-variant-numeric:tabular-nums; }
+  .team .jk { font-size:12px; font-weight:700; background:rgba(0,0,0,.3); border-radius:999px; padding:1px 9px; display:inline-block; }
+  .keys { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:10px; }
+  .key { height:52px; border-radius:10px; border:1px solid var(--line2); background:var(--raised); font-family:var(--num); font-size:24px; font-weight:700; color:var(--tc); }
+  .key:active { transform:scale(.95); }
+  .key:disabled { opacity:.35; }
+  .ta { --tc:var(--a); } .tb { --tc:var(--b); }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .actions .btn { flex:1 1 150px; }
+
+  /* settings */
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .field { display:grid; gap:4px; min-width:0; }
+  .namerow { display:flex; gap:6px; }
+  .namerow input[type=color] { width:48px; height:44px; padding:2px; border-radius:10px; border:1px solid var(--line2); background:var(--field); flex:none; }
+  .seg { display:flex; gap:6px; flex-wrap:wrap; }
+  .seg button { flex:1 1 auto; min-height:40px; padding:4px 10px; border-radius:9px; border:1px solid var(--line2); background:var(--raised); font-size:13.5px; font-weight:600; }
+  .seg button[aria-pressed="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .link { display:flex; gap:6px; }
+  .link input { font-size:13px; }
+
+  .hist { list-style:none; margin:0; padding:0; }
+  .hist li { display:grid; grid-template-columns:64px 1fr auto; gap:10px; padding:7px 0; border-top:1px solid var(--line); align-items:center; }
+  .hist .who { display:flex; gap:8px; align-items:center; min-width:0; }
+  .hist .who span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hist i { width:10px; height:10px; border-radius:50%; background:var(--tc); flex:none; }
+  .hist b, .hist .run { font-family:var(--num); font-size:18px; font-variant-numeric:tabular-nums; }
+  .hist b { color:var(--tc); }
+  .toast { position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg);
+    padding:8px 16px; border-radius:999px; font-weight:700; z-index:9; }
+  @media (max-width:520px) { body { padding-inline:12px; } .grid2 { grid-template-columns:1fr; } .keys { padding:8px; gap:5px; } .key { height:48px; } }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js?v=3"></script>
+<script src="common.js?v=3"></script>
+</head>
+<body>
+<div class="login" id="login" hidden>
+  <form id="loginForm">
+    <h1>Mee <b>Overlay</b> · ເປຕັ່ງ</h1>
+    <p class="muted">ເຂົ້າສູ່ລະບົບດ້ວຍບັນຊີດຽວກັບ Studio</p>
+    <label for="lg-email">ອີເມວ</label><input type="email" id="lg-email" autocomplete="username" required>
+    <label for="lg-pass">ລະຫັດຜ່ານ</label><input type="password" id="lg-pass" autocomplete="current-password" minlength="6" required>
+    <button class="btn primary" type="submit">ເຂົ້າສູ່ລະບົບ</button>
+    <p id="lg-msg" class="muted" role="status"></p>
+  </form>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header class="top">
+    <h1>ສະກໍ<b>ເປຕັ່ງ</b> · ໄລ້ສົດ</h1>
+    <span class="net"><span class="dot" id="netDot"></span><span id="netTxt">ກຳລັງເຊື່ອມ…</span></span>
+    <a class="btn" href="index.html" style="text-decoration:none;color:inherit">← Studio</a>
+    <button class="btn" id="out">ອອກ</button>
+  </header>
+
+  <section class="card">
+    <div class="preview"><iframe id="pv" title="ຕົວຢ່າງ overlay"></iframe></div>
+    <div class="onair">
+      <button class="btn tog" id="tgShow" aria-pressed="true"><span class="sw"></span>ສະແດງສະກໍເທິງໄລ້</button>
+      <button class="btn tog" id="tgWin" aria-pressed="true"><span class="sw"></span>ປ້າຍຜູ້ຊະນະຕອນຈົບ</button>
+    </div>
+  </section>
+
+  <section class="board">
+    <article class="team ta"><div class="hd"><div class="nm" id="n0"></div><div class="sc" id="c0">0</div><span class="jk" id="j0" hidden>ໂຍນລູກເປົ້າ</span></div><div class="keys" id="k0"></div></article>
+    <article class="team tb"><div class="hd"><div class="nm" id="n1"></div><div class="sc" id="c1">0</div><span class="jk" id="j1" hidden>ໂຍນລູກເປົ້າ</span></div><div class="keys" id="k1"></div></article>
+  </section>
+  <div class="actions">
+    <button class="btn" id="undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>ຍົກເລີກຮອບລ່າສຸດ</button>
+    <button class="btn" id="toss">ສຸ່ມຜູ້ໂຍນລູກເປົ້າກ່ອນ</button>
+  </div>
+
+  <section class="card">
+    <h2>ຕັ້ງຄ່າເກມ</h2>
+    <div class="field"><label for="fTitle">ຫົວຂໍ້ເທິງສະກໍ</label><input type="text" id="fTitle" maxlength="40" placeholder="ເຊັ່ນ ງານແຂ່ງເປຕັ່ງ ບ້ານ…"></div>
+    <div class="grid2">
+      <div class="field"><label for="fA">ທີມທີ 1</label><div class="namerow"><input type="text" id="fA" maxlength="24"><input type="color" id="cA" aria-label="ສີທີມທີ 1"></div></div>
+      <div class="field"><label for="fB">ທີມທີ 2</label><div class="namerow"><input type="text" id="fB" maxlength="24"><input type="color" id="cB" aria-label="ສີທີມທີ 2"></div></div>
+    </div>
+    <div class="field"><span class="lab">ຮູບແບບ</span><div class="seg" id="segF"><button data-v="single">ດ່ຽວ (3 ລູກ)</button><button data-v="double">ຄູ່</button><button data-v="triple">ທີມ 3 ຄົນ</button></div></div>
+    <div class="field"><span class="lab">ຄະແນນຊະນະ</span><div class="seg" id="segT"><button data-v="11">11</button><button data-v="13">13</button><button data-v="15">15</button><button data-v="21">21</button></div></div>
+    <div class="grid2">
+      <div class="field"><span class="lab">ຕຳແໜ່ງສະກໍ</span><div class="seg" id="segP"><button data-v="tl">ຊ້າຍເທິງ</button><button data-v="tc">ກາງເທິງ</button><button data-v="tr">ຂວາເທິງ</button><button data-v="bc">ກາງລຸ່ມ</button></div></div>
+      <div class="field"><span class="lab">ຂະໜາດ</span><div class="seg" id="segS"><button data-v="0.8">ນ້ອຍ</button><button data-v="1">ກາງ</button><button data-v="1.25">ໃຫຍ່</button></div></div>
+    </div>
+    <div class="field"><span class="lab">ໂມງນັບເວລາ</span><div class="seg" id="segC"><button data-v="1">ສະແດງ</button><button data-v="0">ເຊື່ອງ</button></div></div>
+    <button class="btn danger" id="newGame">ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)</button>
+  </section>
+
+  <section class="card">
+    <h2>ລິ້ງ Web ຂອງ Live Now (ລິ້ງດຽວກັບ Studio)</h2>
+    <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
+    <p class="muted" style="margin:0;font-size:13px">ຖ້າໃສ່ລິ້ງ overlay ຂອງ Studio ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນຫຍັງ. ສະກໍເປຕັ່ງຈະຂຶ້ນທັບໜ້າຈໍທີ່ເປີດຢູ່ ເມື່ອເປີດ "ສະແດງສະກໍເທິງໄລ້".</p>
+  </section>
+
+  <section class="card">
+    <h2>ປະຫວັດແຕ່ລະຮອບ <span class="muted" id="hc" style="font-size:13px;font-weight:400"></span></h2>
+    <ul class="hist" id="hist"></ul>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const MAX = { single:3, double:6, triple:6 };
+  const db = Mee.createDB();
+  let user = null, S = null, started = false;
+
+  const list = (v) => Array.isArray(v) ? v.filter(Boolean) : v && typeof v === 'object' ? Object.keys(v).sort((a, b) => a - b).map((k) => v[k]).filter(Boolean) : [];
+  const fresh = (p) => ({
+    title: p ? p.title : 'ເປຕັ່ງ', format: p ? p.format : 'triple', target: p ? p.target : 13,
+    teams: p ? p.teams : [{ name:'ທີມ A', color:'#1c5cd0' }, { name:'ທີມ B', color:'#d6281e' }],
+    pos: p ? p.pos : 'tl', size: p ? p.size : 1, clock: p ? p.clock : true, show: p ? p.show : true, showWin: true,
+    ends: [], firstJack: null, startedAt: null, finishedAt: null, lastEvent: null });
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+  const toast = (m) => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 1600); };
+  const scores = () => { const s = [0, 0]; list(S.ends).forEach((e) => s[e.t] += e.p); return s; };
+  const winner = () => { const s = scores(); return s[0] >= S.target ? 0 : s[1] >= S.target ? 1 : null; };
+  const save = () => db.set('petanque', S).catch((e) => toast('ບັນທຶກບໍ່ໄດ້: ' + (e.code || e.message)));
+
+  function render() {
+    const ends = list(S.ends), sc = scores(), w = winner(), max = MAX[S.format] || 6;
+    const jt = ends.length ? ends[ends.length - 1].t : S.firstJack;
+    document.documentElement.style.setProperty('--a', S.teams[0].color);
+    document.documentElement.style.setProperty('--b', S.teams[1].color);
+    [0, 1].forEach((i) => {
+      $('n' + i).textContent = S.teams[i].name; $('c' + i).textContent = sc[i];
+      $('j' + i).hidden = !(w === null && jt === i);
+      $('k' + i).innerHTML = Array.from({ length:max }, (_, n) => `<button class="key" data-t="${i}" data-p="${n + 1}" ${w !== null ? 'disabled' : ''}>+${n + 1}</button>`).join('');
+    });
+    $('undo').disabled = !ends.length; $('toss').hidden = ends.length > 0;
+    $('tgShow').setAttribute('aria-pressed', String(S.show !== false));
+    $('tgWin').setAttribute('aria-pressed', String(S.showWin !== false));
+    // settings (don't clobber the field being typed in)
+    const setVal = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
+    setVal('fTitle', S.title || ''); setVal('fA', S.teams[0].name); setVal('fB', S.teams[1].name);
+    setVal('cA', S.teams[0].color); setVal('cB', S.teams[1].color);
+    seg('segF', S.format); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1); seg('segC', S.clock === false ? 0 : 1);
+    // history
+    $('hc').textContent = ends.length ? ends.length + ' ຮອບ' : '';
+    const run = [0, 0];
+    const rows = ends.map((e, i) => { run[e.t] += e.p; return `<li class="${e.t ? 'tb' : 'ta'}"><span class="muted">ຮອບ ${i + 1}</span><span class="who"><i></i><span>${esc(S.teams[e.t].name)}</span><b>+${e.p}</b></span><span class="run">${run[0]}–${run[1]}</span></li>`; });
+    $('hist').innerHTML = rows.reverse().join('') || '<li class="muted" style="display:block">ກົດ +1 ຫາ +' + max + ' ໃຕ້ທີມທີ່ຊະນະແຕ່ລະຮອບ</li>';
+  }
+  function seg(id, v) { document.querySelectorAll('#' + id + ' button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(v)))); }
+
+  // scoring
+  document.addEventListener('click', (e) => {
+    const k = e.target.closest('.key'); if (!k || winner() !== null) return;
+    const t = +k.dataset.t, p = +k.dataset.p, ends = list(S.ends);
+    if (!S.startedAt) S.startedAt = Date.now();
+    ends.push({ t, p }); S.ends = ends; S.lastEvent = { t, p, at: Date.now() };
+    if (winner() !== null) { S.finishedAt = Date.now(); S.showWin = true; }
+    save(); render(); toast(S.teams[t].name + ' +' + p);
+  });
+  $('undo').onclick = () => { const ends = list(S.ends); if (!ends.length) return; const e = ends.pop(); S.ends = ends; S.finishedAt = null; S.lastEvent = null; save(); render(); toast('ຍົກເລີກ: ' + S.teams[e.t].name + ' +' + e.p); };
+  $('toss').onclick = () => { S.firstJack = Math.random() < .5 ? 0 : 1; save(); render(); toast(S.teams[S.firstJack].name + ' ໂຍນລູກເປົ້າກ່ອນ'); };
+  $('tgShow').onclick = () => { S.show = S.show === false; save(); render(); };
+  $('tgWin').onclick = () => { S.showWin = S.showWin === false; save(); render(); };
+
+  // settings
+  const onText = (id, fn) => $(id).addEventListener('change', () => { fn($(id).value.trim()); save(); render(); });
+  onText('fTitle', (v) => S.title = v);
+  onText('fA', (v) => S.teams[0].name = v || 'ທີມ A');
+  onText('fB', (v) => S.teams[1].name = v || 'ທີມ B');
+  ['cA', 'cB'].forEach((id, i) => $(id).addEventListener('input', () => { S.teams[i].color = $(id).value; clearTimeout(save.h); save.h = setTimeout(save, 250); render(); }));
+  const onSeg = (id, fn) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; if (fn(b.dataset.v) === false) return; save(); render(); });
+  onSeg('segF', (v) => { if (list(S.ends).some((e) => e.p > MAX[v])) { toast('ມີຮອບທີ່ໄດ້ເກີນ ' + MAX[v] + ' ຄະແນນ'); return false; } S.format = v; });
+  onSeg('segT', (v) => { S.target = +v; S.finishedAt = winner() === null ? null : (S.finishedAt || Date.now()); });
+  onSeg('segP', (v) => S.pos = v);
+  onSeg('segS', (v) => S.size = +v);
+  onSeg('segC', (v) => S.clock = v === '1');
+  let armed = false;
+  $('newGame').onclick = () => {
+    if (!armed) { armed = true; $('newGame').classList.add('arm'); $('newGame').textContent = 'ກົດອີກຄັ້ງ ເພື່ອລຶບຄະແນນທັງໝົດ';
+      setTimeout(() => { armed = false; $('newGame').classList.remove('arm'); $('newGame').textContent = 'ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)'; }, 4000); return; }
+    S = fresh(S); save(); render(); toast('ເລີ່ມເກມໃໝ່ແລ້ວ');
+  };
+  $('copy').onclick = () => {
+    const u = $('url').value;
+    const fallback = () => { $('url').select(); toast('ເລືອກລິ້ງແລ້ວ, ກົດກັອບປີ້ເອງ'); };
+    try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), fallback); } catch (e) { fallback(); }
+  };
+
+  // boot
+  function start() {
+    if (started) return; started = true;
+    $('login').hidden = true; $('app').hidden = false;
+    db.setUser(user);
+    const url = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
+    $('url').value = url; $('pv').src = url;
+    if (db.mode === 'local') { $('netDot').className = 'dot demo'; $('netTxt').textContent = 'ໂໝດທົດລອງ'; $('out').hidden = true; }
+    else db.onConnection((ok) => { $('netDot').className = 'dot ' + (ok ? 'ok' : 'bad'); $('netTxt').textContent = ok ? 'ເຊື່ອມຕໍ່ແລ້ວ' : 'ຂາດການເຊື່ອມຕໍ່'; });
+    let first = true;
+    db.watch('petanque', (v) => {
+      if (v) { S = v; S.ends = list(v.ends); S.teams = list(v.teams); if (S.teams.length < 2) S.teams = fresh().teams; }
+      else if (first) { S = fresh(); save(); }
+      first = false; if (S) render();
+    });
+  }
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); $('lg-msg').textContent = 'ກຳລັງເຂົ້າສູ່ລະບົບ…';
+    try { await db.signIn($('lg-email').value.trim(), $('lg-pass').value); }
+    catch (err) { $('lg-msg').textContent = 'ເຂົ້າສູ່ລະບົບບໍ່ໄດ້: ' + (err.code || err.message); }
+  });
+  $('out').onclick = () => db.signOut().then(() => location.reload());
+  db.onAuth((u) => { if (!u) { $('app').hidden = true; $('login').hidden = false; return; } user = u; start(); });
+})();
+</script>
+</body>
+</html>
