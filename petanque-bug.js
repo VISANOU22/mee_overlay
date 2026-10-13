@@ -1,7 +1,7 @@
 // ===== Mee Overlay — ສະກໍບອດເປຕັ່ງ (ໃຊ້ຮ່ວມກັນ: overlay.html ແລະ petanque-overlay.html) =====
 // MeePetanque.mount(db) — ຕິດຕາມ overlays/{uid}/petanque ແລ້ວແຕ້ມສະກໍເທິງ overlay
 (() => {
-  const DESIGN_W = 640;
+  const DESIGN_W = 720;
   const CSS = `
   .mp-root { position:absolute; inset:0; pointer-events:none; z-index:50; }
   .mp-root * { box-sizing:border-box; }
@@ -10,39 +10,39 @@
   .mp-bug { position:absolute; width:${DESIGN_W}px; transform-origin:0 0; font-family:var(--lao); color:#fff;
     transition:opacity .35s; filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
   .mp-bug.off { opacity:0; }
-  .mp-title { display:inline-block; background:var(--bar); padding:4px 14px 2px; border-radius:10px 10px 0 0; font-size:16px; font-weight:700; max-width:100%;
+  .mp-title { display:inline-block; background:var(--bar); padding:4px 16px 2px; border-radius:12px 12px 0 0; font-size:22px; font-weight:700; max-width:100%;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .mp-title:empty { display:none; }
   .mp-card { background:var(--bar); border-radius:12px; overflow:hidden; }
   .mp-title:not(:empty) + .mp-card { border-top-left-radius:0; }
-  .mp-team { display:flex; align-items:center; height:58px; gap:12px; padding-right:14px; position:relative; }
+  .mp-team { display:flex; align-items:center; height:76px; gap:14px; padding-right:14px; position:relative; }
   .mp-team + .mp-team { border-top:1px solid var(--line); }
-  .mp-team::before { content:""; width:7px; align-self:stretch; background:var(--tc); flex:none; }
-  .mp-logo { width:42px; height:42px; border-radius:50%; flex:none; background:#fff center/cover no-repeat; box-shadow:0 0 0 2px rgba(255,255,255,.85); }
+  .mp-team::before { content:""; width:9px; align-self:stretch; background:var(--tc); flex:none; }
+  .mp-logo { width:56px; height:56px; border-radius:50%; flex:none; background:#fff center/cover no-repeat; box-shadow:0 0 0 2px rgba(255,255,255,.85); }
   .mp-nologo .mp-logo { display:none; }
-  .mp-name { flex:1; min-width:0; font-size:25px; font-weight:900; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-block:3px; }
-  .mp-jack { width:16px; height:16px; border-radius:50%; flex:none; background:var(--gold); box-shadow:0 0 0 2px #fff;
+  .mp-name { flex:1; min-width:0; font-size:34px; font-weight:900; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-block:3px; }
+  .mp-jack { width:22px; height:22px; border-radius:50%; flex:none; background:var(--gold); box-shadow:0 0 0 2px #fff;
     transform:scale(0); transition:transform .3s cubic-bezier(.3,1.6,.6,1); }
   .mp-team.j .mp-jack { transform:scale(1); }
-  .mp-balls { display:flex; gap:5px; flex:none; }
+  .mp-balls { display:flex; gap:6px; flex:none; }
   .mp-noballs .mp-balls { display:none; }
-  .mp-balls i { width:15px; height:15px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--tc) 45%,rgba(0,0,0,.55) 120%);
+  .mp-balls i { width:20px; height:20px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--tc) 45%,rgba(0,0,0,.55) 120%);
     box-shadow:0 0 0 1.5px rgba(255,255,255,.55); transition:opacity .3s, transform .3s; }
   .mp-balls i.used { opacity:.22; transform:scale(.7); box-shadow:none; }
-  .mp-score { width:70px; height:46px; flex:none; display:grid; place-items:center; background:var(--tc); border-radius:8px;
-    font-family:var(--num); font-weight:700; font-size:40px; line-height:1; font-variant-numeric:tabular-nums; }
+  .mp-score { width:92px; height:62px; flex:none; display:grid; place-items:center; background:var(--tc); border-radius:10px;
+    font-family:var(--num); font-weight:700; font-size:54px; line-height:1; font-variant-numeric:tabular-nums; }
   .mp-score.pop { animation:mp-pop .6s ease; }
   @keyframes mp-pop { 0%{transform:scale(1)} 30%{transform:scale(1.22); box-shadow:0 0 0 4px var(--gold)} 100%{transform:scale(1)} }
   .mp-foot { display:inline-flex; gap:10px; align-items:center; background:var(--bar2); border-radius:0 0 10px 10px; margin-left:18px;
-    padding:3px 14px 4px; font-size:16px; font-weight:700; }
+    padding:4px 18px 5px; font-size:23px; font-weight:700; }
   .mp-foot .mp-dim { opacity:.65; font-weight:500; }
-  .mp-clock { font-family:var(--num); font-weight:500; font-size:17px; letter-spacing:.03em; opacity:.8; }
+  .mp-clock { font-family:var(--num); font-weight:500; font-size:24px; letter-spacing:.03em; opacity:.8; }
   .mp-clock:empty { display:none; }
   .mp-fw { display:flex; }
   .mp-flash { margin-top:8px; display:inline-flex; align-items:center; gap:10px; background:var(--tc); padding:5px 14px 5px 12px; border-radius:10px;
-    font-size:21px; font-weight:700; transform:translateY(-12px); opacity:0; transition:all .35s; }
+    font-size:28px; font-weight:700; transform:translateY(-12px); opacity:0; transition:all .35s; }
   .mp-flash.on { transform:none; opacity:1; }
-  .mp-flash b { font-family:var(--num); font-size:26px; background:rgba(0,0,0,.25); border-radius:8px; padding:0 10px; }
+  .mp-flash b { font-family:var(--num); font-size:34px; background:rgba(0,0,0,.25); border-radius:8px; padding:0 10px; }
   .mp-win { position:absolute; left:50%; top:50%; width:820px; transform-origin:0 0; font-family:var(--lao); color:#fff; text-align:center;
     opacity:0; transition:opacity .4s; }
   .mp-win.on { opacity:1; }
@@ -94,15 +94,17 @@
     let S = null, last = null, lastEventAt = 0, flashT = null, ballSig = '';
 
     function layout() {
-      const W = innerWidth, H = innerHeight, base = W >= H ? 1920 : 1000;
-      const k = W / base * ((S && S.size) || 1) * 1.15, m = 28 * (W / base);
-      const w = DESIGN_W * k, h = bug.offsetHeight * k, pos = (S && S.pos) || 'tl';
+      const W = innerWidth, H = innerHeight, land = W >= H;
+      // ຂະໜາດກາງ: ກວ້າງ 55% ຂອງຈໍແນວນອນ, 92% ຂອງຈໍແນວຕັ້ງ
+      const k = W * (land ? .55 : .92) / DESIGN_W * ((S && S.size) || 1), m = W * (land ? .022 : .04);
+      const kk = Math.min(k, (W - 2 * m) / DESIGN_W);
+      const w = DESIGN_W * kk, h = bug.offsetHeight * kk, pos = (S && S.pos) || 'tl';
       let x = m, y = m;
       if (pos === 'tc' || pos === 'bc') x = (W - w) / 2;
       if (pos === 'tr') x = W - w - m;
       if (pos === 'bl' || pos === 'bc' || pos === 'br') y = H - h - m;
       if (pos === 'br') x = W - w - m;
-      bug.style.left = x + 'px'; bug.style.top = y + 'px'; bug.style.transform = 'scale(' + k + ')';
+      bug.style.left = x + 'px'; bug.style.top = y + 'px'; bug.style.transform = 'scale(' + kk + ')';
       const wk = Math.min(W * .8 / 820, H * .8 / 560);
       win.style.transform = 'scale(' + wk + ') translate(-50%,-50%)';
     }
@@ -118,7 +120,7 @@
       const ends = list(S.ends), teams = list(S.teams), target = S.target || 13;
       const name = (i) => (teams[i] && teams[i].name) || (i ? 'ທີມ B' : 'ທີມ A');
       const logo = (i) => (teams[i] && teams[i].logo) || '';
-      const sc = [0, 0]; ends.forEach((e) => { sc[e.t] += e.p; });
+      const sc = [0, 0]; ends.forEach((e) => { if (!e.n) sc[e.t] += e.p; });
       const w = sc[0] >= target ? 0 : sc[1] >= target ? 1 : null;
       const jt = ends.length ? ends[ends.length - 1].t : (S.firstJack == null ? null : S.firstJack);
       const nb = BALLS[S.format] || 6, th = S.thrown || {}, thrown = [+th[0] || 0, +th[1] || 0];
@@ -151,8 +153,13 @@
         lastEventAt = ev.at;
         if (fresh && on) {
           const f = el.flash;
-          f.style.setProperty('--tc', ev.t ? 'var(--b)' : 'var(--a)');
-          el.fname.textContent = name(ev.t) + ' ໄດ້'; el.fpts.textContent = '+' + ev.p;
+          if (ev.n) {
+            f.style.setProperty('--tc', '#4a5260');
+            el.fname.textContent = 'ຮອບນີ້ ໂມຄະ'; el.fpts.textContent = '0';
+          } else {
+            f.style.setProperty('--tc', ev.t ? 'var(--b)' : 'var(--a)');
+            el.fname.textContent = name(ev.t) + ' ໄດ້'; el.fpts.textContent = '+' + ev.p;
+          }
           f.classList.add('on'); clearTimeout(flashT); flashT = setTimeout(() => f.classList.remove('on'), 3500);
         }
       } else if (!ev) lastEventAt = lastEventAt || 1;

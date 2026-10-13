@@ -152,12 +152,13 @@
   </section>
 
   <section class="board">
-    <article class="team ta"><div class="hd"><span class="lg none" id="lg0"></span><div class="nm" id="n0"></div><div class="sc" id="c0">0</div><span class="jk" id="j0" hidden>ໂຍນລູກເປົ້າ</span></div><div class="throw"><div class="bd" id="bd0"></div><div class="trow"><button class="btn" data-th="0" data-d="-1" aria-label="ລົບ 1 ລູກ">−1</button><button class="btn big" data-th="0" data-d="1">ໂຍນ 1 ລູກ</button></div></div><div class="keys" id="k0"></div></article>
-    <article class="team tb"><div class="hd"><span class="lg none" id="lg1"></span><div class="nm" id="n1"></div><div class="sc" id="c1">0</div><span class="jk" id="j1" hidden>ໂຍນລູກເປົ້າ</span></div><div class="throw"><div class="bd" id="bd1"></div><div class="trow"><button class="btn" data-th="1" data-d="-1" aria-label="ລົບ 1 ລູກ">−1</button><button class="btn big" data-th="1" data-d="1">ໂຍນ 1 ລູກ</button></div></div><div class="keys" id="k1"></div></article>
+    <article class="team ta"><div class="hd"><span class="lg none" id="lg0"></span><div class="nm" id="n0"></div><div class="sc" id="c0">0</div><span class="jk" id="j0" hidden>ໂຍນລູກໝູ</span></div><div class="throw"><div class="bd" id="bd0"></div><div class="trow"><button class="btn" data-th="0" data-d="-1" aria-label="ລົບ 1 ລູກ">−1</button><button class="btn big" data-th="0" data-d="1">ໂຍນ 1 ລູກ</button></div></div><div class="keys" id="k0"></div></article>
+    <article class="team tb"><div class="hd"><span class="lg none" id="lg1"></span><div class="nm" id="n1"></div><div class="sc" id="c1">0</div><span class="jk" id="j1" hidden>ໂຍນລູກໝູ</span></div><div class="throw"><div class="bd" id="bd1"></div><div class="trow"><button class="btn" data-th="1" data-d="-1" aria-label="ລົບ 1 ລູກ">−1</button><button class="btn big" data-th="1" data-d="1">ໂຍນ 1 ລູກ</button></div></div><div class="keys" id="k1"></div></article>
   </section>
   <div class="actions">
     <button class="btn" id="undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>ຍົກເລີກຮອບລ່າສຸດ</button>
-    <button class="btn" id="toss">ສຸ່ມຜູ້ໂຍນລູກເປົ້າກ່ອນ</button>
+    <button class="btn" id="nullEnd" title="ສະເໝີ ຫຼື ລູກໝູອອກນອກເດີ່ນ: ບໍ່ມີໃຜໄດ້ຄະແນນ">ຮອບໂມຄະ (ສະເໝີ / ລູກໝູອອກ)</button>
+    <button class="btn" id="toss">ສຸ່ມຜູ້ໂຍນລູກໝູກ່ອນ</button>
   </div>
 
   <section class="card">
@@ -207,7 +208,7 @@
     ends: [], firstJack: null, startedAt: null, finishedAt: null, lastEvent: null });
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
   const toast = (m) => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 1600); };
-  const scores = () => { const s = [0, 0]; list(S.ends).forEach((e) => s[e.t] += e.p); return s; };
+  const scores = () => { const s = [0, 0]; list(S.ends).forEach((e) => { if (!e.n) s[e.t] += e.p; }); return s; };
   const winner = () => { const s = scores(); return s[0] >= S.target ? 0 : s[1] >= S.target ? 1 : null; };
   const save = () => db.set('petanque', S).catch((e) => toast('ບັນທຶກບໍ່ໄດ້: ' + (e.code || e.message)));
 
@@ -221,7 +222,7 @@
       $('j' + i).hidden = !(w === null && jt === i);
       $('k' + i).innerHTML = Array.from({ length:max }, (_, n) => `<button class="key" data-t="${i}" data-p="${n + 1}" ${w !== null ? 'disabled' : ''}>+${n + 1}</button>`).join('');
     });
-    $('undo').disabled = !ends.length; $('toss').hidden = ends.length > 0;
+    $('undo').disabled = !ends.length; $('nullEnd').disabled = w !== null; $('toss').hidden = ends.length > 0;
     $('tgShow').setAttribute('aria-pressed', String(S.show !== false));
     $('tgWin').setAttribute('aria-pressed', String(S.showWin !== false));
     $('tgLogo').setAttribute('aria-pressed', String(S.logos !== false));
@@ -245,7 +246,9 @@
     // history
     $('hc').textContent = ends.length ? ends.length + ' ຮອບ' : '';
     const run = [0, 0];
-    const rows = ends.map((e, i) => { run[e.t] += e.p; return `<li class="${e.t ? 'tb' : 'ta'}"><span class="muted">ຮອບ ${i + 1}</span><span class="who"><i></i><span>${esc(S.teams[e.t].name)}</span><b>+${e.p}</b></span><span class="run">${run[0]}–${run[1]}</span></li>`; });
+    const rows = ends.map((e, i) => {
+      if (e.n) return `<li><span class="muted">ຮອບ ${i + 1}</span><span class="who muted">ໂມຄະ (ສະເໝີ / ລູກໝູອອກ)</span><span class="run">${run[0]}–${run[1]}</span></li>`;
+      run[e.t] += e.p; return `<li class="${e.t ? 'tb' : 'ta'}"><span class="muted">ຮອບ ${i + 1}</span><span class="who"><i></i><span>${esc(S.teams[e.t].name)}</span><b>+${e.p}</b></span><span class="run">${run[0]}–${run[1]}</span></li>`; });
     $('hist').innerHTML = rows.reverse().join('') || '<li class="muted" style="display:block">ກົດ +1 ຫາ +' + max + ' ໃຕ້ທີມທີ່ຊະນະແຕ່ລະຮອບ</li>';
   }
   function seg(id, v) { document.querySelectorAll('#' + id + ' button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(v)))); }
@@ -259,8 +262,17 @@
     if (winner() !== null) { S.finishedAt = Date.now(); S.showWin = true; }
     save(); render(); toast(S.teams[t].name + ' +' + p);
   });
-  $('undo').onclick = () => { const ends = list(S.ends); if (!ends.length) return; const e = ends.pop(); S.ends = ends; S.finishedAt = null; S.lastEvent = null; S.thrown = [0, 0]; save(); render(); toast('ຍົກເລີກ: ' + S.teams[e.t].name + ' +' + e.p); };
-  $('toss').onclick = () => { S.firstJack = Math.random() < .5 ? 0 : 1; save(); render(); toast(S.teams[S.firstJack].name + ' ໂຍນລູກເປົ້າກ່ອນ'); };
+  $('undo').onclick = () => { const ends = list(S.ends); if (!ends.length) return; const e = ends.pop(); S.ends = ends; S.finishedAt = null; S.lastEvent = null; S.thrown = [0, 0]; save(); render(); toast(e.n ? 'ຍົກເລີກຮອບໂມຄະ' : 'ຍົກເລີກ: ' + S.teams[e.t].name + ' +' + e.p); };
+  // ຮອບໂມຄະ: ບໍ່ມີໃຜໄດ້ຄະແນນ, ທີມທີ່ໂຍນລູກໝູຮອບນີ້ ໂຍນອີກໃນຮອບໜ້າ
+  $('nullEnd').onclick = () => {
+    if (winner() !== null) return;
+    const ends = list(S.ends), jt = ends.length ? ends[ends.length - 1].t : S.firstJack;
+    if (!S.startedAt) S.startedAt = Date.now();
+    ends.push({ t: jt == null ? -1 : jt, p: 0, n: 1 }); S.ends = ends;
+    S.lastEvent = { t: -1, p: 0, n: 1, at: Date.now() }; S.thrown = [0, 0];
+    save(); render(); toast('ບັນທຶກຮອບໂມຄະ');
+  };
+  $('toss').onclick = () => { S.firstJack = Math.random() < .5 ? 0 : 1; save(); render(); toast(S.teams[S.firstJack].name + ' ໂຍນລູກໝູກ່ອນ'); };
   $('tgShow').onclick = () => { S.show = S.show === false; save(); render(); };
   $('tgWin').onclick = () => { S.showWin = S.showWin === false; save(); render(); };
   $('tgLogo').onclick = () => { S.logos = S.logos === false; save(); render(); };
