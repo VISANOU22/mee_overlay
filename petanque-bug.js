@@ -57,13 +57,6 @@
   .mp-fs { font-family:var(--num); font-weight:700; font-size:96px; line-height:1.05; padding:10px 0 4px; }
   .mp-meta { font-size:22px; opacity:.8; padding-bottom:18px; }
   .mp-fanny { display:inline-block; background:var(--gold); color:#1a1404; font-weight:900; border-radius:999px; padding:2px 18px; font-size:26px; margin-bottom:12px; }
-  .mp-tap .mp-team, .mp-tap .mp-win.on { pointer-events:auto; cursor:pointer; touch-action:manipulation;
-    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
-  .mp-tap .mp-team.press { background:rgba(255,255,255,.07); }
-  .mp-flash { position:relative; overflow:hidden; }
-  .mp-flash.pend::after { content:""; position:absolute; left:0; bottom:0; height:4px; width:100%; background:#fff; opacity:.85;
-    transform-origin:0 50%; animation:mp-wait var(--wait,2.5s) linear forwards; }
-  @keyframes mp-wait { from { transform:scaleX(1) } to { transform:scaleX(0) } }
   @media (prefers-reduced-motion:reduce) { .mp-root * { animation:none !important; transition:none !important; } }`;
 
   const team = (i) => `
@@ -182,89 +175,6 @@
       }
       win.classList.toggle('on', on && w !== null && S.showWin !== false);
       tick(); layout();
-    }
-
-    if (opts.tap) setupTap();
-
-    // ---------- ໂໝດກົດເທິງຈໍ (overlay.html?...&tap=1)
-    // ກົດກ່ອງຄະແນນ = +1 (ກົດຕໍ່ກັນໄດ້ +2, +3…, ລໍ 2.5 ວິ ຈຶ່ງບັນທຶກເປັນ 1 ຮອບ)
-    // ກົດຄ້າງກ່ອງຄະແນນ = ຍົກເລີກ (ຄະແນນທີ່ກຳລັງນັບ ຫຼື ຮອບລ່າສຸດ)
-    // ກົດແຖບທີມ (ຊື່/ລູກ) = ໂຍນ 1 ລູກ · ກົດຄ້າງ = ຄືນ 1 ລູກ · ກົດປ້າຍຜູ້ຊະນະ = ເຊື່ອງປ້າຍ
-    function setupTap() {
-      root.classList.add('mp-tap');
-      const WAIT = 2500, HOLD = 650;
-      let pend = null;
-      const can = () => !opts.tap.canWrite || opts.tap.canWrite();
-      const state = () => {
-        const n = JSON.parse(JSON.stringify(S));
-        n.ends = list(n.ends); n.teams = list(n.teams);
-        const th = n.thrown || {}; n.thrown = [+th[0] || 0, +th[1] || 0];
-        return n;
-      };
-      const scoreOf = (n) => { const sc = [0, 0]; n.ends.forEach((e) => { if (!e.n) sc[e.t] += e.p; }); return sc; };
-      const winOf = (n) => { const sc = scoreOf(n), t = n.target || 13; return sc[0] >= t ? 0 : sc[1] >= t ? 1 : null; };
-      const nameOf = (i) => { const t = list(S.teams)[i]; return (t && t.name) || (i ? 'ທີມ B' : 'ທີມ A'); };
-      const save = (n) => db.set('petanque', n).catch((e) => note('ບັນທຶກບໍ່ໄດ້: ' + (e.code || e.message), '#4a5260'));
-      function note(txt, color, pts) {
-        const f = el.flash;
-        f.style.setProperty('--tc', color);
-        el.fname.textContent = txt; el.fpts.textContent = pts || ''; el.fpts.hidden = !pts;
-        f.classList.remove('pend'); f.classList.add('on');
-        clearTimeout(flashT); flashT = setTimeout(() => { f.classList.remove('on'); el.fpts.hidden = false; }, 2500);
-      }
-      function showPend() {
-        const f = el.flash;
-        f.style.setProperty('--tc', pend.t ? 'var(--b)' : 'var(--a)'); f.style.setProperty('--wait', WAIT + 'ms');
-        el.fname.textContent = nameOf(pend.t) + ' ໄດ້'; el.fpts.textContent = '+' + pend.p; el.fpts.hidden = false;
-        clearTimeout(flashT); f.classList.remove('pend'); void f.offsetWidth; f.classList.add('on', 'pend');
-      }
-      function commit() {
-        if (!pend) return;
-        const { t, p } = pend; clearTimeout(pend.timer); pend = null;
-        el.flash.classList.remove('pend');
-        const n = state(); if (winOf(n) !== null) return;
-        if (!n.startedAt) n.startedAt = Date.now();
-        n.ends.push({ t, p }); n.lastEvent = { t, p, at: Date.now() }; n.thrown = [0, 0];
-        if (winOf(n) !== null) { n.finishedAt = Date.now(); n.showWin = true; }
-        save(n);
-      }
-      function scoreTap(t) {
-        const n = state(); if (winOf(n) !== null) return;
-        if (pend && pend.t !== t) commit();
-        if (!pend) pend = { t, p: 0 };
-        pend.p = Math.min(BALLS[n.format] || 6, pend.p + 1);
-        clearTimeout(pend.timer); pend.timer = setTimeout(commit, WAIT);
-        showPend();
-      }
-      function scoreHold() {
-        if (pend) { clearTimeout(pend.timer); pend = null; note('ຍົກເລີກແລ້ວ', '#4a5260'); return; }
-        const n = state(); if (!n.ends.length) return;
-        n.ends.pop(); n.finishedAt = null; n.lastEvent = null; n.thrown = [0, 0];
-        save(n); note('ຍົກເລີກຮອບລ່າສຸດ', '#4a5260');
-      }
-      function ball(t, d) {
-        const n = state(); if (winOf(n) !== null) return;
-        n.thrown[t] = Math.max(0, Math.min(BALLS[n.format] || 6, n.thrown[t] + d)); save(n);
-      }
-      function press(node, onTap, onHold) {
-        let timer = null, held = false, down = false;
-        const end = () => { clearTimeout(timer); node.classList.remove('press'); down = false; };
-        node.addEventListener('pointerdown', (e) => {
-          if (!S) return; e.preventDefault(); down = true; held = false; node.classList.add('press');
-          timer = setTimeout(() => { held = true; end(); if (!can()) { if (opts.tap.needLogin) opts.tap.needLogin(); return; } onHold(e); }, HOLD);
-        });
-        node.addEventListener('pointerup', (e) => {
-          if (!down) return; end(); if (held) return;
-          if (!can()) { if (opts.tap.needLogin) opts.tap.needLogin(); return; }
-          onTap(e);
-        });
-        ['pointercancel', 'pointerleave'].forEach((ev) => node.addEventListener(ev, end));
-        node.addEventListener('contextmenu', (e) => e.preventDefault());
-      }
-      [0, 1].forEach((i) => press(el['s' + i],
-        (e) => e.target.closest('.mp-score') ? scoreTap(i) : ball(i, 1),
-        (e) => e.target.closest('.mp-score') ? scoreHold() : ball(i, -1)));
-      press(win, () => { const n = state(); n.showWin = false; save(n); }, () => {});
     }
 
     setInterval(tick, 1000);

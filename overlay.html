@@ -16,35 +16,17 @@
   .msg.on { display:block; }
   .testframe { position:absolute; inset:0; border:6px dashed rgba(255,214,0,.9); pointer-events:none; box-sizing:border-box; display:none; }
   .testframe.on { display:block; }
-  /* ເຂົ້າສູ່ລະບົບ (ສະເພາະໂໝດກົດ &tap=1) */
-  .tlog { position:absolute; right:12px; bottom:12px; z-index:90; width:min(320px,calc(100% - 24px)); display:none; gap:8px;
-    background:rgba(12,14,19,.92); color:#fff; border-radius:14px; padding:14px; font:15px/1.4 'Noto Sans Lao',system-ui,sans-serif; }
-  .tlog.on { display:grid; }
-  .tlog b { font-size:16px; }
-  .tlog input { height:42px; border-radius:9px; border:1px solid #353b48; background:#0a0c10; color:#fff; padding:0 10px; font:inherit; }
-  .tlog .row { display:grid; grid-template-columns:1fr auto; gap:8px; }
-  .tlog button { height:42px; border-radius:9px; border:0; background:#ff4d3d; color:#fff; font:700 15px 'Noto Sans Lao',sans-serif; padding:0 14px; }
-  .tlog button.ghost { background:#272c37; }
-  .tlog p { margin:0; color:#ffb4ad; font-size:13.5px; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
-<script src="petanque-bug.js?v=5"></script>
+<script src="petanque-bug.js?v=4"></script>
 </head>
 <body>
 <div id="wrap"><div id="stage" class="mee-stage"></div></div>
 <div class="msg" id="msg"></div>
 <div class="testframe" id="tf"></div>
-<form class="tlog" id="tlog" autocomplete="on">
-  <b>ເຂົ້າສູ່ລະບົບ ເພື່ອກົດສະກໍເທິງຈໍ</b>
-  <input type="email" id="tlE" placeholder="ອີເມວ" autocomplete="username" required>
-  <input type="password" id="tlP" placeholder="ລະຫັດຜ່ານ" autocomplete="current-password" required>
-  <div class="row"><button type="submit">ເຂົ້າສູ່ລະບົບ</button><button type="button" class="ghost" id="tlX">ປິດ</button></div>
-  <p id="tlM"></p>
-</form>
 <script>
 (() => {
   document.getElementById('fontcss').href = Mee.FONT_CSS;
@@ -58,26 +40,7 @@
   try { db = Mee.createDB(); } catch (e) { say('ເປີດຖານຂໍ້ມູນບໍ່ໄດ້: ' + e.message); return; }
   db.setUser(user);
   // ສະກໍເປຕັ່ງ (ຄວບຄຸມຈາກ petanque.html) — ຂຶ້ນທັບໜ້າຈໍອື່ນເມື່ອເປີດສະແດງ
-  // &tap=1 → ກົດສະກໍເທິງຈໍໄດ້ (ຕ້ອງເຂົ້າສູ່ລະບົບບັນຊີດຽວກັບ Studio ເທື່ອດຽວ)
-  const tap = q.get('tap') === '1';
-  let authed = db.mode === 'local';
-  const showLogin = (on, m) => { $('tlog').classList.toggle('on', on); $('tlM').textContent = m || ''; };
-  if (tap && db.mode !== 'local') {
-    db.onAuth((uid) => {
-      authed = uid === user;
-      if (uid && uid !== user) showLogin(true, 'ບັນຊີນີ້ບໍ່ແມ່ນເຈົ້າຂອງລິ້ງ overlay ນີ້');
-      else if (uid) showLogin(false);
-    });
-    $('tlog').addEventListener('submit', async (e) => {
-      e.preventDefault(); $('tlM').textContent = 'ກຳລັງເຂົ້າສູ່ລະບົບ…';
-      try { await db.signIn($('tlE').value.trim(), $('tlP').value); }
-      catch (err) { $('tlM').textContent = 'ເຂົ້າບໍ່ໄດ້: ' + (err.code || err.message); }
-    });
-    $('tlX').onclick = () => showLogin(false);
-  }
-  try {
-    if (window.MeePetanque) MeePetanque.mount(db, tap ? { tap: { canWrite: () => authed, needLogin: () => showLogin(true) } } : {});
-  } catch (e) { console.warn('petanque', e); }
+  try { if (window.MeePetanque) MeePetanque.mount(db); } catch (e) { console.warn('petanque', e); }
 
   const cache = new Map();
   const getAsset = (id) => {
