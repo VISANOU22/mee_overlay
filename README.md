@@ -13,10 +13,8 @@
 
 ## Import ເຂົ້າ Live Now (ໄຟລ໌ HTML)
 
-`petanque-livenow.html` ເປັນໄຟລ໌ດຽວ (ມີຟອນໃນໄຟລ໌, ບໍ່ຕ້ອງໃຊ້ເນັດ) ສຳລັບ "Import overlay" ໃນ Live Now.
-ໃຊ້ຮູບແບບດຽວກັບ scoreboard ຂອງ Live Now ແລະ ບອກແອັບວ່າເປັນ `badminton`, ແອັບຈຶ່ງສ້າງປຸ່ມກົດຄະແນນໃຫ້
-ແລ້ວສົ່ງຄ່າເຂົ້າມາທາງ `window.template.update(field, value)`: `scoreA/B` ຄະແນນ, `teamA/B` ຊື່, `logoA/B` ໂລໂກ້, `teamTurn` ຈຸດລູກໝູ, `setA/B` ນັດທີ່ຊະນະ.
-ບໍ່ຊິ້ງກັບ Firebase/petanque.html. ດາວໂຫຼດໄດ້ຈາກ petanque.html → ຕັ້ງຄ່າ → ຂໍ້ 4.
+`scoreboard-badminton-petanque.html` ສຳລັບ "Import overlay" ໃນ Live Now. ສ້າງຈາກໄຟລ໌ scoreboard badminton ທີ່ export ຈາກ Live Now
+(ໂຄດເດີມຢູ່ຄົບທຸກໄບ) ແລ້ວໃສ່ `livenow/petanque-inject.html` ທ້າຍໄຟລ໌: ເຊື່ອງກາຟິກເດີມ, ແຕ້ມສະກໍເປຕັ່ງແທນ, ແລະ ດັກ `window.template.update`
+ເພື່ອຮັບຄ່າຈາກປຸ່ມຂອງແອັບ: `scoreA/B` ຄະແນນ, `teamA/B` ຊື່, `logoA/B` ໂລໂກ້, `teamTurn` ຈຸດລູກໝູ, `setA/B` ນັດທີ່ຊະນະ. ບໍ່ຊິ້ງກັບ Firebase.
 
-ແກ້ທີ່ `livenow/petanque-livenow.src.html` ແລ້ວ build:
-`npm i @fontsource/noto-sans-lao@5 @fontsource/oswald@5 && python3 livenow/build.py node_modules/@fontsource`
+Build: `npm i @fontsource/noto-sans-lao@5 @fontsource/oswald@5 && python3 livenow/build.py <scoreboard-badminton-xxxx.html> node_modules/@fontsource`
