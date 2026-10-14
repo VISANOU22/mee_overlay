@@ -274,6 +274,9 @@
       <h3><span class="n">4</span>ລິ້ງ Web ຂອງ Live Now</h3>
       <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
       <p class="muted" style="margin:0;font-size:13px">ລິ້ງດຽວກັບ Studio. ຖ້າໃສ່ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນ.</p>
+      <span class="lab" style="margin-top:4px">ລິ້ງແບບກົດສະກໍເທິງຈໍ Live Now ໄດ້</span>
+      <div class="link"><input type="text" id="urlTap" readonly><button class="btn" id="copyTap">ກັອບປີ້</button></div>
+      <p class="muted" style="margin:0;font-size:13px">ກົດກ່ອງຄະແນນ = +1 (ກົດຕໍ່ກັນ +2, +3…, ລໍ 2.5 ວິ ບັນທຶກເປັນ 1 ຮອບ) · ກົດຄ້າງ = ຍົກເລີກ · ກົດຊື່ທີມ = ໂຍນ 1 ລູກ, ກົດຄ້າງ = ຄືນລູກ. ເທື່ອທຳອິດຕ້ອງເຂົ້າສູ່ລະບົບໃນ Live Now.</p>
     </section>
 
     <section class="card" id="installCard">
@@ -457,11 +460,12 @@
     armed = false; $('newGame').classList.remove('arm'); $('newGame').textContent = 'ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)';
     S = fresh(S); save(); render(); toast('ເລີ່ມເກມໃໝ່ແລ້ວ');
   };
-  $('copy').onclick = () => {
-    const u = $('url').value;
-    const fallback = () => { $('url').select(); toast('ເລືອກລິ້ງແລ້ວ, ກົດກັອບປີ້ເອງ'); };
+  const copyLink = (id) => () => {
+    const u = $(id).value;
+    const fallback = () => { $(id).select(); toast('ເລືອກລິ້ງແລ້ວ, ກົດກັອບປີ້ເອງ'); };
     try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), fallback); } catch (e) { fallback(); }
   };
+  $('copy').onclick = copyLink('url'); $('copyTap').onclick = copyLink('urlTap');
 
   // ---------- ຕິດຕັ້ງເປັນແອັບ (PWA)
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -486,6 +490,7 @@
     $('login').hidden = true; $('app').hidden = false;
     db.setUser(user);
     $('url').value = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
+    $('urlTap').value = $('url').value + '&tap=1';
     const loadLive = () => { if ($('scrBox').open && !$('pvLive').src) $('pvLive').src = $('url').value; };
     try { if (localStorage.getItem('pq-scr') === '0') $('scrBox').open = false; } catch (e) {}
     $('scrBox').addEventListener('toggle', () => { try { localStorage.setItem('pq-scr', $('scrBox').open ? '1' : '0'); } catch (e) {} loadLive(); });
