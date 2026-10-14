@@ -274,7 +274,9 @@
       <h3><span class="n">4</span>ລິ້ງ Web ຂອງ Live Now</h3>
       <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
       <p class="muted" style="margin:0;font-size:13px">ລິ້ງດຽວກັບ Studio. ຖ້າໃສ່ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນ.</p>
-      <span class="lab" style="margin-top:4px">ລິ້ງແບບກົດສະກໍເທິງຈໍ Live Now ໄດ້</span>
+      <span class="lab" style="margin-top:4px">ໄຟລ໌ HTML ສຳລັບ Import overlay ເຂົ້າ Live Now (ກົດສະກໍເທິງຈໍໄດ້)</span>
+      <button class="btn primary" id="dlLN" type="button">ດາວໂຫຼດໄຟລ໌ petanque-livenow.html</button>
+      <span class="lab" style="margin-top:4px">ຫຼື ລິ້ງ Web ແບບກົດສະກໍເທິງຈໍໄດ້</span>
       <div class="link"><input type="text" id="urlTap" readonly><button class="btn" id="copyTap">ກັອບປີ້</button></div>
       <p class="muted" style="margin:0;font-size:13px">ກົດກ່ອງຄະແນນ = +1 (ກົດຕໍ່ກັນ +2, +3…, ລໍ 2.5 ວິ ບັນທຶກເປັນ 1 ຮອບ) · ກົດຄ້າງ = ຍົກເລີກ · ກົດຊື່ທີມ = ໂຍນ 1 ລູກ, ກົດຄ້າງ = ຄືນລູກ. ເທື່ອທຳອິດຕ້ອງເຂົ້າສູ່ລະບົບໃນ Live Now.</p>
     </section>
@@ -466,6 +468,26 @@
     try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), fallback); } catch (e) { fallback(); }
   };
   $('copy').onclick = copyLink('url'); $('copyTap').onclick = copyLink('urlTap');
+
+  // ສ້າງໄຟລ໌ດຽວ (ໂຄດທັງໝົດຢູ່ໃນໄຟລ໌) ສຳລັບ Import overlay ໃນ Live Now
+  $('dlLN').onclick = async () => {
+    const btn = $('dlLN'); btn.disabled = true;
+    try {
+      const get = (f) => fetch(f + '?t=' + Date.now(), { cache: 'no-store' }).then((r) => { if (!r.ok) throw new Error(f); return r.text(); });
+      const [tpl, cfg, common, bug] = await Promise.all(['petanque-livenow-template.html', 'config.js', 'common.js', 'petanque-bug.js'].map(get));
+      const safe = (js) => js.replace(/<\/script/gi, '<\\/script');
+      const html = tpl.replace('/*@CONFIG@*/', () => safe(cfg)).replace('/*@COMMON@*/', () => safe(common))
+        .replace('/*@BUG@*/', () => safe(bug)).replace("'@USER@'", () => JSON.stringify(String(user)));
+      const file = new File([html], 'petanque-livenow.html', { type: 'text/html' });
+      if (navigator.canShare && navigator.canShare({ files: [file] }) && /android|iphone|ipad/i.test(navigator.userAgent)) {
+        try { await navigator.share({ files: [file], title: 'petanque-livenow.html' }); return; } catch (e) { if (e.name === 'AbortError') return; }
+      }
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      toast('ດາວໂຫຼດແລ້ວ. ໄປ Import ໃນ Live Now');
+    } catch (e) { toast('ສ້າງໄຟລ໌ບໍ່ໄດ້: ' + e.message); }
+    finally { btn.disabled = false; }
+  };
 
   // ---------- ຕິດຕັ້ງເປັນແອັບ (PWA)
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
