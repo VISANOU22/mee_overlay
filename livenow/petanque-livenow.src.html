@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mee Overlay · ສະກໍເປຕັ່ງ (Live Now)</title>
+<!--
+  ໄຟລ໌ສຳລັບ "Import overlay" ໃນແອັບ Live Now.
+  ໃຊ້ຮູບແບບດຽວກັບ scoreboard ຂອງ Live Now ແລະ ບອກແອັບວ່າເປັນ "badminton"
+  ເພື່ອໃຫ້ແອັບສ້າງປຸ່ມກົດຄະແນນເອງ ແລ້ວສົ່ງຄ່າເຂົ້າມາທາງ window.template.update(field, value).
+    scoreA / scoreB  → ຄະແນນເປຕັ່ງ (ກົດ +1)
+    teamA / teamB    → ຊື່ທີມ        logoA / logoB → ໂລໂກ້
+    teamTurn         → ຈຸດລູກໝູ (ທີມທີ່ໂຍນລູກໝູ)
+    setA / setB      → ນັດທີ່ຊະນະ (ຖ້າແຂ່ງຫຼາຍນັດ)
+  ແກ້ໄຟລ໌ນີ້ (livenow/petanque-livenow.src.html) ແລ້ວ build ດ້ວຍ livenow/build.py
+-->
+<script>
+  // ແອັບອາດເອີ້ນ template.* ກ່ອນໂຄດຫຼັກໂຫຼດແລ້ວ: ເກັບໄວ້ກ່ອນ ແລ້ວຄ່ອຍເຮັດຕາມ
+  (function () {
+    var queue = (window.__templateQueue = []);
+    var queued = function (name) { return function () { queue.push([name, Array.prototype.slice.call(arguments)]); }; };
+    window.template = { update: queued('update'), action: queued('action'), save: queued('save'), show: queued('show'), hide: queued('hide'), end: queued('end') };
+  })();
+</script>
+<style>
+/*@FONTS@*/
+  :root { --a:#1c5cd0; --b:#d6281e; --gold:#ffc21a; --bar:#0f141c; --bar2:#1b222d; --line:rgba(255,255,255,.09);
+    --lao:'Noto Sans Lao','Phetsarath OT',sans-serif; --num:'Oswald','Noto Sans Lao',sans-serif; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:transparent !important; }
+  body { overflow:hidden; height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; font-family:var(--lao); color:#fff;
+    -webkit-user-select:none; user-select:none; }
+  #root { display:flex; align-items:center; justify-content:center; }
+  #canvas-container { position:relative; width:800px; height:165px; overflow:visible; transform-origin:center center; flex:none; }
+  #elements-container { position:relative; width:100%; height:100%; transition:opacity .35s, transform .35s; }
+  #elements-container.hidden { opacity:0; transform:translateY(-14px); }
+
+  .tab { position:absolute; left:0; top:2px; height:22px; padding:0 12px; border-radius:10px 10px 0 0; background:var(--bar);
+    font-size:14px; font-weight:900; line-height:22px; letter-spacing:.02em; }
+  .tab b { color:var(--gold); font-weight:900; }
+  .card { position:absolute; left:0; top:24px; width:800px; height:115px; background:var(--bar); border-radius:0 12px 12px 12px; overflow:hidden;
+    box-shadow:0 6px 16px rgba(0,0,0,.45); }
+  .row { position:absolute; left:0; width:800px; height:57px; }
+  .row.ra { top:0; --tc:var(--a); } .row.rb { top:58px; --tc:var(--b); }
+  .row::before { content:""; position:absolute; left:0; top:0; bottom:0; width:8px; background:var(--tc); }
+  .card .sep { position:absolute; left:8px; right:0; top:57px; height:1px; background:var(--line); }
+  .row.win { background:linear-gradient(90deg, color-mix(in srgb, var(--tc) 35%, transparent), transparent 70%); }
+
+  /* ຕຳແໜ່ງດຽວກັບ scoreboard badminton ຂອງ Live Now (x ຕາມ __INITIAL_STATE__) */
+  .logo { position:absolute; left:26px; top:6px; width:45px; height:45px; border-radius:50%; background:#fff center/cover no-repeat;
+    box-shadow:0 0 0 2px rgba(255,255,255,.85); }
+  .logo.none { display:none; }
+  .name { position:absolute; left:95px; top:0; width:500px; height:57px; display:flex; align-items:center;
+    font-size:30px; font-weight:900; line-height:1.3; white-space:nowrap; overflow:hidden; }
+  .nologo .name { left:24px; width:571px; }
+  .name span { display:block; transform-origin:0 50%; padding-block:2px; }
+  .jack { position:absolute; left:621px; top:17px; width:23px; height:23px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 0 2px #fff, 0 0 10px rgba(255,194,26,.7); transform:scale(0); transition:transform .3s cubic-bezier(.3,1.6,.6,1); }
+  .row.j .jack { transform:scale(1); }
+  .score { position:absolute; left:663px; top:5px; width:67px; height:47px; border-radius:9px; background:var(--tc);
+    display:grid; place-items:center; font-family:var(--num); font-weight:700; font-size:40px; line-height:1; font-variant-numeric:tabular-nums; }
+  .score.pop { animation:pop .6s ease; }
+  @keyframes pop { 0%{transform:scale(1)} 30%{transform:scale(1.22); box-shadow:0 0 0 3px var(--gold)} 100%{transform:scale(1)} }
+  .set { position:absolute; left:736px; top:5px; width:58px; height:47px; border-radius:9px; background:var(--bar2);
+    display:grid; place-items:center; align-content:center; line-height:1; }
+  .set small { font-size:11px; font-weight:700; opacity:.6; }
+  .set b { font-family:var(--num); font-weight:700; font-size:26px; font-variant-numeric:tabular-nums; }
+  .nosets .set { opacity:0; }
+
+  .foot { position:absolute; left:16px; top:139px; height:24px; display:flex; gap:8px; align-items:stretch; }
+  .foot > span { background:var(--bar2); border-radius:0 0 9px 9px; padding:0 12px; font-size:14px; font-weight:700; line-height:24px; white-space:nowrap; }
+  .foot .dim { opacity:.65; font-weight:600; }
+  .flash { background:var(--tc) !important; transform:translateY(-8px); opacity:0; transition:all .3s; }
+  .flash.on { transform:none; opacity:1; }
+  .flash b { font-family:var(--num); font-size:16px; margin-left:4px; }
+  .winmsg { background:var(--gold) !important; color:#1a1404; display:none; }
+  .winmsg.on { display:block; }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="canvas-container">
+    <div id="elements-container">
+      <div class="tab">ເປຕັ່ງ · <b id="tgt"></b></div>
+      <div class="card" id="card">
+        <div class="row ra" id="rowA"><span id="logoA" class="logo none"></span><div id="teamA" class="name"><span>ທີມ A</span></div>
+          <i id="serveIndicatorAView" class="jack"></i><div id="scoreA" class="score">0</div><div id="setA" class="set"><small>ນັດ</small><b>0</b></div></div>
+        <div class="sep"></div>
+        <div class="row rb" id="rowB"><span id="logoB" class="logo none"></span><div id="teamB" class="name"><span>ທີມ B</span></div>
+          <i id="serveIndicatorBView" class="jack"></i><div id="scoreB" class="score">0</div><div id="setB" class="set"><small>ນັດ</small><b>0</b></div></div>
+      </div>
+      <div class="foot"><span id="endNo">ຮອບທີ 1</span><span class="flash" id="flash"><span id="fName"></span><b id="fPts"></b></span><span class="winmsg" id="winMsg"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ຂໍ້ມູນທີ່ແອັບ Live Now ອ່ານ: type "badminton" ເພື່ອໃຫ້ແອັບສ້າງປຸ່ມກົດຄະແນນ
+  window.__INITIAL_STATE__ = /*@STATE@*/;
+
+  (() => {
+    const TARGET = 13;              // ຄະແນນຊະນະ (ປ່ຽນໄດ້: 11, 13, 15, 21)
+    const MERGE_MS = 4000;          // ກົດ +1 ຕໍ່ກັນພາຍໃນ 4 ວິ = ຮອບດຽວກັນ
+    const KEY = 'mee-petanque-livenow';
+    const $ = (id) => document.getElementById(id);
+
+    // ---------- ສື່ສານກັບແອັບ (ແບບດຽວກັບ scoreboard ຂອງ Live Now)
+    const postToNative = (payload) => {
+      try { if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.native) { window.webkit.messageHandlers.native.postMessage(payload); return; } } catch (e) {}
+      try { if (window.Android && window.Android.postMessage) window.Android.postMessage(JSON.stringify(payload)); } catch (e) {}
+      try { if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*'); } catch (e) {}
+    };
+    let fps = 1, fpsT = null;
+    const animate = (ms) => {   // ຂໍ 30 fps ລະຫວ່າງອະນິເມຊັນ ແລ້ວກັບໄປ 1 fps
+      if (fps !== 30) { fps = 30; postToNative({ type: 'fps', value: 30 }); }
+      clearTimeout(fpsT); fpsT = setTimeout(() => { fps = 1; postToNative({ type: 'fps', value: 1 }); }, ms || 1500);
+    };
+
+    // ---------- ຂະໜາດ: ຂະຫຍາຍ 800×165 ໃຫ້ເຕັມກອບທີ່ແອັບໃຫ້
+    const box = $('canvas-container');
+    const scale = () => { const k = Math.min(innerWidth / 800, innerHeight / 165); box.style.transform = 'scale(' + k + ')'; };
+    scale(); addEventListener('resize', scale);
+
+    // ---------- ສະຖານະ
+    const S = { score: [0, 0], set: [0, 0], ends: [], turn: 0, seen: [false, false] };
+    let burst = null, flashT = null;
+    try { const v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && Array.isArray(v.ends)) { S.ends = v.ends; S.saved = v.score; } } catch (e) {}
+    const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ ends: S.ends, score: S.score })); } catch (e) {} };
+    const name = (t) => $(t ? 'teamB' : 'teamA').textContent.trim() || (t ? 'ທີມ B' : 'ທີມ A');
+    const winner = () => S.score[0] >= TARGET ? 0 : S.score[1] >= TARGET ? 1 : null;
+
+    function fitName(id) {
+      const wrap = $(id), sp = wrap.firstElementChild; sp.style.transform = '';
+      const k = Math.min(1, (wrap.clientWidth - 4) / sp.scrollWidth);
+      if (k < 1) sp.style.transform = 'scaleX(' + Math.max(.55, k) + ')';
+    }
+    function flash(t, pts) {
+      const f = $('flash'); f.style.setProperty('--tc', t ? 'var(--b)' : 'var(--a)');
+      $('fName').textContent = name(t) + ' ໄດ້'; $('fPts').textContent = '+' + pts;
+      f.classList.add('on'); clearTimeout(flashT); flashT = setTimeout(() => f.classList.remove('on'), 3500); animate(4000);
+    }
+    function render() {
+      $('tgt').textContent = 'ເກມ ' + TARGET;
+      const w = winner();
+      $('endNo').textContent = w === null ? 'ຮອບທີ ' + (S.ends.length + 1) : 'ຈົບເກມ · ' + S.ends.length + ' ຮອບ';
+      $('winMsg').classList.toggle('on', w !== null);
+      if (w !== null) $('winMsg').textContent = '🏆 ' + name(w) + ' ຊະນະ ' + S.score[w] + '–' + S.score[1 - w];
+      $('rowA').classList.toggle('win', w === 0); $('rowB').classList.toggle('win', w === 1);
+      // ລູກໝູ: ຕາມທີ່ແອັບສົ່ງມາ (teamTurn), ຖ້າບໍ່ມີ ໃຊ້ທີມທີ່ຊະນະຮອບລ່າສຸດ
+      const jt = S.turn ? S.turn : (S.ends.length ? S.ends[S.ends.length - 1].t + 1 : 0);
+      $('rowA').classList.toggle('j', w === null && jt === 1); $('rowB').classList.toggle('j', w === null && jt === 2);
+      $('card').classList.toggle('nosets', !S.set[0] && !S.set[1]);
+    }
+    function setScore(t, v) {
+      v = Math.max(0, parseInt(v, 10) || 0);
+      const d = v - S.score[t], first = !S.seen[t]; S.seen[t] = true; S.score[t] = v;
+      const el = $(t ? 'scoreB' : 'scoreA'); el.textContent = v;
+      if (first) {
+        // ຄ່າທຳອິດຫຼັງເປີດໄຟລ໌: ໃຊ້ປະຫວັດຮອບທີ່ເກັບໄວ້ຖ້າກົງກັນ, ບໍ່ກົງກໍລ້າງ
+        const sum = S.ends.filter((e) => e.t === t).reduce((a, e) => a + e.p, 0);
+        if (sum !== v) S.ends = S.ends.filter((e) => e.t !== t).concat(v ? [{ t, p: v }] : []);
+      } else if (d > 0) {
+        const last = S.ends[S.ends.length - 1];
+        if (burst && burst.t === t && Date.now() - burst.at < MERGE_MS && last && last.t === t) last.p += d;
+        else S.ends.push({ t, p: d });
+        burst = { t, at: Date.now() };
+        el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+        flash(t, S.ends[S.ends.length - 1].p);
+      } else if (d < 0) {
+        // ລົບຄະແນນ (ກົດ −1 ໃນແອັບ): ເອົາອອກຈາກຮອບລ່າສຸດຂອງທີມນີ້
+        let left = -d;
+        for (let i = S.ends.length - 1; i >= 0 && left > 0; i--) {
+          if (S.ends[i].t !== t) continue;
+          const take = Math.min(left, S.ends[i].p); S.ends[i].p -= take; left -= take;
+          if (!S.ends[i].p) S.ends.splice(i, 1);
+        }
+        burst = null; $('flash').classList.remove('on');
+      }
+      if (!S.score[0] && !S.score[1]) S.ends = [];
+      persist(); render();
+    }
+    function setImage(id, v) {
+      const el = $(id), url = String(v || '').trim();
+      el.style.backgroundImage = url ? 'url("' + url.replace(/"/g, '%22') + '")' : 'none';
+      el.classList.toggle('none', !url);
+      $(id === 'logoA' ? 'rowA' : 'rowB').classList.toggle('nologo', !url);
+      fitName(id === 'logoA' ? 'teamA' : 'teamB');
+    }
+
+    window.template = {
+      update: (field, value) => {
+        if (!field || typeof field !== 'string') return;
+        switch (field) {
+          case 'scoreA': setScore(0, value); break;
+          case 'scoreB': setScore(1, value); break;
+          case 'teamA': case 'teamB': $(field).firstElementChild.textContent = String(value == null ? '' : value); fitName(field); render(); break;
+          case 'logoA': case 'logoB': setImage(field, value); break;
+          case 'logoTeam': setImage('logoA', value); break;
+          case 'setA': case 'setB': { const i = field === 'setA' ? 0 : 1; S.set[i] = parseInt(value, 10) || 0; $(field).querySelector('b').textContent = S.set[i]; render(); break; }
+          case 'teamTurn': { const n = parseInt(value, 10) || 0; S.turn = n === 1 || n === 3 ? 1 : n === 2 || n === 4 ? 2 : 0; render(); break; }
+          default: break;   // ຊ່ອງອື່ນ (doubleMode ແລະ ອື່ນໆ) ບໍ່ໄດ້ໃຊ້ໃນເປຕັ່ງ
+        }
+      },
+      action: () => {}, save: () => {},
+      show: () => { $('elements-container').classList.remove('hidden'); animate(800); postToNative({ type: 'overlay', value: 'shown' }); },
+      hide: () => { $('elements-container').classList.add('hidden'); animate(800); postToNative({ type: 'overlay', value: 'hidden' }); },
+      end: () => { clearTimeout(fpsT); fps = 1; postToNative({ type: 'fps', value: 1 }); },
+    };
+
+    ['A', 'B'].forEach((x) => { $('row' + x).classList.add('nologo'); fitName('team' + x); });
+    render();
+    if (document.fonts) document.fonts.ready.then(() => { fitName('teamA'); fitName('teamB'); });
+
+    const queued = window.__templateQueue || []; window.__templateQueue = null;
+    queued.forEach((c) => { try { window.template[c[0]].apply(window.template, c[1]); } catch (e) { console.warn('template replay failed', c[0], e); } });
+    postToNative({ type: 'ready' });
+  })();
+</script>
+</body>
+</html>

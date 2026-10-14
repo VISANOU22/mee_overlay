@@ -13,4 +13,10 @@
 
 ## Import ເຂົ້າ Live Now (ໄຟລ໌ HTML)
 
-`petanque.html` → ຕັ້ງຄ່າ → ຂໍ້ 4 → ປຸ່ມ "ດາວໂຫຼດໄຟລ໌ petanque-livenow.html". ປຸ່ມນີ້ສ້າງໄຟລ໌ດຽວຈາກ `petanque-livenow-template.html` (ໂຄດທັງໝົດຢູ່ໃນໄຟລ໌ ແລະ ໃສ່ ID ບັນຊີໃຫ້ແລ້ວ). ເອົາໄຟລ໌ນັ້ນໄປ Import overlay ໃນ Live Now. ຖ້າແກ້ `common.js` ຫຼື `petanque-bug.js` ຕ້ອງດາວໂຫຼດ ແລະ Import ໃໝ່.
+`petanque-livenow.html` ເປັນໄຟລ໌ດຽວ (ມີຟອນໃນໄຟລ໌, ບໍ່ຕ້ອງໃຊ້ເນັດ) ສຳລັບ "Import overlay" ໃນ Live Now.
+ໃຊ້ຮູບແບບດຽວກັບ scoreboard ຂອງ Live Now ແລະ ບອກແອັບວ່າເປັນ `badminton`, ແອັບຈຶ່ງສ້າງປຸ່ມກົດຄະແນນໃຫ້
+ແລ້ວສົ່ງຄ່າເຂົ້າມາທາງ `window.template.update(field, value)`: `scoreA/B` ຄະແນນ, `teamA/B` ຊື່, `logoA/B` ໂລໂກ້, `teamTurn` ຈຸດລູກໝູ, `setA/B` ນັດທີ່ຊະນະ.
+ບໍ່ຊິ້ງກັບ Firebase/petanque.html. ດາວໂຫຼດໄດ້ຈາກ petanque.html → ຕັ້ງຄ່າ → ຂໍ້ 4.
+
+ແກ້ທີ່ `livenow/petanque-livenow.src.html` ແລ້ວ build:
+`npm i @fontsource/noto-sans-lao@5 @fontsource/oswald@5 && python3 livenow/build.py node_modules/@fontsource`
