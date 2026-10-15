@@ -1,7 +1,7 @@
 // Service worker ຂອງແອັບສະກໍເປຕັ່ງ: ໃຫ້ຕິດຕັ້ງເປັນແອັບໄດ້ ແລະ ເປີດໜ້າໄດ້ຕອນເນັດຫຼຸດ.
 // ຈັບແຕ່ໜ້າ petanque.html ແລະ ໄອຄອນ; overlay.html ແລະ Studio ບໍ່ຖືກແຕະຕ້ອງ.
 const CACHE = 'petanque-v1';
-const OWN = /\/petanque(\.html|\.webmanifest|-icon-\d+\.png)?$/;
+const OWN = /\/(petanque(\.html|\.webmanifest|-icon-\d+\.png)?|fonts\/[\w.-]+)$/;
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(
   caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())

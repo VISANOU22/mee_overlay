@@ -7,7 +7,7 @@
   .mp-root { position:absolute; inset:0; pointer-events:none; z-index:50; }
   .mp-root * { box-sizing:border-box; }
   .mp-root { --a:#1c5cd0; --b:#d6281e; --gold:#ffc21a; --bar:#0f141c; --bar2:#1b222d; --line:rgba(255,255,255,.08);
-    --lao:'Noto Sans Lao','Phetsarath OT',system-ui,sans-serif; --num:'Oswald','Arial Narrow',sans-serif; }
+    --lao:'MeeLao','Noto Sans Lao',sans-serif; --num:'MeeNum','Oswald','MeeLao',sans-serif; }
   .mp-bug { position:absolute; width:${DESIGN_W}px; transform-origin:0 0; font-family:var(--lao); color:#fff;
     transition:opacity .35s; filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
   .mp-bug.off { opacity:0; }
@@ -165,6 +165,10 @@
     if (!document.getElementById('mp-css')) {
       const st = document.createElement('style'); st.id = 'mp-css'; st.textContent = CSS; document.head.appendChild(st);
     }
+    // ຟອນ Noto Sans Lao (ບໍ່ມີຫົວ) ທີ່ເກັບໄວ້ໃນ repo: ບໍ່ອີງ Google Fonts ຫຼື ຟອນລາວໃນເຄື່ອງ (ທີ່ສະຫຼະທັບວັນນະຍຸດ)
+    if (!document.getElementById('mp-fonts')) {
+      const lk = document.createElement('link'); lk.id = 'mp-fonts'; lk.rel = 'stylesheet'; lk.href = 'fonts/fonts.css?v=1'; document.head.appendChild(lk);
+    }
     const root = document.createElement('div'); root.className = 'mp-root'; root.innerHTML = HTML;
     document.body.appendChild(root);
     // data-k ດຽວກັນ ມີໄດ້ຫຼາຍບ່ອນ (ແຕ່ລະແບບສະກໍ) → ຂຽນຄ່າໃສ່ທຸກບ່ອນ
@@ -276,7 +280,10 @@
 
     setInterval(tick, 1000);
     addEventListener('resize', layout);
-    if (document.fonts) document.fonts.ready.then(layout);
+    if (document.fonts) {
+      document.fonts.ready.then(layout);
+      Promise.all(['400', '700', '900'].map((w) => document.fonts.load(w + ' 30px MeeLao', 'ກີ້ຂ໋ອບ'))).then(layout, () => {});
+    }
     layout();
     return db.watch('petanque', (v) => { S = v || null; render(); if (opts.onState) opts.onState(S); });
   }
