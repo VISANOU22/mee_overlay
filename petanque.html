@@ -265,6 +265,7 @@
     <section class="card">
       <h3><span class="n">3</span>ສະກໍເທິງໄລ້</h3>
       <div class="preview"><iframe id="pv" title="ຕົວຢ່າງ overlay"></iframe></div>
+      <div class="field"><span class="lab">ແບບສະກໍ</span><div class="seg" id="segD"><button data-v="classic">ຄລາສສິກ</button><button data-v="light">ພື້ນຂາວ</button><button data-v="sport">ສະປອດ</button><button data-v="tv">ແຖບທີວີ</button></div></div>
       <div class="field"><span class="lab">ຕຳແໜ່ງ</span><div class="seg" id="segP"><button data-v="tl">ຊ້າຍເທິງ</button><button data-v="tc">ກາງເທິງ</button><button data-v="tr">ຂວາເທິງ</button><button data-v="bl">ຊ້າຍລຸ່ມ</button><button data-v="bc">ກາງລຸ່ມ</button><button data-v="br">ຂວາລຸ່ມ</button></div></div>
       <div class="field"><span class="lab">ຂະໜາດ</span><div class="seg" id="segS"><button data-v="0.8">ນ້ອຍ</button><button data-v="1">ກາງ</button><button data-v="1.25">ໃຫຍ່</button></div></div>
       <div>
@@ -313,7 +314,7 @@
     pos: p ? p.pos : 'tl', size: p ? p.size : 1, clock: p ? p.clock : true, show: p ? p.show : true, showWin: true,
     logos: p ? p.logos !== false : true, balls: p ? p.balls !== false : true, thrown: [0, 0],
     ends: [], firstJack: null, startedAt: null, finishedAt: null, lastEvent: null,
-    bestOf: p ? (p.bestOf || 3) : 3, setLog: [] });
+    bestOf: p ? (p.bestOf || 3) : 3, setLog: [], theme: p ? (p.theme || 'classic') : 'classic' });
   // ເຊັດຕໍ່ໄປ: ຮັກສາທີມ ແລະ ຜົນເຊັດທີ່ຜ່ານມາ; ທີມທີ່ເສຍເຊັດກ່ອນໜ້າ ໂຍນລູກໝູກ່ອນ
   const nextSet = (p, w, sc) => { const n = fresh(p); n.setLog = list(p.setLog).concat([{ w, s: sc }]); n.firstJack = 1 - w; return n; };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
@@ -381,7 +382,7 @@
     setVal('fTitle', S.title || ''); setVal('fA', name(0)); setVal('fB', name(1));
     setVal('cA', S.teams[0].color); setVal('cB', S.teams[1].color);
     [0, 1].forEach((i) => { const lg = S.teams[i].logo || ''; $('pv' + i).style.backgroundImage = lg ? 'url("' + lg + '")' : 'none'; $('rm' + i).hidden = !lg; $('sj' + i).textContent = name(i); });
-    seg('segF', S.format); seg('segB', S.bestOf || 3); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1);
+    seg('segF', S.format); seg('segB', S.bestOf || 3); seg('segD', S.theme || 'classic'); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1);
     seg('segJ', S.firstJack == null ? '' : S.firstJack);
     tog('tgLogo', S.logos !== false); tog('tgBalls', S.balls !== false); tog('tgClock', S.clock !== false); tog('tgWin2', S.showWin !== false);
   }
@@ -442,6 +443,7 @@
   const onSeg = (id, fn) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; if (fn(b.dataset.v) === false) return; save(); render(); });
   onSeg('segF', (v) => { if (list(S.ends).some((e) => e.p > MAX[v])) { toast('ມີຮອບທີ່ໄດ້ເກີນ ' + MAX[v] + ' ຄະແນນ'); return false; } S.format = v; });
   onSeg('segB', (v) => { S.bestOf = +v; });
+  onSeg('segD', (v) => { S.theme = v; });
   onSeg('segT', (v) => { S.target = +v; S.finishedAt = winner() === null ? null : (S.finishedAt || Date.now()); });
   onSeg('segP', (v) => S.pos = v);
   onSeg('segS', (v) => S.size = +v);
