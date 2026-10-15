@@ -29,6 +29,12 @@
   .mp-balls i { width:20px; height:20px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--tc) 45%,rgba(0,0,0,.55) 120%);
     box-shadow:0 0 0 1.5px rgba(255,255,255,.55); transition:opacity .3s, transform .3s; }
   .mp-balls i.used { opacity:.22; transform:scale(.7); box-shadow:none; }
+  .mp-set { width:56px; height:62px; flex:none; display:grid; place-items:center; align-content:center; background:var(--bar2); border-radius:10px; line-height:1; }
+  .mp-set small { font-size:15px; font-weight:700; opacity:.65; }
+  .mp-set b { font-family:var(--num); font-weight:700; font-size:36px; font-variant-numeric:tabular-nums; }
+  .mp-set.pop { animation:mp-pop .6s ease; }
+  .mp-onesets .mp-set { display:none; }
+  .mp-sets { font-size:22px; opacity:.85; padding-bottom:6px; }
   .mp-score { width:92px; height:62px; flex:none; display:grid; place-items:center; background:var(--tc); border-radius:10px;
     font-family:var(--num); font-weight:700; font-size:54px; line-height:1; font-variant-numeric:tabular-nums; }
   .mp-score.pop { animation:mp-pop .6s ease; }
@@ -62,7 +68,7 @@
   const team = (i) => `
       <div class="mp-team" data-k="s${i}" style="--tc:var(--${i ? 'b' : 'a'})">
         <span class="mp-logo" data-k="l${i}"></span><span class="mp-name" data-k="n${i}"></span><i class="mp-jack"></i>
-        <span class="mp-balls" data-k="b${i}"></span><span class="mp-score" data-k="c${i}">0</span>
+        <span class="mp-balls" data-k="b${i}"></span><span class="mp-set" data-k="st${i}"><small>ເຊັດ</small><b data-k="sv${i}">0</b></span><span class="mp-score" data-k="c${i}">0</span>
       </div>`;
   const HTML = `
   <div class="mp-bug off">
@@ -71,8 +77,8 @@
     <div class="mp-foot"><span data-k="endno"></span><span class="mp-dim" data-k="target"></span><span class="mp-clock" data-k="clock"></span></div>
     <div class="mp-fw"><div class="mp-flash" data-k="flash"><span data-k="fname"></span><b data-k="fpts"></b></div></div>
   </div>
-  <div class="mp-win"><div class="mp-wcard"><div class="mp-wtop"><span class="mp-wlogo" data-k="wlogo"></span><div class="mp-lbl">ຜູ້ຊະນະ</div><div class="mp-who" data-k="wname"></div></div>
-    <div class="mp-fs" data-k="wscore"></div><div data-k="wfanny" hidden><span class="mp-fanny">ແຟນນີ້! 13–0</span></div><div class="mp-meta" data-k="wmeta"></div></div></div>`;
+  <div class="mp-win"><div class="mp-wcard"><div class="mp-wtop"><span class="mp-wlogo" data-k="wlogo"></span><div class="mp-lbl" data-k="wlbl">ຜູ້ຊະນະ</div><div class="mp-who" data-k="wname"></div></div>
+    <div class="mp-fs" data-k="wscore"></div><div data-k="wfanny" hidden><span class="mp-fanny">ແຟນນີ້! 13–0</span></div><div class="mp-sets" data-k="wsets"></div><div class="mp-meta" data-k="wmeta"></div></div></div>`;
 
   const BALLS = { single:3, double:6, triple:6 };
   const list = (v) => Array.isArray(v) ? v.filter(Boolean)
@@ -91,7 +97,7 @@
     const el = {}; root.querySelectorAll('[data-k]').forEach((n) => { el[n.dataset.k] = n; });
     const bug = root.querySelector('.mp-bug'), win = root.querySelector('.mp-win');
 
-    let S = null, last = null, lastEventAt = 0, flashT = null, ballSig = '';
+    let S = null, last = null, lastSets = null, lastEventAt = 0, flashT = null, ballSig = '';
 
     function layout() {
       const W = innerWidth, H = innerHeight, land = W >= H;
@@ -130,7 +136,17 @@
       root.style.setProperty('--a', (teams[0] && teams[0].color) || '#1c5cd0');
       root.style.setProperty('--b', (teams[1] && teams[1].color) || '#d6281e');
       el.title.textContent = S.title || '';
-      el.endno.textContent = w === null ? 'ຮອບທີ ' + (ends.length + 1) : 'ຈົບເກມ';
+      // ເຊັດ (ແຂ່ງ 2 ໃນ 3): ນັບເຊັດທີ່ຈົບແລ້ວ + ເຊັດປັດຈຸບັນຖ້າມີຜູ້ຊະນະ
+      const bestOf = S.bestOf || 3, multi = bestOf > 1, need = Math.ceil(bestOf / 2), setLog = list(S.setLog);
+      const sw = [0, 0]; setLog.forEach((x) => { sw[+x.w || 0]++; }); if (w !== null) sw[w]++;
+      const mw = sw[0] >= need ? 0 : sw[1] >= need ? 1 : null, setNo = setLog.length + 1;
+      root.classList.toggle('mp-onesets', !multi);
+      el.endno.textContent = (multi ? 'ເຊັດທີ ' + setNo + ' · ' : '') + (w === null ? 'ຮອບທີ ' + (ends.length + 1) : 'ຈົບເຊັດ');
+      [0, 1].forEach((i) => {
+        el['sv' + i].textContent = sw[i];
+        if (lastSets && lastSets[i] !== sw[i]) { const n = el['st' + i]; n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); }
+      });
+      lastSets = sw;
       el.target.textContent = 'ເກມ ' + target;
       const sig = [nb, thrown[0], thrown[1]].join(',');
       [0, 1].forEach((i) => {
@@ -170,6 +186,9 @@
         el.wlogo.hidden = !logo(w);
         el.wname.textContent = name(w);
         el.wscore.textContent = sc[w] + ' – ' + sc[1 - w];
+        el.wlbl.textContent = !multi ? 'ຜູ້ຊະນະ' : mw !== null ? 'ຊະນະການແຂ່ງ ' + sw[mw] + '–' + sw[1 - mw] + ' ເຊັດ' : 'ຊະນະເຊັດທີ ' + setNo;
+        const past = setLog.map((x) => (+(x.s && x.s[0]) || 0) + '–' + (+(x.s && x.s[1]) || 0)).concat([sc[0] + '–' + sc[1]]);
+        el.wsets.textContent = multi ? 'ເຊັດ: ' + past.join(' · ') : '';
         el.wfanny.hidden = sc[1 - w] !== 0;
         el.wmeta.textContent = ends.length + ' ຮອບ' + (S.startedAt ? ' · ' + fmt((S.finishedAt || Date.now()) - S.startedAt) : '');
       }

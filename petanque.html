@@ -93,6 +93,10 @@
   .lg.none { display:none; }
   .hd .nm { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
   .hd .sc { font-family:var(--num); font-weight:700; font-size:clamp(52px,15vw,88px); line-height:1; font-variant-numeric:tabular-nums; }
+  .hd .st { position:absolute; right:10px; bottom:8px; display:flex; gap:4px; align-items:center; font-size:12px; font-weight:700; }
+  .hd .st i { width:12px; height:12px; border-radius:50%; border:2px solid #fff; }
+  .hd .st i.on { background:var(--gold); border-color:var(--gold); }
+  .win .sets { font-size:14px; color:var(--muted); }
   .hd .jkdot { position:absolute; right:10px; top:10px; width:16px; height:16px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 2px #fff; }
   .throw { padding:10px 8px 0; display:grid; gap:8px; }
   .bd { display:flex; gap:5px; align-items:center; flex-wrap:wrap; font-size:12.5px; color:var(--muted); min-height:18px; }
@@ -208,7 +212,7 @@
   </div>
 
   <div class="win" id="win" hidden>
-    <span class="muted">ຈົບເກມ · ຜູ້ຊະນະ</span><b id="wName"></b><span class="fs" id="wScore"></span>
+    <span class="muted" id="wLbl">ຈົບເກມ · ຜູ້ຊະນະ</span><b id="wName"></b><span class="fs" id="wScore"></span><span class="sets" id="wSets"></span>
     <div class="row">
       <button class="btn" id="tgWin">ປ້າຍຜູ້ຊະນະ: ເປີດ</button>
       <button class="btn primary" id="nextGame">ນັດຕໍ່ໄປ</button>
@@ -216,10 +220,10 @@
   </div>
 
   <section class="board">
-    <article class="team ta"><div class="hd"><span class="lg none" id="lg0"></span><div class="nm" id="n0"></div><div class="sc" id="c0">0</div><i class="jkdot" id="j0" hidden></i></div>
+    <article class="team ta"><div class="hd"><span class="lg none" id="lg0"></span><div class="nm" id="n0"></div><div class="sc" id="c0">0</div><i class="jkdot" id="j0" hidden></i><span class="st" id="st0"></span></div>
       <div class="throw"><div class="bd" id="bd0"></div><div class="trow"><button class="btn" data-th="0" data-d="-1" aria-label="ຄືນ 1 ລູກ">−1</button><button class="btn big" data-th="0" data-d="1">ໂຍນ 1 ລູກ</button></div></div>
       <div class="keys" id="k0"></div></article>
-    <article class="team tb"><div class="hd"><span class="lg none" id="lg1"></span><div class="nm" id="n1"></div><div class="sc" id="c1">0</div><i class="jkdot" id="j1" hidden></i></div>
+    <article class="team tb"><div class="hd"><span class="lg none" id="lg1"></span><div class="nm" id="n1"></div><div class="sc" id="c1">0</div><i class="jkdot" id="j1" hidden></i><span class="st" id="st1"></span></div>
       <div class="throw"><div class="bd" id="bd1"></div><div class="trow"><button class="btn" data-th="1" data-d="-1" aria-label="ຄືນ 1 ລູກ">−1</button><button class="btn big" data-th="1" data-d="1">ໂຍນ 1 ລູກ</button></div></div>
       <div class="keys" id="k1"></div></article>
   </section>
@@ -241,6 +245,7 @@
       <h3><span class="n">1</span>ນັດແຂ່ງ</h3>
       <div class="field"><label class="lab" for="fTitle">ຫົວຂໍ້ເທິງສະກໍ (ປະຫວ່າງໄດ້)</label><input type="text" id="fTitle" maxlength="40" placeholder="ເຊັ່ນ ຊິງຊະນະເລີດ ແຂວງອຸດົມໄຊ"></div>
       <div class="field"><span class="lab">ຮູບແບບ</span><div class="seg" id="segF"><button data-v="single">ດ່ຽວ (3 ລູກ)</button><button data-v="double">ຄູ່ (6 ລູກ)</button><button data-v="triple">ທີມ 3 ຄົນ (6 ລູກ)</button></div></div>
+      <div class="field"><span class="lab">ຈຳນວນເຊັດ</span><div class="seg" id="segB"><button data-v="1">ເຊັດດຽວ</button><button data-v="3">2 ໃນ 3</button><button data-v="5">3 ໃນ 5</button></div></div>
       <div class="field"><span class="lab">ຄະແນນຊະນະ</span><div class="seg" id="segT"><button data-v="11">11</button><button data-v="13">13</button><button data-v="15">15</button><button data-v="21">21</button></div></div>
     </section>
 
@@ -307,11 +312,17 @@
     teams: p ? p.teams : [{ name:'ທີມ A', color:'#1c5cd0' }, { name:'ທີມ B', color:'#d6281e' }],
     pos: p ? p.pos : 'tl', size: p ? p.size : 1, clock: p ? p.clock : true, show: p ? p.show : true, showWin: true,
     logos: p ? p.logos !== false : true, balls: p ? p.balls !== false : true, thrown: [0, 0],
-    ends: [], firstJack: null, startedAt: null, finishedAt: null, lastEvent: null });
+    ends: [], firstJack: null, startedAt: null, finishedAt: null, lastEvent: null,
+    bestOf: p ? (p.bestOf || 3) : 3, setLog: [] });
+  // ເຊັດຕໍ່ໄປ: ຮັກສາທີມ ແລະ ຜົນເຊັດທີ່ຜ່ານມາ; ທີມທີ່ເສຍເຊັດກ່ອນໜ້າ ໂຍນລູກໝູກ່ອນ
+  const nextSet = (p, w, sc) => { const n = fresh(p); n.setLog = list(p.setLog).concat([{ w, s: sc }]); n.firstJack = 1 - w; return n; };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
   const toast = (m) => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 1600); };
   const scores = () => { const s = [0, 0]; list(S.ends).forEach((e) => { if (!e.n) s[e.t] += e.p; }); return s; };
   const winner = () => { const s = scores(); return s[0] >= S.target ? 0 : s[1] >= S.target ? 1 : null; };
+  const need = () => Math.ceil((S.bestOf || 3) / 2);
+  const setsWon = () => { const s = [0, 0]; list(S.setLog).forEach((x) => { s[x.w]++; }); const w = winner(); if (w !== null) s[w]++; return s; };
+  const matchWinner = () => { const s = setsWon(); return s[0] >= need() ? 0 : s[1] >= need() ? 1 : null; };
   const jackTeam = () => { const ends = list(S.ends); return ends.length ? ends[ends.length - 1].t : S.firstJack; };
   const save = () => db.set('petanque', S).catch((e) => toast('ບັນທຶກບໍ່ໄດ້: ' + (e.code || e.message)));
   const tog = (id, on, label) => { $(id).setAttribute('aria-pressed', String(on)); if (label) $(id).textContent = label + (on ? 'ເປີດ' : 'ປິດ'); };
@@ -327,7 +338,9 @@
     $('hTitle').textContent = S.title || 'ເປຕັ່ງ';
     tog('tgShow', S.show !== false, 'ສະກໍ: ');
     $('scrOff').hidden = S.show !== false;
-    $('sEnd').textContent = w === null ? 'ຮອບທີ ' + (ends.length + 1) + ' · ເກມ ' + S.target : 'ຈົບເກມ';
+    const multi = (S.bestOf || 3) > 1, setNo = list(S.setLog).length + 1, sw = setsWon(), mw = matchWinner();
+    $('sEnd').textContent = (multi ? 'ເຊັດທີ ' + setNo + ' · ' : '') + (w === null ? 'ຮອບທີ ' + (ends.length + 1) + ' · ເກມ ' + S.target : 'ຈົບເຊັດ')
+      + (multi ? ' · ເຊັດ ' + sw[0] + '–' + sw[1] : '');
     const jOk = w === null && (jt === 0 || jt === 1);
     $('sJack').hidden = !jOk;
     if (jOk) $('sJack').querySelector('span').textContent = 'ໂຍນລູກໝູ: ' + name(jt);
@@ -336,13 +349,18 @@
     $('win').hidden = w === null;
     if (w !== null) {
       $('win').className = 'win ' + (w ? 'tb' : 'ta');
+      $('wLbl').textContent = !multi ? 'ຈົບເກມ · ຜູ້ຊະນະ' : mw !== null ? 'ຈົບການແຂ່ງ · ຊະນະ ' + sw[mw] + '–' + sw[1 - mw] + ' ເຊັດ' : 'ຈົບເຊັດທີ ' + setNo + ' · ຜູ້ຊະນະເຊັດ';
       $('wName').textContent = name(w); $('wScore').textContent = sc[w] + ' – ' + sc[1 - w];
+      const past = list(S.setLog).map((x) => x.s[0] + '–' + x.s[1]).concat([sc[0] + '–' + sc[1]]);
+      $('wSets').textContent = multi ? 'ຄະແນນແຕ່ລະເຊັດ (' + name(0) + ' – ' + name(1) + '): ' + past.join(', ') : '';
+      if (!nextArmed) $('nextGame').textContent = multi && mw === null ? 'ເຊັດຕໍ່ໄປ' : 'ນັດຕໍ່ໄປ';
       tog('tgWin', S.showWin !== false, 'ປ້າຍຜູ້ຊະນະ: ');
     }
     [0, 1].forEach((i) => {
       const lg = S.teams[i].logo || '';
       $('n' + i).textContent = name(i); $('c' + i).textContent = sc[i];
       $('j' + i).hidden = !(jOk && jt === i);
+      $('st' + i).innerHTML = multi ? 'ເຊັດ ' + Array.from({ length: need() }, (_, n) => `<i class="${n < sw[i] ? 'on' : ''}"></i>`).join('') : '';
       $('lg' + i).style.backgroundImage = lg ? 'url("' + lg + '")' : 'none';
       $('lg' + i).classList.toggle('none', !lg || S.logos === false);
       const used = Math.min(nb, +th[i] || 0);
@@ -363,7 +381,7 @@
     setVal('fTitle', S.title || ''); setVal('fA', name(0)); setVal('fB', name(1));
     setVal('cA', S.teams[0].color); setVal('cB', S.teams[1].color);
     [0, 1].forEach((i) => { const lg = S.teams[i].logo || ''; $('pv' + i).style.backgroundImage = lg ? 'url("' + lg + '")' : 'none'; $('rm' + i).hidden = !lg; $('sj' + i).textContent = name(i); });
-    seg('segF', S.format); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1);
+    seg('segF', S.format); seg('segB', S.bestOf || 3); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1);
     seg('segJ', S.firstJack == null ? '' : S.firstJack);
     tog('tgLogo', S.logos !== false); tog('tgBalls', S.balls !== false); tog('tgClock', S.clock !== false); tog('tgWin2', S.showWin !== false);
   }
@@ -381,7 +399,9 @@
     const b = e.target.closest('[data-th]');
     if (b && !b.disabled) {
       const i = +b.dataset.th, nb = MAX[S.format] || 6, th = S.thrown || {}, t = [+th[0] || 0, +th[1] || 0];
-      t[i] = Math.max(0, Math.min(nb, t[i] + +b.dataset.d)); S.thrown = t; save(); render(); return;
+      t[i] = Math.max(0, Math.min(nb, t[i] + +b.dataset.d)); S.thrown = t;
+      if (+b.dataset.d > 0 && !S.startedAt) { S.startedAt = Date.now(); toast('ເລີ່ມນັບເວລາ'); }
+      save(); render(); return;
     }
     const j = e.target.closest('[data-jack]');
     if (j) { S.firstJack = +j.dataset.jack; save(); render(); toast(S.teams[S.firstJack].name + ' ໂຍນລູກໝູກ່ອນ'); }
@@ -398,11 +418,14 @@
   };
   $('tgShow').onclick = () => { S.show = S.show === false; save(); render(); toast(S.show ? 'ສະກໍຂຶ້ນເທິງໄລ້ແລ້ວ' : 'ເຊື່ອງສະກໍແລ້ວ'); };
   $('tgWin').onclick = () => { S.showWin = S.showWin === false; save(); render(); };
-  let nextArmed = false;
+  var nextArmed = false;
   $('nextGame').onclick = () => {
-    if (!nextArmed) { nextArmed = true; $('nextGame').textContent = 'ກົດອີກຄັ້ງ ເພື່ອຢືນຢັນ'; setTimeout(() => { nextArmed = false; $('nextGame').textContent = 'ນັດຕໍ່ໄປ'; }, 4000); return; }
-    nextArmed = false; $('nextGame').textContent = 'ນັດຕໍ່ໄປ';
-    S = fresh(S); save(); render(); openSheet(); toast('ຕັ້ງທີມສຳລັບນັດຕໍ່ໄປ');
+    if (!nextArmed) { nextArmed = true; $('nextGame').textContent = 'ກົດອີກຄັ້ງ ເພື່ອຢືນຢັນ'; setTimeout(() => { nextArmed = false; render(); }, 4000); return; }
+    nextArmed = false;
+    const w = winner(); if (w === null) return;
+    if ((S.bestOf || 3) > 1 && matchWinner() === null) {
+      S = nextSet(S, w, scores()); save(); render(); toast('ເລີ່ມເຊັດທີ ' + (list(S.setLog).length + 1) + ' · ' + S.teams[S.firstJack].name + ' ໂຍນລູກໝູກ່ອນ');
+    } else { S = fresh(S); save(); render(); openSheet(); toast('ຕັ້ງທີມສຳລັບນັດຕໍ່ໄປ'); }
   };
 
   // ---------- settings sheet
@@ -418,6 +441,7 @@
   ['cA', 'cB'].forEach((id, i) => $(id).addEventListener('input', () => { S.teams[i].color = $(id).value; clearTimeout(save.h); save.h = setTimeout(save, 250); render(); }));
   const onSeg = (id, fn) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; if (fn(b.dataset.v) === false) return; save(); render(); });
   onSeg('segF', (v) => { if (list(S.ends).some((e) => e.p > MAX[v])) { toast('ມີຮອບທີ່ໄດ້ເກີນ ' + MAX[v] + ' ຄະແນນ'); return false; } S.format = v; });
+  onSeg('segB', (v) => { S.bestOf = +v; });
   onSeg('segT', (v) => { S.target = +v; S.finishedAt = winner() === null ? null : (S.finishedAt || Date.now()); });
   onSeg('segP', (v) => S.pos = v);
   onSeg('segS', (v) => S.size = +v);
@@ -494,7 +518,7 @@
     else db.onConnection((ok) => { $('netDot').className = 'dot ' + (ok ? 'ok' : 'bad'); $('netTxt').textContent = ok ? 'ເຊື່ອມຕໍ່ແລ້ວ' : 'ຂາດການເຊື່ອມຕໍ່'; });
     let first = true;
     db.watch('petanque', (v) => {
-      if (v) { S = v; S.ends = list(v.ends); S.teams = list(v.teams); if (S.teams.length < 2) S.teams = fresh().teams; }
+      if (v) { S = v; S.ends = list(v.ends); S.teams = list(v.teams); S.setLog = list(v.setLog).map((x) => ({ w: +x.w || 0, s: [+(x.s && x.s[0]) || 0, +(x.s && x.s[1]) || 0] })); if (S.teams.length < 2) S.teams = fresh().teams; }
       else if (first) { S = fresh(); save(); openSheet(); }
       first = false; if (S) render();
     });
