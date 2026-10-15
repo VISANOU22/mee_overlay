@@ -159,6 +159,15 @@
   .preview { position:relative; aspect-ratio:16/9; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--line);
     background:repeating-conic-gradient(#20252e 0 25%, #171b22 0 50%) 0 0/24px 24px; }
   .preview iframe { position:absolute; inset:0; width:100%; height:100%; border:0; color-scheme:light; }
+  /* ລາກວາງສະກໍໃນຕົວຢ່າງ */
+  .preview .dragbox { position:absolute; z-index:2; border:2px dashed var(--gold); border-radius:6px; cursor:move; touch-action:none;
+    background:rgba(255,194,26,.06); }
+  .preview .dragbox.on { background:rgba(255,194,26,.14); }
+  .preview .dragbox .rz { position:absolute; right:-3px; bottom:-3px; width:30px; height:30px; border-radius:50%; background:var(--gold);
+    border:3px solid var(--bg); cursor:nwse-resize; touch-action:none; box-shadow:0 2px 6px rgba(0,0,0,.5); }
+  .preview .dragbox .rz::after { content:""; position:absolute; inset:7px; border-right:2px solid #1a1404; border-bottom:2px solid #1a1404; }
+  .preview .hint { position:absolute; right:6px; top:6px; z-index:1; font-size:12px; color:#fff; background:rgba(0,0,0,.6);
+    padding:2px 8px; border-radius:6px; pointer-events:none; }
   .link { display:flex; gap:6px; } .link input { font-size:13px; } .link .btn { white-space:nowrap; flex:none; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .done { position:sticky; bottom:0; padding:10px 0 0; background:linear-gradient(transparent, var(--bg) 30%); }
@@ -309,7 +318,7 @@
   const fresh = (p) => ({
     title: p ? p.title : 'ເປຕັ່ງ', format: p ? p.format : 'triple', target: p ? p.target : 13,
     teams: p ? p.teams : [{ name:'ທີມ A', color:'#1c5cd0' }, { name:'ທີມ B', color:'#d6281e' }],
-    pos: p ? p.pos : 'tl', size: p ? p.size : 1, clock: p ? p.clock : true, show: p ? p.show : true, showWin: true,
+    pos: p ? p.pos : 'tl', size: p ? p.size : 1, fx: p && p.fx != null ? p.fx : null, fy: p && p.fy != null ? p.fy : null, clock: p ? p.clock : true, show: p ? p.show : true, showWin: true,
     logos: p ? p.logos !== false : true, balls: p ? p.balls !== false : true, thrown: [0, 0],
     ends: [], firstJack: null, startedAt: null, finishedAt: null, lastEvent: null,
     bestOf: p ? (p.bestOf || 3) : 3, setLog: [], theme: p ? (p.theme || 'classic') : 'classic' });
@@ -380,7 +389,7 @@
     setVal('fTitle', S.title || ''); setVal('fA', name(0)); setVal('fB', name(1));
     setVal('cA', S.teams[0].color); setVal('cB', S.teams[1].color);
     [0, 1].forEach((i) => { const lg = S.teams[i].logo || ''; $('pv' + i).style.backgroundImage = lg ? 'url("' + lg + '")' : 'none'; $('rm' + i).hidden = !lg; $('sj' + i).textContent = name(i); });
-    seg('segF', S.format); seg('segB', S.bestOf || 3); seg('segD', S.theme || 'classic'); seg('segT', S.target); seg('segP', S.pos || 'tl'); seg('segS', S.size || 1);
+    seg('segF', S.format); seg('segB', S.bestOf || 3); seg('segD', S.theme || 'classic'); seg('segT', S.target); seg('segP', S.fx != null ? '' : (S.pos || 'tl')); seg('segS', +S.size || 1);
     seg('segJ', S.firstJack == null ? '' : S.firstJack);
     tog('tgLogo', S.logos !== false); tog('tgBalls', S.balls !== false); tog('tgClock', S.clock !== false); tog('tgWin2', S.showWin !== false);
   }
@@ -443,8 +452,8 @@
   onSeg('segB', (v) => { S.bestOf = +v; });
   onSeg('segD', (v) => { S.theme = v; });
   onSeg('segT', (v) => { S.target = +v; S.finishedAt = winner() === null ? null : (S.finishedAt || Date.now()); });
-  onSeg('segP', (v) => S.pos = v);
-  onSeg('segS', (v) => S.size = +v);
+  onSeg('segP', (v) => { S.pos = v; S.fx = null; S.fy = null; });
+  onSeg('segS', (v) => { S.size = +v; });
   onSeg('segJ', (v) => S.firstJack = v === '' ? null : +v);
   $('tgLogo').onclick = () => { S.logos = S.logos === false; save(); render(); };
   $('tgBalls').onclick = () => { S.balls = S.balls === false; save(); render(); };
@@ -486,6 +495,60 @@
     const fallback = () => { $('url').select(); toast('ເລືອກລິ້ງແລ້ວ, ກົດກັອບປີ້ເອງ'); };
     try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), fallback); } catch (e) { fallback(); }
   };
+
+  // ---------- ລາກວາງ: ຍ້າຍ ແລະ ປັບຂະໜາດສະກໍ ໃນກ່ອງຕົວຢ່າງ (ທັງໜ້າຫຼັກ ແລະ ໜ້າຕັ້ງຄ່າ)
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const frames = () => [$('pvLive'), $('pv')].filter(Boolean);
+  const previewAll = (o) => frames().forEach((f) => { try { f.contentWindow.__mpPreview && f.contentWindow.__mpPreview.set(o); } catch (e) {} });
+  function attachEditor(ifr) {
+    const pre = ifr.parentElement;
+    const box = document.createElement('div'); box.className = 'dragbox'; box.hidden = true;
+    box.innerHTML = '<span class="rz" title="ປັບຂະໜາດ"></span>';
+    const hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = 'ລາກສະກໍເພື່ອຍ້າຍ · ດຶງຈຸດເຫຼືອງເພື່ອປັບຂະໜາດ';
+    pre.append(box, hint);
+    let drag = null, saveT = 0;
+    const target = () => { try { const d = ifr.contentDocument; return d && d.querySelector('.mp-bug:not(.mp-hide), .mp-tv:not(.mp-hide)'); } catch (e) { return null; } };
+    function place() {
+      if (drag) return;
+      const t = S && target(), r = t && t.getBoundingClientRect();
+      if (!r || !r.width || !ifr.clientWidth) { box.hidden = true; return; }
+      Object.assign(box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); box.hidden = false;
+    }
+    setInterval(place, 400);
+    ifr.addEventListener('load', () => setTimeout(place, 600));
+    box.addEventListener('pointerdown', (e) => {
+      const t = target(); if (!t || !S) return;
+      e.preventDefault(); box.setPointerCapture(e.pointerId); box.classList.add('on');
+      const r = t.getBoundingClientRect();
+      drag = { mode: e.target.closest('.rz') ? 'size' : 'move', x0: e.clientX, y0: e.clientY, l: r.left, t: r.top, w: r.width, h: r.height,
+        W: ifr.clientWidth, H: ifr.clientHeight, size: +S.size || 1, o: null };
+    });
+    box.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+      if (drag.mode === 'move') {
+        const l = clamp(drag.l + dx, 0, Math.max(0, drag.W - drag.w)), t = clamp(drag.t + dy, 0, Math.max(0, drag.H - drag.h));
+        drag.o = { fx: +(l / drag.W).toFixed(4), fy: +(t / drag.H).toFixed(4), size: drag.size };
+        box.style.left = l + 'px'; box.style.top = t + 'px';
+      } else {
+        const fmax = Math.min((drag.W - drag.l) / drag.w, (drag.H - drag.t) / drag.h);   // ບໍ່ໃຫ້ລົ້ນຂອບຈໍ
+        const size = +clamp(drag.size * Math.min((drag.w + dx) / drag.w, fmax), 0.35, 3).toFixed(3), f = size / drag.size;
+        drag.o = { fx: +(drag.l / drag.W).toFixed(4), fy: +(drag.t / drag.H).toFixed(4), size };
+        box.style.width = drag.w * f + 'px'; box.style.height = drag.h * f + 'px';
+      }
+      previewAll(drag.o);
+      // ສົ່ງໄປ Live Now ລະຫວ່າງລາກ (ບໍ່ເກີນ 4 ເທື່ອ/ວິ)
+      if (Date.now() - saveT > 250) { saveT = Date.now(); Object.assign(S, drag.o); save(); }
+    });
+    const end = () => {
+      if (!drag) return;
+      const o = drag.o; drag = null; box.classList.remove('on');
+      if (o) { Object.assign(S, o); save(); render(); }
+      setTimeout(place, 300);
+    };
+    box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+  }
+  frames().forEach(attachEditor);
 
   // ---------- ຕິດຕັ້ງເປັນແອັບ (PWA)
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;

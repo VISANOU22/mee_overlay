@@ -178,7 +178,9 @@
     const txt = (k, v) => each(k, (n) => { n.textContent = v; });
     const pop = (n) => { n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); };
     const bug = root.querySelector('.mp-bug'), tv = root.querySelector('.mp-tv'), win = root.querySelector('.mp-win');
-    let theme = 'classic', active = bug;
+    let theme = 'classic', active = bug, override = null;
+    // ໃຫ້ໜ້າຄວບຄຸມ (petanque.html) ຍ້າຍ/ປັບຂະໜາດໃນຕົວຢ່າງໄດ້ທັນທີ ຂະນະລາກ (ກ່ອນຂໍ້ມູນກັບມາຈາກ Firebase)
+    window.__mpPreview = { set(o) { override = Object.assign(override || {}, o); layout(); } };
 
     let S = null, last = null, lastSets = null, lastEventAt = 0, flashT = null, ballSig = '';
 
@@ -186,14 +188,20 @@
       const W = innerWidth, H = innerHeight, land = W >= H;
       // ຂະໜາດກາງ: ກວ້າງ 55% ຂອງຈໍແນວນອນ, 92% ຂອງຈໍແນວຕັ້ງ
       const DW = theme === 'tv' ? TV_W : DESIGN_W, share = theme === 'tv' ? (land ? .7 : .96) : (land ? .55 : .92);
-      const k = W * share / DW * ((S && S.size) || 1), m = W * (land ? .022 : .04);
-      const kk = Math.min(k, (W - 2 * m) / DW);
-      const w = DW * kk, h = active.offsetHeight * kk, pos = (S && S.pos) || 'tl';
+      const L = Object.assign({}, S || {}, override || {});
+      const k = W * share / DW * (+L.size || 1), m = W * (land ? .022 : .04);
+      const kk = Math.min(k, W / DW);
+      const w = DW * kk, h = active.offsetHeight * kk, pos = L.pos || 'tl';
       let x = m, y = m;
-      if (pos === 'tc' || pos === 'bc') x = (W - w) / 2;
-      if (pos === 'tr') x = W - w - m;
-      if (pos === 'bl' || pos === 'bc' || pos === 'br') y = H - h - m;
-      if (pos === 'br') x = W - w - m;
+      if (L.fx != null && L.fy != null) {
+        // ວາງເອງ (ລາກວາງ): fx/fy = ສັດສ່ວນຂອງຈໍ, ບໍ່ໃຫ້ອອກນອກຈໍ
+        x = Math.max(0, Math.min(W - w, L.fx * W)); y = Math.max(0, Math.min(H - h, L.fy * H));
+      } else {
+        if (pos === 'tc' || pos === 'bc') x = (W - w) / 2;
+        if (pos === 'tr') x = W - w - m;
+        if (pos === 'bl' || pos === 'bc' || pos === 'br') y = H - h - m;
+        if (pos === 'br') x = W - w - m;
+      }
       active.style.left = x + 'px'; active.style.top = y + 'px'; active.style.transform = 'scale(' + kk + ')';
       const wk = Math.min(W * .8 / 820, H * .8 / 560);
       win.style.transform = 'scale(' + wk + ') translate(-50%,-50%)';
@@ -285,7 +293,11 @@
       Promise.all(['400', '700', '900'].map((w) => document.fonts.load(w + ' 30px MeeLao', 'ກີ້ຂ໋ອບ'))).then(layout, () => {});
     }
     layout();
-    return db.watch('petanque', (v) => { S = v || null; render(); if (opts.onState) opts.onState(S); });
+    return db.watch('petanque', (v) => {
+      S = v || null;
+      if (override && S && ['fx', 'fy', 'size', 'pos'].every((k) => !(k in override) || S[k] === override[k])) override = null;
+      render(); if (opts.onState) opts.onState(S);
+    });
   }
 
   window.MeePetanque = { mount, BALLS, THEMES };
