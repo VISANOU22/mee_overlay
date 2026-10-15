@@ -132,13 +132,13 @@
         <span class="mp-balls" data-k="b${i}"></span><span class="mp-set" data-k="st${i}"><small>ເຊັດ</small><b data-k="sv${i}">0</b></span><span class="mp-score" data-k="c${i}">0</span>
       </div>`;
   const HTML = `
-  <div class="mp-bug off">
+  <div class="mp-bug off" data-edit="bug">
     <div class="mp-title" data-k="title"></div>
     <div class="mp-card">${team(0)}${team(1)}</div>
     <div class="mp-foot"><span data-k="endno"></span><span class="mp-dim" data-k="target"></span><span class="mp-clock" data-k="clock"></span></div>
     <div class="mp-fw"><div class="mp-flash" data-k="flash"><span data-k="fname"></span><b data-k="fpts"></b></div></div>
   </div>
-  <div class="mp-tv off mp-hide">
+  <div class="mp-tv off mp-hide" data-edit="bug">
     <div class="mp-title" data-k="title"></div>
     <div class="mp-tvbar">
       <div class="mp-tvt a" data-k="s0" style="--tc:var(--a)"><span class="mp-logo" data-k="l0"></span><span class="mp-name" data-k="n0"></span><i class="mp-jack"></i></div>

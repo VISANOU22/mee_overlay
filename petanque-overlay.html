@@ -18,7 +18,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
-<script src="petanque-bug.js?v=8"></script>
+<script src="petanque-bug.js?v=9"></script>
+<script src="extras.js?v=1"></script>
 </head>
 <body>
 <div class="msg" id="msg"></div>
@@ -30,6 +31,7 @@
   let db;
   try { db = Mee.createDB(); } catch (e) { say('ເປີດຖານຂໍ້ມູນບໍ່ໄດ້: ' + e.message); return; }
   db.setUser(q.get('u') || 'local');
+  if (window.MeeExtras) MeeExtras.mount(db);
   MeePetanque.mount(db, { onState: (s) => say(!s && q.get('test') === '1' ? 'ຍັງບໍ່ມີເກມ. ເປີດ petanque.html ເພື່ອເລີ່ມ' : '') });
 })();
 </script>
