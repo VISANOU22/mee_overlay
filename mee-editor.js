@@ -2,7 +2,7 @@
 // MeeEditor.attach(iframe, handler)
 //   ແຕະອົງປະກອບທີ່ມີ [data-edit] ໃນ overlay (ສະກໍ, ໜັງສື, ຮູບ) → ຂຶ້ນກອບສີເຫຼືອງ
 //   ລາກ = ຍ້າຍ · ດຶງຈຸດມຸມ = ປັບຂະໜາດ · ກອບຫາຍເອງຫຼັງປ່ອຍນິ້ວ 2.5 ວິ ຫຼື ແຕະບ່ອນຫວ່າງ
-// handler.change(key, { fx, fy, f }, final)   fx/fy = ມຸມຊ້າຍເທິງ (ສັດສ່ວນຈໍ), f = ອັດຕາຂະຫຍາຍທຽບກັບຕອນເລີ່ມລາກ
+// handler.change(key, { fx, fy, f }, final, live, iframe)   fx/fy = ມຸມຊ້າຍເທິງ (ສັດສ່ວນຈໍ), f = ອັດຕາຂະຫຍາຍທຽບກັບຕອນເລີ່ມລາກ
 // handler.start(key) (ບໍ່ບັງຄັບ) — ເອີ້ນຕອນເລີ່ມລາກ
 (() => {
   const CSS = `
@@ -54,7 +54,7 @@
       select(key); clearTimeout(hideT); frame.classList.add('drag');
       drag = { key, mode, x0: e.clientX, y0: e.clientY, l: r.left, t: r.top, w: r.width, h: r.height,
         W: ifr.clientWidth, H: ifr.clientHeight, last: null, sentAt: 0, moved: false };
-      if (handler.start) handler.start(key);
+      if (handler.start) handler.start(key, ifr);
     }
     function move(e) {
       if (!drag) return;
@@ -75,12 +75,12 @@
       drag.last = p;
       const live = Date.now() - drag.sentAt > 250;     // ສົ່ງໄປ Live Now ບໍ່ເກີນ 4 ເທື່ອ/ວິ
       if (live) drag.sentAt = Date.now();
-      handler.change(drag.key, p, false, live);
+      handler.change(drag.key, p, false, live, ifr);
     }
     function end() {
       if (!drag) return;
       const d = drag; drag = null; frame.classList.remove('drag');
-      if (d.last && d.moved) handler.change(d.key, d.last, true, true);
+      if (d.last && d.moved) handler.change(d.key, d.last, true, true, ifr);
       autoHide();
     }
 

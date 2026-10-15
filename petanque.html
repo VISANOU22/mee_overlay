@@ -174,8 +174,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
-<script src="mee-editor.js?v=2"></script>
-<script src="extras-panel.js?v=1"></script>
+<script src="mee-editor.js?v=3"></script>
+<script src="extras-panel.js?v=2"></script>
 </head>
 <body>
 <div class="login" id="login" hidden>
@@ -283,6 +283,7 @@
       <input type="file" id="exUp" accept="image/*" hidden>
       <p class="muted" style="margin:0;font-size:13px">ຍ້າຍ ແລະ ປັບຂະໜາດ: ແຕະທີ່ໜັງສື ຫຼື ຮູບ ໃນກ່ອງຕົວຢ່າງຂ້າງເທິງ ແລ້ວລາກ, ດຶງຈຸດເຫຼືອງເພື່ອປັບຂະໜາດ. ເປີດ/ປິດດ່ວນໄດ້ຢູ່ໜ້າຫຼັກ (ໃຕ້ກ່ອງໜ້າຈໍໄລ້).</p>
       <div class="xp-list" id="exList"></div>
+      <div id="exImpWrap" class="field" hidden><span class="lab">ນຳເຂົ້າຈາກ Studio ເກົ່າ (ເລືອກໜ້າຈໍ ແລ້ວກົດນຳເຂົ້າ)</span><div id="exImp"></div></div>
     </section>
 
     <section class="card">
@@ -439,7 +440,7 @@
   };
 
   // ---------- settings sheet
-  function openSheet() { $('sheet').hidden = false; if (!$('pv').src) $('pv').src = $('url').value; }
+  function openSheet() { $('sheet').hidden = false; if (!$('pv').src) $('pv').src = $('url').value + '&pv=' + Date.now(); }
   function closeSheet() { $('sheet').hidden = true; window.scrollTo(0, 0); }
   $('openSet').onclick = openSheet; $('closeSet').onclick = closeSheet; $('closeSet2').onclick = closeSheet;
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
@@ -501,15 +502,16 @@
   // ---------- ໜັງສື ແລະ ຮູບ (ໂມດູນໃຊ້ຮ່ວມທຸກກິລາ: extras-panel.js / extras.js)
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const frames = () => [$('pvLive'), $('pv')].filter(Boolean);
-  const ex = MeeExtrasPanel.mount(db, { list: $('exList'), chips: $('exChips'), addText: $('exAddT'), upload: $('exUp'), toast, frames });
+  const ex = MeeExtrasPanel.mount(db, { list: $('exList'), chips: $('exChips'), addText: $('exAddT'), upload: $('exUp'), importBox: $('exImp'), toast, frames });
+  new MutationObserver(() => { $('exImpWrap').hidden = $('exImp').hidden || !$('exImp').querySelector('option'); }).observe($('exImp'), { attributes: true, childList: true, subtree: true });
 
   // ---------- ລາກວາງໃນກ່ອງຕົວຢ່າງ (mee-editor.js): ແຕະສະກໍ/ໜັງສື/ຮູບ → ລາກຍ້າຍ, ດຶງຈຸດເຫຼືອງ = ປັບຂະໜາດ, ກອບຫາຍເອງ
   let baseSize = 1;
   const previewBug = (o) => frames().forEach((f) => { try { f.contentWindow.__mpPreview && f.contentWindow.__mpPreview.set(o); } catch (e) {} });
   const editHandler = {
-    start(key) { if (key === 'bug') baseSize = +(S && S.size) || 1; else if (key.startsWith('x:')) ex.start(key.slice(2)); },
-    change(key, p, final, live) {
-      if (key.startsWith('x:')) return ex.change(key.slice(2), p, final, live);
+    start(key, ifr) { if (key === 'bug') baseSize = +(S && S.size) || 1; else if (key.startsWith('x:')) ex.start(key.slice(2), ifr); },
+    change(key, p, final, live, ifr) {
+      if (key.startsWith('x:')) return ex.change(key.slice(2), p, final, live, ifr);
       if (key !== 'bug' || !S) return;
       const o = { fx: p.fx, fy: p.fy, size: +clamp(baseSize * p.f, 0.35, 3).toFixed(3) };
       previewBug(o);
@@ -542,7 +544,9 @@
     $('login').hidden = true; $('app').hidden = false;
     db.setUser(user);
     $('url').value = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
-    const loadLive = () => { if ($('scrBox').open && !$('pvLive').src) $('pvLive').src = $('url').value; };
+    // ກ່ອງຕົວຢ່າງ: ຕໍ່ທ້າຍລິ້ງດ້ວຍເວລາ ເພື່ອບໍ່ໃຫ້ browser ໃຊ້ overlay.html ໂຕເກົ່າທີ່ cache ໄວ້
+    const pvUrl = () => $('url').value + '&pv=' + Date.now();
+    const loadLive = () => { if ($('scrBox').open && !$('pvLive').src) $('pvLive').src = pvUrl(); };
     try { if (localStorage.getItem('pq-scr') === '0') $('scrBox').open = false; } catch (e) {}
     $('scrBox').addEventListener('toggle', () => { try { localStorage.setItem('pq-scr', $('scrBox').open ? '1' : '0'); } catch (e) {} loadLive(); });
     loadLive();
