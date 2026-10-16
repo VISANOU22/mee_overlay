@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mee Live · ໜັງສື ແລະ ຮູບ</title>
+<meta name="theme-color" content="#0c0e13">
+<link rel="icon" href="petanque-icon-192.png">
+<link rel="stylesheet" href="fonts/fonts.css?v=1">
+<style>
+  :root {
+    --bg:#0c0e13; --surface:#14171e; --raised:#1b1f28; --field:#0a0c10; --line:#272c37; --line2:#353b48;
+    --ink:#eef0f4; --muted:#9097a5; --accent:#ff4d3d; --onair:#e0261b; --ok:#34c77b; --gold:#ffc21a; --warn:#ff7a70;
+    --a:#1c5cd0; --b:#d6281e;
+    --lao:'MeeLao','Noto Sans Lao',sans-serif; --num:'MeeNum','Oswald','MeeLao',sans-serif;
+    color-scheme:dark;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--lao); -webkit-tap-highlight-color:transparent; }
+  button, input { font:inherit; color:inherit; }
+  button { cursor:pointer; }
+  [hidden] { display:none !important; }
+  :focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .muted { color:var(--muted); }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 14px; border-radius:10px;
+    border:1px solid var(--line2); background:var(--raised); font-weight:600; text-decoration:none; color:inherit; }
+  .btn:disabled { opacity:.35; cursor:not-allowed; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.danger { color:var(--warn); }
+  .btn.danger.arm { background:var(--onair); border-color:var(--onair); color:#fff; }
+  .btn svg { width:20px; height:20px; flex:none; }
+  input[type=text], input[type=email], input[type=password] { height:46px; border-radius:10px; border:1px solid var(--line2); background:var(--field); padding:0 12px; width:100%; min-width:0; }
+
+  /* login */
+  .login { min-height:100vh; display:grid; place-items:center; padding:24px 16px; }
+  .login form { width:100%; max-width:380px; display:flex; flex-direction:column; gap:10px; }
+  .login h1 { margin:0; font-size:26px; } .login h1 b { color:var(--accent); }
+  .login label { font-size:13px; color:var(--muted); }
+
+  /* ======== live screen ======== */
+  .live { max-width:720px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(24px + env(safe-area-inset-bottom,0px)); display:grid; gap:10px; }
+  .ctl { display:grid; gap:10px; min-width:0; }
+  /* ໜ້າຈໍໄລ້ (ຕົວຢ່າງສົດ) */
+  details.scr { background:var(--surface); border:1px solid var(--line); border-radius:12px; min-width:0; }
+  details.scr summary { padding:10px 12px; font-weight:700; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; }
+  details.scr summary::-webkit-details-marker { display:none; }
+  details.scr summary::after { content:"▾"; color:var(--muted); margin-left:auto; }
+  details.scr[open] summary::after { content:"▴"; }
+  details.scr .rec { width:9px; height:9px; border-radius:50%; background:var(--onair); flex:none; }
+  details.scr .off { color:var(--warn); font-size:12.5px; font-weight:600; }
+  details.scr .preview { margin:0 10px 10px; }
+  @media (min-width:960px) {
+    .live { max-width:1360px; grid-template-columns:minmax(0,1fr) 620px; align-items:start; column-gap:14px; }
+    .live > .bar { grid-column:1 / -1; }
+    details.scr { position:sticky; top:10px; }
+  }
+  .bar { display:flex; align-items:center; gap:8px; }
+  .bar .ttl { margin-right:auto; min-width:0; }
+  .bar .ttl b { display:block; font-size:16px; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar .ttl small { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:12.5px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--muted); flex:none; }
+  .dot.ok { background:var(--ok); } .dot.bad { background:var(--warn); } .dot.demo { background:var(--gold); }
+  .onbtn { min-width:118px; }
+  .onbtn[aria-pressed="true"] { background:var(--onair); border-color:var(--onair); color:#fff; }
+  .gear { width:46px; padding:0; }
+
+  .status { display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:8px 12px; font-weight:700; }
+  .status .jk { display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color:var(--muted); min-width:0; }
+  .status .jk i { width:12px; height:12px; border-radius:50%; background:var(--gold); flex:none; }
+  .status .jk span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .pick { background:color-mix(in srgb,var(--gold) 12%,var(--surface)); border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line)); border-radius:12px; padding:10px; display:grid; gap:8px; }
+  .pick p { margin:0; font-weight:700; }
+  .pick .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pick .btn { min-height:48px; border-color:var(--tc); color:#fff; background:color-mix(in srgb,var(--tc) 35%,var(--raised)); min-width:0; }
+  .pick .btn span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .board { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .team { border-radius:14px; overflow:hidden; border:1px solid var(--line); background:var(--surface); min-width:0; display:flex; flex-direction:column; }
+  .ta { --tc:var(--a); } .tb { --tc:var(--b); }
+  .hd { background:var(--tc); padding:8px 10px 10px; display:grid; grid-template-columns:auto 1fr; column-gap:8px; align-items:center; position:relative; }
+  .lg { grid-row:1 / span 2; width:40px; height:40px; border-radius:50%; background:#fff center/cover no-repeat; box-shadow:0 0 0 2px #fff; }
+  .lg.none { display:none; }
+  .hd .nm { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .hd .sc { font-family:var(--num); font-weight:700; font-size:clamp(52px,15vw,88px); line-height:1; font-variant-numeric:tabular-nums; }
+  .hd .st { position:absolute; right:10px; bottom:8px; display:flex; gap:4px; align-items:center; font-size:12px; font-weight:700; }
+  .hd .st i { width:12px; height:12px; border-radius:50%; border:2px solid #fff; }
+  .hd .st i.on { background:var(--gold); border-color:var(--gold); }
+  .win .sets { font-size:14px; color:var(--muted); }
+  .hd .jkdot { position:absolute; right:10px; top:10px; width:16px; height:16px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 2px #fff; }
+  .throw { padding:10px 8px 0; display:grid; gap:8px; }
+  .bd { display:flex; gap:5px; align-items:center; flex-wrap:wrap; font-size:12.5px; color:var(--muted); min-height:18px; }
+  .bd i { width:15px; height:15px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--tc) 45%,#000 130%); }
+  .bd i.used { opacity:.2; transform:scale(.75); }
+  .bd span { margin-left:auto; }
+  .trow { display:grid; grid-template-columns:44px 1fr; gap:6px; }
+  .trow .btn { min-height:54px; padding:0 6px; }
+  .trow .big { font-size:16px; font-weight:700; background:color-mix(in srgb,var(--tc) 25%,var(--raised)); border-color:color-mix(in srgb,var(--tc) 60%,var(--line2)); }
+  .keys { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:8px; margin-top:auto; }
+  .keys .lbl { grid-column:1 / -1; font-size:12px; color:var(--muted); }
+  .key { height:52px; border-radius:10px; border:1px solid var(--line2); background:var(--raised); font-family:var(--num); font-size:24px; font-weight:700; color:var(--tc); }
+  .key:active, .trow .btn:active { transform:scale(.95); }
+  .key:disabled { opacity:.3; }
+
+  .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .actions .btn { min-height:50px; line-height:1.3; text-align:center; padding:4px 10px; }
+
+  .win { border-radius:14px; padding:14px; text-align:center; background:color-mix(in srgb,var(--tc) 30%,var(--surface)); border:1px solid var(--tc); display:grid; gap:8px; }
+  .win b { font-size:22px; } .win .fs { font-family:var(--num); font-size:44px; font-weight:700; line-height:1; }
+  .win .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  details.hist { background:var(--surface); border:1px solid var(--line); border-radius:12px; }
+  details.hist summary { padding:10px 12px; font-weight:700; cursor:pointer; list-style:none; display:flex; justify-content:space-between; }
+  details.hist summary::-webkit-details-marker { display:none; }
+  details.hist summary::after { content:"▾"; color:var(--muted); }
+  details.hist[open] summary::after { content:"▴"; }
+  .hist ul { list-style:none; margin:0; padding:0 12px 8px; }
+  .hist li { display:grid; grid-template-columns:60px 1fr auto; gap:10px; padding:7px 0; border-top:1px solid var(--line); align-items:center; }
+  .hist .who { display:flex; gap:8px; align-items:center; min-width:0; }
+  .hist .who span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hist li i { width:10px; height:10px; border-radius:50%; background:var(--tc); flex:none; }
+  .hist b, .hist .run { font-family:var(--num); font-size:18px; font-variant-numeric:tabular-nums; }
+  .hist b { color:var(--tc); }
+
+  /* ======== settings sheet ======== */
+  .sheet { position:fixed; inset:0; z-index:20; background:var(--bg); overflow-y:auto; overscroll-behavior:contain; }
+  .sheet .top { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:10px; background:var(--bg); border-bottom:1px solid var(--line);
+    padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px; }
+  .sheet .top h2 { margin:0 auto 0 0; font-size:19px; }
+  .sheet .body { max-width:720px; margin:0 auto; padding:14px 16px calc(40px + env(safe-area-inset-bottom,0px)); display:grid; gap:14px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; display:grid; gap:12px; min-width:0; }
+  .card h3 { margin:0; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .card h3 .n { width:22px; height:22px; border-radius:50%; background:var(--raised); border:1px solid var(--line2); display:grid; place-items:center; font-size:12px; flex:none; }
+  .field { display:grid; gap:5px; min-width:0; }
+  .lab { font-size:13px; color:var(--muted); }
+  .teamset { display:grid; gap:8px; padding:10px; border-radius:12px; border:1px solid var(--line); border-left:5px solid var(--tc); }
+  .namerow { display:flex; gap:6px; }
+  .namerow input[type=color] { width:50px; height:46px; padding:2px; border-radius:10px; border:1px solid var(--line2); background:var(--field); flex:none; }
+  .logorow { display:flex; gap:8px; align-items:center; }
+  .logorow .pv { width:44px; height:44px; border-radius:50%; background:var(--field) center/cover no-repeat; border:1px solid var(--line2); flex:none; }
+  .logorow .btn { min-height:40px; font-size:13.5px; padding:0 12px; }
+  .seg { display:flex; gap:6px; flex-wrap:wrap; }
+  .seg button { flex:1 1 auto; min-height:42px; padding:4px 10px; border-radius:9px; border:1px solid var(--line2); background:var(--raised); font-size:13.5px; font-weight:600; }
+  .seg button[aria-pressed="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .tgl { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:46px; padding:0 2px; background:none; border:0; width:100%; text-align:left; font-weight:600; }
+  .tgl .sw { width:42px; height:24px; border-radius:999px; background:var(--line2); position:relative; flex:none; transition:background .2s; }
+  .tgl .sw::after { content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .2s; }
+  .tgl[aria-pressed="true"] .sw { background:var(--ok); }
+  .tgl[aria-pressed="true"] .sw::after { transform:translateX(18px); }
+  .tgl + .tgl { border-top:1px solid var(--line); }
+  .preview { position:relative; aspect-ratio:16/9; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--line);
+    background:repeating-conic-gradient(#20252e 0 25%, #171b22 0 50%) 0 0/24px 24px; }
+  .preview iframe { position:absolute; inset:0; width:100%; height:100%; border:0; color-scheme:light; }
+  .link { display:flex; gap:6px; } .link input { font-size:13px; } .link .btn { white-space:nowrap; flex:none; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .done { position:sticky; bottom:0; padding:10px 0 0; background:linear-gradient(transparent, var(--bg) 30%); }
+  .done .btn { width:100%; min-height:52px; font-size:17px; }
+
+  .toast { position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg);
+    padding:8px 16px; border-radius:999px; font-weight:700; z-index:30; max-width:90vw; text-align:center; }
+  @media (max-width:520px) { .grid2 { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js?v=3"></script>
+<script src="common.js?v=3"></script>
+<script src="mee-editor.js?v=5"></script>
+<script src="extras-panel.js?v=4"></script>
+</head>
+<body>
+
+<main id="app" hidden style="max-width:760px;margin:0 auto;padding:12px 12px calc(28px + env(safe-area-inset-bottom,0px));display:grid;gap:12px">
+  <header class="bar" data-standalone style="padding-top:env(safe-area-inset-top,0px)"><div class="ttl"><b>ໜັງສື ແລະ ຮູບ ເທິງໄລ້</b><small><a href="live.html" style="color:inherit">← ໜ້າຫຼັກ Mee Live</a></small></div></header>
+  <section class="card">
+    <h3>ຕົວຢ່າງໜ້າຈໍໄລ້</h3>
+    <div class="preview"><iframe id="pv" title="ຕົວຢ່າງ overlay"></iframe></div>
+    <p class="muted" style="margin:0;font-size:13px">ແຕະໜັງສື ຫຼື ຮູບ ໃນກ່ອງນີ້ → ລາກເພື່ອຍ້າຍ, ດຶງຈຸດເຫຼືອງ = ປັບຂະໜາດ, ມີປຸ່ມ ເຊື່ອງ / ລຶບ. ໃຊ້ຮ່ວມທຸກກິລາ.</p>
+    <div class="xp-chips" id="exChips" style="padding:0"></div>
+  </section>
+  <section class="card">
+    <h3>ເພີ່ມ</h3>
+    <div class="grid2" style="grid-template-columns:1fr 1fr"><button class="btn primary" id="exAddT" type="button">＋ ໜັງສື</button><label class="btn primary" for="exUp">＋ ຮູບ / ໂລໂກ້</label></div>
+    <input type="file" id="exUp" accept="image/*" hidden>
+  </section>
+  <section class="card">
+    <h3>ລາຍການ (ກົດຊື່ເພື່ອແກ້ ສີ, ຟອນ, ເອັບເຟັກ)</h3>
+    <div class="xp-list" id="exList"></div>
+    <div id="exImpWrap" class="field" hidden><span class="lab">ນຳເຂົ້າຈາກ Studio ເກົ່າ</span><div id="exImp"></div></div>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const db = Mee.createDB();
+  const toast = (m) => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 1800); };
+  if (window.parent !== window) document.querySelectorAll('[data-standalone]').forEach((n) => { n.hidden = true; });
+  let ex = null;
+  const frames = () => [$('pv')];
+  new MutationObserver(() => { $('exImpWrap').hidden = $('exImp').hidden || !$('exImp').querySelector('option'); }).observe($('exImp'), { attributes: true, childList: true, subtree: true });
+  MeeEditor.attach($('pv'), {
+    accept: (key) => key.startsWith('x:'),
+    actions(key) {
+      if (!ex || !key.startsWith('x:') || !ex.has(key.slice(2))) return [];
+      const id = key.slice(2);
+      return [{ label: 'ເຊື່ອງ', run: () => ex.hide(id) }, { label: 'ລຶບ', cls: 'del', confirm: 'ກົດອີກເທື່ອເພື່ອລຶບ', run: () => ex.remove(id) }];
+    },
+    start(key, ifr) { if (ex && key.startsWith('x:')) ex.start(key.slice(2), ifr); },
+    change(key, p, final, live, ifr) { if (ex && key.startsWith('x:')) ex.change(key.slice(2), p, final, live, ifr); },
+  });
+  db.onAuth((u) => {
+    if (!u) { location.href = 'live.html'; return; }
+    db.setUser(u); $('app').hidden = false;
+    ex = MeeExtrasPanel.mount(db, { list: $('exList'), chips: $('exChips'), addText: $('exAddT'), upload: $('exUp'), importBox: $('exImp'), toast, frames });
+    $('pv').src = new URL('overlay.html?u=' + encodeURIComponent(u), location.href).href + '&pv=' + Date.now();
+  });
+})();
+</script>
+</body>
+</html>

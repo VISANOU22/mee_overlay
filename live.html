@@ -3,84 +3,399 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Mee Live · ຄວບຄຸມໄລ້ກິລາ</title>
-<link rel="manifest" href="petanque.webmanifest">
+<title>Mee Live</title>
 <meta name="theme-color" content="#0c0e13">
+<link rel="icon" href="petanque-icon-192.png">
+<link rel="stylesheet" href="fonts/fonts.css?v=1">
+<link rel="manifest" href="petanque.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mee Live">
 <link rel="apple-touch-icon" href="petanque-icon-192.png">
-<link rel="icon" href="petanque-icon-192.png">
-<link rel="stylesheet" href="fonts/fonts.css?v=1">
 <style>
-  /* ໜ້າດຽວ ຄວບຄຸມທຸກກິລາ: ເລືອກກິລາຢູ່ແຖບເທິງ → ໜ້າຄວບຄຸມ ແລະ ປ້າຍເທິງໄລ້ ປ່ຽນຕາມ */
-  :root { --bg:#0c0e13; --surface:#14171e; --raised:#1b1f28; --line:#272c37; --line2:#353b48; --ink:#eef0f4; --muted:#9097a5; --accent:#ff4d3d; --gold:#ffc21a; color-scheme:dark; }
+  :root {
+    --bg:#0c0e13; --surface:#14171e; --raised:#1b1f28; --field:#0a0c10; --line:#272c37; --line2:#353b48;
+    --ink:#eef0f4; --muted:#9097a5; --accent:#ff4d3d; --onair:#e0261b; --ok:#34c77b; --gold:#ffc21a; --warn:#ff7a70;
+    --a:#1c5cd0; --b:#d6281e;
+    --lao:'MeeLao','Noto Sans Lao',sans-serif; --num:'MeeNum','Oswald','MeeLao',sans-serif;
+    color-scheme:dark;
+  }
   * { box-sizing:border-box; }
-  html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:15px/1.4 'MeeLao','Noto Sans Lao',sans-serif; overflow:hidden; }
-  .top { position:fixed; left:0; right:0; top:0; z-index:5; display:flex; align-items:center; gap:10px;
-    padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px; background:var(--bg); border-bottom:1px solid var(--line); }
-  .brand { font-weight:900; font-size:16px; white-space:nowrap; }
-  .brand b { color:var(--accent); }
-  .tabs { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; flex:1; min-width:0; }
-  .tabs::-webkit-scrollbar { display:none; }
-  .tab { flex:none; display:inline-flex; align-items:center; gap:6px; min-height:42px; padding:0 16px; border-radius:999px; border:1px solid var(--line2);
-    background:var(--raised); color:inherit; font:700 15px 'MeeLao','Noto Sans Lao',sans-serif; cursor:pointer; }
-  .tab[aria-selected="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
-  .tab i { font-style:normal; font-size:17px; }
-  .onair { flex:none; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); white-space:nowrap; }
-  .onair::before { content:""; width:8px; height:8px; border-radius:50%; background:#e0261b; }
-  .stage { position:fixed; left:0; right:0; bottom:0; top:var(--th, 56px); }
-  .stage iframe { position:absolute; inset:0; width:100%; height:100%; border:0; background:var(--bg); }
-  .stage iframe[hidden] { display:none; }
-  @media (max-width:520px) { .brand { display:none; } .onair span { display:none; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--lao); -webkit-tap-highlight-color:transparent; }
+  button, input { font:inherit; color:inherit; }
+  button { cursor:pointer; }
+  [hidden] { display:none !important; }
+  :focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .muted { color:var(--muted); }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 14px; border-radius:10px;
+    border:1px solid var(--line2); background:var(--raised); font-weight:600; text-decoration:none; color:inherit; }
+  .btn:disabled { opacity:.35; cursor:not-allowed; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.danger { color:var(--warn); }
+  .btn.danger.arm { background:var(--onair); border-color:var(--onair); color:#fff; }
+  .btn svg { width:20px; height:20px; flex:none; }
+  input[type=text], input[type=email], input[type=password] { height:46px; border-radius:10px; border:1px solid var(--line2); background:var(--field); padding:0 12px; width:100%; min-width:0; }
+
+  /* login */
+  .login { min-height:100vh; display:grid; place-items:center; padding:24px 16px; }
+  .login form { width:100%; max-width:380px; display:flex; flex-direction:column; gap:10px; }
+  .login h1 { margin:0; font-size:26px; } .login h1 b { color:var(--accent); }
+  .login label { font-size:13px; color:var(--muted); }
+
+  /* ======== live screen ======== */
+  .live { max-width:720px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(24px + env(safe-area-inset-bottom,0px)); display:grid; gap:10px; }
+  .ctl { display:grid; gap:10px; min-width:0; }
+  /* ໜ້າຈໍໄລ້ (ຕົວຢ່າງສົດ) */
+  details.scr { background:var(--surface); border:1px solid var(--line); border-radius:12px; min-width:0; }
+  details.scr summary { padding:10px 12px; font-weight:700; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; }
+  details.scr summary::-webkit-details-marker { display:none; }
+  details.scr summary::after { content:"▾"; color:var(--muted); margin-left:auto; }
+  details.scr[open] summary::after { content:"▴"; }
+  details.scr .rec { width:9px; height:9px; border-radius:50%; background:var(--onair); flex:none; }
+  details.scr .off { color:var(--warn); font-size:12.5px; font-weight:600; }
+  details.scr .preview { margin:0 10px 10px; }
+  @media (min-width:960px) {
+    .live { max-width:1360px; grid-template-columns:minmax(0,1fr) 620px; align-items:start; column-gap:14px; }
+    .live > .bar { grid-column:1 / -1; }
+    details.scr { position:sticky; top:10px; }
+  }
+  .bar { display:flex; align-items:center; gap:8px; }
+  .bar .ttl { margin-right:auto; min-width:0; }
+  .bar .ttl b { display:block; font-size:16px; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar .ttl small { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:12.5px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--muted); flex:none; }
+  .dot.ok { background:var(--ok); } .dot.bad { background:var(--warn); } .dot.demo { background:var(--gold); }
+  .onbtn { min-width:118px; }
+  .onbtn[aria-pressed="true"] { background:var(--onair); border-color:var(--onair); color:#fff; }
+  .gear { width:46px; padding:0; }
+
+  .status { display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:8px 12px; font-weight:700; }
+  .status .jk { display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color:var(--muted); min-width:0; }
+  .status .jk i { width:12px; height:12px; border-radius:50%; background:var(--gold); flex:none; }
+  .status .jk span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .pick { background:color-mix(in srgb,var(--gold) 12%,var(--surface)); border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line)); border-radius:12px; padding:10px; display:grid; gap:8px; }
+  .pick p { margin:0; font-weight:700; }
+  .pick .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pick .btn { min-height:48px; border-color:var(--tc); color:#fff; background:color-mix(in srgb,var(--tc) 35%,var(--raised)); min-width:0; }
+  .pick .btn span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .board { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .team { border-radius:14px; overflow:hidden; border:1px solid var(--line); background:var(--surface); min-width:0; display:flex; flex-direction:column; }
+  .ta { --tc:var(--a); } .tb { --tc:var(--b); }
+  .hd { background:var(--tc); padding:8px 10px 10px; display:grid; grid-template-columns:auto 1fr; column-gap:8px; align-items:center; position:relative; }
+  .lg { grid-row:1 / span 2; width:40px; height:40px; border-radius:50%; background:#fff center/cover no-repeat; box-shadow:0 0 0 2px #fff; }
+  .lg.none { display:none; }
+  .hd .nm { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .hd .sc { font-family:var(--num); font-weight:700; font-size:clamp(52px,15vw,88px); line-height:1; font-variant-numeric:tabular-nums; }
+  .hd .st { position:absolute; right:10px; bottom:8px; display:flex; gap:4px; align-items:center; font-size:12px; font-weight:700; }
+  .hd .st i { width:12px; height:12px; border-radius:50%; border:2px solid #fff; }
+  .hd .st i.on { background:var(--gold); border-color:var(--gold); }
+  .win .sets { font-size:14px; color:var(--muted); }
+  .hd .jkdot { position:absolute; right:10px; top:10px; width:16px; height:16px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 2px #fff; }
+  .throw { padding:10px 8px 0; display:grid; gap:8px; }
+  .bd { display:flex; gap:5px; align-items:center; flex-wrap:wrap; font-size:12.5px; color:var(--muted); min-height:18px; }
+  .bd i { width:15px; height:15px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--tc) 45%,#000 130%); }
+  .bd i.used { opacity:.2; transform:scale(.75); }
+  .bd span { margin-left:auto; }
+  .trow { display:grid; grid-template-columns:44px 1fr; gap:6px; }
+  .trow .btn { min-height:54px; padding:0 6px; }
+  .trow .big { font-size:16px; font-weight:700; background:color-mix(in srgb,var(--tc) 25%,var(--raised)); border-color:color-mix(in srgb,var(--tc) 60%,var(--line2)); }
+  .keys { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:8px; margin-top:auto; }
+  .keys .lbl { grid-column:1 / -1; font-size:12px; color:var(--muted); }
+  .key { height:52px; border-radius:10px; border:1px solid var(--line2); background:var(--raised); font-family:var(--num); font-size:24px; font-weight:700; color:var(--tc); }
+  .key:active, .trow .btn:active { transform:scale(.95); }
+  .key:disabled { opacity:.3; }
+
+  .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .actions .btn { min-height:50px; line-height:1.3; text-align:center; padding:4px 10px; }
+
+  .win { border-radius:14px; padding:14px; text-align:center; background:color-mix(in srgb,var(--tc) 30%,var(--surface)); border:1px solid var(--tc); display:grid; gap:8px; }
+  .win b { font-size:22px; } .win .fs { font-family:var(--num); font-size:44px; font-weight:700; line-height:1; }
+  .win .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  details.hist { background:var(--surface); border:1px solid var(--line); border-radius:12px; }
+  details.hist summary { padding:10px 12px; font-weight:700; cursor:pointer; list-style:none; display:flex; justify-content:space-between; }
+  details.hist summary::-webkit-details-marker { display:none; }
+  details.hist summary::after { content:"▾"; color:var(--muted); }
+  details.hist[open] summary::after { content:"▴"; }
+  .hist ul { list-style:none; margin:0; padding:0 12px 8px; }
+  .hist li { display:grid; grid-template-columns:60px 1fr auto; gap:10px; padding:7px 0; border-top:1px solid var(--line); align-items:center; }
+  .hist .who { display:flex; gap:8px; align-items:center; min-width:0; }
+  .hist .who span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hist li i { width:10px; height:10px; border-radius:50%; background:var(--tc); flex:none; }
+  .hist b, .hist .run { font-family:var(--num); font-size:18px; font-variant-numeric:tabular-nums; }
+  .hist b { color:var(--tc); }
+
+  /* ======== settings sheet ======== */
+  .sheet { position:fixed; inset:0; z-index:20; background:var(--bg); overflow-y:auto; overscroll-behavior:contain; }
+  .sheet .top { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:10px; background:var(--bg); border-bottom:1px solid var(--line);
+    padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px; }
+  .sheet .top h2 { margin:0 auto 0 0; font-size:19px; }
+  .sheet .body { max-width:720px; margin:0 auto; padding:14px 16px calc(40px + env(safe-area-inset-bottom,0px)); display:grid; gap:14px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; display:grid; gap:12px; min-width:0; }
+  .card h3 { margin:0; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .card h3 .n { width:22px; height:22px; border-radius:50%; background:var(--raised); border:1px solid var(--line2); display:grid; place-items:center; font-size:12px; flex:none; }
+  .field { display:grid; gap:5px; min-width:0; }
+  .lab { font-size:13px; color:var(--muted); }
+  .teamset { display:grid; gap:8px; padding:10px; border-radius:12px; border:1px solid var(--line); border-left:5px solid var(--tc); }
+  .namerow { display:flex; gap:6px; }
+  .namerow input[type=color] { width:50px; height:46px; padding:2px; border-radius:10px; border:1px solid var(--line2); background:var(--field); flex:none; }
+  .logorow { display:flex; gap:8px; align-items:center; }
+  .logorow .pv { width:44px; height:44px; border-radius:50%; background:var(--field) center/cover no-repeat; border:1px solid var(--line2); flex:none; }
+  .logorow .btn { min-height:40px; font-size:13.5px; padding:0 12px; }
+  .seg { display:flex; gap:6px; flex-wrap:wrap; }
+  .seg button { flex:1 1 auto; min-height:42px; padding:4px 10px; border-radius:9px; border:1px solid var(--line2); background:var(--raised); font-size:13.5px; font-weight:600; }
+  .seg button[aria-pressed="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .tgl { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:46px; padding:0 2px; background:none; border:0; width:100%; text-align:left; font-weight:600; }
+  .tgl .sw { width:42px; height:24px; border-radius:999px; background:var(--line2); position:relative; flex:none; transition:background .2s; }
+  .tgl .sw::after { content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .2s; }
+  .tgl[aria-pressed="true"] .sw { background:var(--ok); }
+  .tgl[aria-pressed="true"] .sw::after { transform:translateX(18px); }
+  .tgl + .tgl { border-top:1px solid var(--line); }
+  .preview { position:relative; aspect-ratio:16/9; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid var(--line);
+    background:repeating-conic-gradient(#20252e 0 25%, #171b22 0 50%) 0 0/24px 24px; }
+  .preview iframe { position:absolute; inset:0; width:100%; height:100%; border:0; color-scheme:light; }
+  .link { display:flex; gap:6px; } .link input { font-size:13px; } .link .btn { white-space:nowrap; flex:none; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .done { position:sticky; bottom:0; padding:10px 0 0; background:linear-gradient(transparent, var(--bg) 30%); }
+  .done .btn { width:100%; min-height:52px; font-size:17px; }
+
+  .toast { position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg);
+    padding:8px 16px; border-radius:999px; font-weight:700; z-index:30; max-width:90vw; text-align:center; }
+  @media (max-width:520px) { .grid2 { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
 </style>
+<style>
+  html, body { height:100%; }
+  .home { max-width:880px; margin:0 auto; padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(32px + env(safe-area-inset-bottom,0px)); display:grid; gap:18px; }
+  .hhead { display:flex; align-items:center; gap:10px; }
+  .hhead h1 { margin:0 auto 0 0; font-size:24px; line-height:1.3; } .hhead h1 b { color:var(--accent); }
+  .sec { display:grid; gap:10px; }
+  .sec > h2 { margin:0; font-size:14px; font-weight:700; color:var(--muted); letter-spacing:.02em; }
+  .sports { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:12px; }
+  .sport { position:relative; text-align:left; border-radius:18px; border:2px solid var(--line2); background:var(--surface); padding:16px; min-height:150px;
+    display:grid; grid-template-rows:auto 1fr auto; gap:8px; cursor:pointer; color:inherit; font:inherit; transition:transform .12s, border-color .2s; }
+  .sport:active { transform:scale(.98); }
+  .sport .ic { font-size:34px; line-height:1; }
+  .sport .nm { font-size:22px; font-weight:900; }
+  .sport .sum { color:var(--muted); font-size:14px; line-height:1.45; min-height:2.9em; }
+  .sport .sum b { color:var(--ink); }
+  .sport .go { justify-self:start; font-weight:700; font-size:14px; color:var(--ink); background:var(--raised); border:1px solid var(--line2); border-radius:999px; padding:4px 14px; }
+  .sport.on { border-color:var(--onair); background:color-mix(in srgb, var(--onair) 10%, var(--surface)); }
+  .sport .air { position:absolute; right:14px; top:14px; display:none; align-items:center; gap:6px; background:var(--onair); color:#fff; font-size:12.5px; font-weight:800; border-radius:999px; padding:3px 10px; }
+  .sport.on .air { display:inline-flex; }
+  .sport .air::before { content:""; width:7px; height:7px; border-radius:50%; background:#fff; animation:blink 1.2s infinite; }
+  @keyframes blink { 50% { opacity:.2 } }
+  .sport.soon { cursor:default; opacity:.45; border-style:dashed; }
+  .tools { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:12px; }
+  .tool { text-align:left; display:flex; gap:12px; align-items:center; border-radius:14px; border:1px solid var(--line2); background:var(--surface); padding:14px; color:inherit; font:inherit; cursor:pointer; min-height:72px; }
+  .tool .ic { font-size:26px; flex:none; width:34px; text-align:center; }
+  .tool b { display:block; font-size:16px; } .tool small { color:var(--muted); font-size:13px; }
+  .linkbox { border-radius:14px; border:1px solid var(--line2); background:var(--surface); padding:14px; display:grid; gap:8px; }
+  .note { color:var(--muted); font-size:13px; margin:0; }
+  .foot { display:flex; gap:8px; flex-wrap:wrap; }
+  .foot a, .foot button { font-size:13.5px; min-height:40px; }
+  /* ໜ້າຍ່ອຍ (ກິລາ / ໜັງສື-ຮູບ) */
+  .view { position:fixed; inset:0; display:flex; flex-direction:column; background:var(--bg); z-index:10; }
+  .vbar { flex:none; display:flex; align-items:center; gap:10px; padding:calc(6px + env(safe-area-inset-top,0px)) 10px 6px; border-bottom:1px solid var(--line); background:var(--bg); }
+  .vbar .back { min-height:42px; font-size:15px; padding:0 14px; }
+  .vbar .vt { font-weight:900; font-size:17px; margin-right:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vbar .chip { display:none; align-items:center; gap:6px; background:var(--onair); color:#fff; font-size:12.5px; font-weight:800; border-radius:999px; padding:3px 10px; white-space:nowrap; }
+  .vbar .chip.on { display:inline-flex; }
+  .vbody { flex:1; position:relative; }
+  .vbody iframe { position:absolute; inset:0; width:100%; height:100%; border:0; background:var(--bg); }
+  .vbody iframe[hidden] { display:none; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js?v=3"></script>
+<script src="common.js?v=3"></script>
 </head>
 <body>
-<header class="top" id="top">
-  <div class="brand">Mee <b>Live</b></div>
-  <nav class="tabs" id="tabs" role="tablist" aria-label="ເລືອກກິລາ"></nav>
-  <span class="onair" title="ກິລາທີ່ເລືອກ ຈະຂຶ້ນເທິງໄລ້"><span>ຂຶ້ນໄລ້ຕາມທີ່ເລືອກ</span></span>
-</header>
-<main class="stage" id="stage"></main>
+<div class="login" id="login" hidden>
+  <form id="loginForm">
+    <h1>Mee <b>Live</b></h1>
+    <p class="muted">ເຂົ້າສູ່ລະບົບເທື່ອດຽວ ໃຊ້ໄດ້ທຸກກິລາ</p>
+    <label for="lg-email">ອີເມວ</label><input type="email" id="lg-email" autocomplete="username" required>
+    <label for="lg-pass">ລະຫັດຜ່ານ</label><input type="password" id="lg-pass" autocomplete="current-password" minlength="6" required>
+    <button class="btn primary" type="submit">ເຂົ້າສູ່ລະບົບ</button>
+    <button class="btn" type="button" id="lg-reset" style="background:transparent;border-color:transparent;text-decoration:underline">ລືມລະຫັດຜ່ານ?</button>
+    <p id="lg-msg" class="muted" role="status"></p>
+  </form>
+</div>
+
+
+<div class="home" id="home" hidden>
+  <header class="hhead">
+    <h1>Mee <b>Live</b></h1>
+    <small class="muted" style="display:flex;align-items:center;gap:6px"><span class="dot" id="netDot"></span><span id="netTxt">ກຳລັງເຊື່ອມ…</span></small>
+  </header>
+
+  <section class="sec">
+    <h2>① ເລືອກກິລາ — ກົດເຂົ້າກິລາໃດ ປ້າຍກິລານັ້ນຈະຂຶ້ນໄລ້</h2>
+    <div class="sports" id="sports"></div>
+  </section>
+
+  <section class="sec">
+    <h2>② ໃຊ້ຮ່ວມທຸກກິລາ</h2>
+    <div class="tools">
+      <button class="tool" data-open="extras"><span class="ic">🖼️</span><span><b>ໜັງສື ແລະ ຮູບ ເທິງໄລ້</b><small id="exSum">ໂລໂກ້ສະປອນເຊີ, ຂໍ້ຄວາມ, ເອັບເຟັກ</small></span></button>
+    </div>
+    <div class="linkbox">
+      <b>🔗 ລິ້ງໃສ່ປຸ່ມ Web ຂອງ Live Now (ໃສ່ເທື່ອດຽວ ໃຊ້ໄດ້ທຸກກິລາ)</b>
+      <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>③ ອື່ນໆ</h2>
+    <div class="foot">
+      <button class="btn" id="hideAll">ເຊື່ອງປ້າຍກິລາທັງໝົດ</button>
+      <button class="btn" id="installBtn" hidden>ຕິດຕັ້ງເປັນແອັບ</button>
+      <a class="btn" href="index.html">Studio ເກົ່າ</a>
+      <button class="btn" id="out">ອອກຈາກລະບົບ</button>
+    </div>
+    <p class="note" id="installHelp"></p>
+  </section>
+</div>
+
+<div class="view" id="view" hidden>
+  <div class="vbar">
+    <button class="btn back" id="back">← ໜ້າຫຼັກ</button>
+    <span class="vt" id="vTitle"></span>
+    <span class="chip" id="vChip">● ກຳລັງຂຶ້ນໄລ້</span>
+  </div>
+  <div class="vbody" id="vbody"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
 <script>
 (() => {
-  // ເພີ່ມກິລາໃໝ່: ເພີ່ມ 1 ແຖວຢູ່ນີ້ (ໜ້າຄວບຄຸມຂອງກິລານັ້ນ ຕ້ອງຂຽນ meta/sport = id ຕອນເປີດ)
+  // ເພີ່ມກິລາໃໝ່: ເພີ່ມ 1 ແຖວຢູ່ນີ້ (+ ໜ້າຄວບຄຸມ ແລະ ໂມດູນປ້າຍຂອງກິລານັ້ນ)
   const SPORTS = [
     { id: 'petanque', name: 'ເປຕັ່ງ', icon: '🎯', url: 'petanque.html' },
     { id: 'boat', name: 'ເຮືອຊ່ວງ', icon: '🚣', url: 'boat.html' },
+    { id: 'soon', name: 'ກິລາອື່ນ', icon: '➕', soon: true },
   ];
+  const PAGES = { extras: { name: 'ໜັງສື ແລະ ຮູບ ເທິງໄລ້', url: 'extras.html' } };
   const $ = (id) => document.getElementById(id);
+  const db = Mee.createDB();
+  const list = (v) => Array.isArray(v) ? v.filter(Boolean) : v && typeof v === 'object' ? Object.keys(v).sort((a, b) => a - b).map((k) => v[k]).filter(Boolean) : [];
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const toast = (m) => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 1800); };
+  let user = null, started = false, onAir = null, data = { petanque: null, boat: null };
   const frames = {};
-  let cur = null;
-  const fit = () => document.documentElement.style.setProperty('--th', $('top').offsetHeight + 'px');
-  addEventListener('resize', fit);
 
-  function open(id, fromUser) {
-    const sp = SPORTS.find((s) => s.id === id) || SPORTS[0];
-    cur = sp.id;
-    try { localStorage.setItem('mee-live-sport', sp.id); } catch (e) {}
-    history.replaceState(null, '', '?s=' + sp.id);
-    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.id === sp.id)));
-    Object.values(frames).forEach((f) => { f.hidden = true; });
-    let f = frames[sp.id];
-    if (!f) {
-      f = frames[sp.id] = document.createElement('iframe');
-      f.title = 'ຄວບຄຸມ ' + sp.name; f.src = sp.url + '?embed=1'; f.allow = 'clipboard-write';
-      $('stage').appendChild(f);   // ໜ້າທີ່ໂຫຼດໃໝ່ ຈະຕັ້ງຕົນເອງເປັນກິລາທີ່ຂຶ້ນໄລ້ ເອງ
-    } else if (fromUser) {
-      try { f.contentWindow.postMessage({ type: 'mee-activate' }, location.origin); } catch (e) {}
-    }
-    f.hidden = false;
-    document.title = 'Mee Live · ' + sp.name;
+  // ---------- ສະຫຼຸບສັ້ນໆ ຂອງແຕ່ລະກິລາ (ໃຫ້ເຫັນຈາກໜ້າຫຼັກ)
+  const SUM = {
+    petanque(S) {
+      if (!S) return 'ຍັງບໍ່ໄດ້ຕັ້ງເກມ';
+      const t = list(S.teams), sc = [0, 0]; list(S.ends).forEach((e) => { if (!e.n) sc[e.t] += e.p; });
+      const sets = list(S.setLog).length;
+      return `<b>${esc((t[0] || {}).name || 'ທີມ A')} ${sc[0]} – ${sc[1]} ${esc((t[1] || {}).name || 'ທີມ B')}</b><br>ເຊັດທີ ${sets + 1} · ຮອບທີ ${list(S.ends).length + 1}`;
+    },
+    boat(S) {
+      if (!S) return 'ຍັງບໍ່ໄດ້ຕັ້ງຖ້ຽວ';
+      const hs = list(S.heats), i = Math.min(hs.length - 1, +S.cur || 0), h = hs[i] || {};
+      return `<b>${esc((h.r || {}).name || '—')} vs ${esc((h.l || {}).name || '—')}</b><br>ຖ້ຽວທີ ${i + 1} / ${hs.length || 1}${h.w ? ' · ມີຜົນແລ້ວ' : ''}`;
+    },
+  };
+  function renderHome() {
+    $('sports').innerHTML = SPORTS.map((s) => s.soon
+      ? `<div class="sport soon"><span class="ic">${s.icon}</span><span><span class="nm">${s.name}</span><div class="sum">ຈະເພີ່ມພາຍຫຼັງ</div></span><span></span></div>`
+      : `<button class="sport${onAir === s.id ? ' on' : ''}" data-open="${s.id}"><span class="air">ກຳລັງຂຶ້ນໄລ້</span><span class="ic">${s.icon}</span>
+          <span><span class="nm">${s.name}</span><div class="sum">${SUM[s.id] ? SUM[s.id](data[s.id]) : ''}</div></span><span class="go">ເຂົ້າຄວບຄຸມ →</span></button>`).join('');
+    $('vChip').classList.toggle('on', !!cur && cur === onAir);
   }
 
-  $('tabs').innerHTML = SPORTS.map((s) => `<button class="tab" role="tab" data-id="${s.id}"><i>${s.icon}</i>${s.name}</button>`).join('');
-  $('tabs').addEventListener('click', (e) => { const t = e.target.closest('.tab'); if (t && t.dataset.id !== cur) open(t.dataset.id, true); });
-  let first = new URLSearchParams(location.search).get('s');
-  if (!first) { try { first = localStorage.getItem('mee-live-sport'); } catch (e) {} }
-  fit(); open(first || 'petanque', false);
+  // ---------- ນຳທາງ: #petanque, #boat, #extras (ປຸ່ມ back ຂອງມືຖືໃຊ້ໄດ້)
+  let cur = null;
+  function route() {
+    const id = location.hash.slice(1);
+    const sp = SPORTS.find((s) => s.id === id && !s.soon), pg = PAGES[id];
+    if (!sp && !pg) { cur = null; $('view').hidden = true; $('home').hidden = false; document.title = 'Mee Live'; renderHome(); return; }
+    cur = id; $('home').hidden = true; $('view').hidden = false;
+    $('vTitle').textContent = sp ? sp.icon + ' ' + sp.name : '🖼️ ' + pg.name;
+    Object.values(frames).forEach((f) => { f.hidden = true; });
+    let f = frames[id];
+    if (!f) { f = frames[id] = document.createElement('iframe'); f.title = $('vTitle').textContent; f.src = (sp || pg).url + '?embed=1'; f.allow = 'clipboard-write'; $('vbody').appendChild(f); }
+    else if (sp) { try { f.contentWindow.postMessage({ type: 'mee-activate' }, location.origin); } catch (e) {} }
+    f.hidden = false; document.title = 'Mee Live · ' + (sp || pg).name;
+    try { if (sp) localStorage.setItem('mee-live-sport', id); } catch (e) {}
+    renderHome();
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) location.hash = b.dataset.open; });
+  $('back').onclick = () => { if (history.length > 1 && location.hash) history.back(); else location.hash = ''; };
+  addEventListener('hashchange', route);
+
+  $('copy').onclick = () => { const u = $('url').value; try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), () => $('url').select()); } catch (e) { $('url').select(); } };
+  $('hideAll').onclick = () => db.set('meta/sport', 'none').then(() => toast('ເຊື່ອງປ້າຍກິລາທັງໝົດແລ້ວ — ກົດເຂົ້າກິລາໃດ ກໍຂຶ້ນຄືນ'));
+
+  // ---------- ຕິດຕັ້ງເປັນແອັບ
+  let deferred = null;
+  const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  function installUI() {
+    if (standalone()) { $('installBtn').hidden = true; $('installHelp').textContent = ''; return; }
+    $('installBtn').hidden = !deferred;
+    $('installHelp').textContent = deferred ? '' : /iphone|ipad|ipod/i.test(navigator.userAgent)
+      ? 'ຕິດຕັ້ງເປັນແອັບ (iPhone): Safari → ປຸ່ມແບ່ງປັນ → "ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ"' : 'ຕິດຕັ້ງເປັນແອັບ (Android): Chrome ⋮ → "ຕິດຕັ້ງແອັບ"';
+  }
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; installUI(); });
+  $('installBtn').onclick = async () => { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (e) {} deferred = null; installUI(); };
+  installUI();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('petanque-sw.js').catch(() => {});
+
+  // ---------- ເລີ່ມ (ເຂົ້າສູ່ລະບົບເທື່ອດຽວຢູ່ໜ້ານີ້)
+  function start() {
+    if (started) return; started = true;
+    $('login').hidden = true;
+    db.setUser(user);
+    $('url').value = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
+    if (db.mode === 'local') { $('netDot').className = 'dot demo'; $('netTxt').textContent = 'ໂໝດທົດລອງ'; $('out').hidden = true; }
+    else db.onConnection((ok) => { $('netDot').className = 'dot ' + (ok ? 'ok' : 'bad'); $('netTxt').textContent = ok ? 'ເຊື່ອມຕໍ່ແລ້ວ' : 'ຂາດການເຊື່ອມຕໍ່'; });
+    db.watch('meta/sport', (v) => { onAir = v || null; renderHome(); });
+    SPORTS.forEach((s) => { if (!s.soon) db.watch(s.id, (v) => { data[s.id] = v; renderHome(); }); });
+    db.watch('extras/items', (v) => { const n = v ? Object.keys(v).length : 0; $('exSum').textContent = n ? n + ' ອັນ · ໂລໂກ້ສະປອນເຊີ, ຂໍ້ຄວາມ, ເອັບເຟັກ' : 'ໂລໂກ້ສະປອນເຊີ, ຂໍ້ຄວາມ, ເອັບເຟັກ'; });
+    // ເປີດລິ້ງເກົ່າ live.html?s=boat → ໄປກິລານັ້ນເລີຍ
+    const s = new URLSearchParams(location.search).get('s');
+    if (s && !location.hash) { history.replaceState(null, '', location.pathname); location.hash = s; } else route();
+  }
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); $('lg-msg').textContent = 'ກຳລັງເຂົ້າສູ່ລະບົບ…';
+    try { await db.signIn($('lg-email').value.trim(), $('lg-pass').value); }
+    catch (err) { $('lg-msg').textContent = 'ເຂົ້າສູ່ລະບົບບໍ່ໄດ້: ' + (err.code || err.message); }
+  });
+  $('out').onclick = () => db.signOut().then(() => location.reload());
+  db.onAuth((u) => { if (!u) { $('home').hidden = true; $('view').hidden = true; $('login').hidden = false; return; } user = u; start(); });
+})();
+</script>
+<script>
+// ລືມລະຫັດຜ່ານ: Firebase ສົ່ງລິ້ງຕັ້ງລະຫັດໃໝ່ໄປທາງອີເມວ
+(() => {
+  const btn = document.getElementById('lg-reset'); if (!btn) return;
+  const msg = (t) => { document.getElementById('lg-msg').textContent = t; };
+  btn.addEventListener('click', async () => {
+    const box = document.getElementById('lg-email'), em = box.value.trim();
+    if (!em) { msg('ພິມອີເມວຂອງບັນຊີກ່ອນ ແລ້ວກົດ "ລືມລະຫັດຜ່ານ" ອີກຄັ້ງ'); box.focus(); return; }
+    if (!window.firebase || !firebase.auth || !firebase.apps.length) { msg('ໂໝດທົດລອງບໍ່ມີລະຫັດຜ່ານ'); return; }
+    btn.disabled = true; msg('ກຳລັງສົ່ງ…');
+    try {
+      firebase.auth().languageCode = 'lo';
+      await firebase.auth().sendPasswordResetEmail(em);
+      msg('ສົ່ງແລ້ວ. ຖ້າ ' + em + ' ມີບັນຊີ ຈະໄດ້ຮັບອີເມວທີ່ມີລິ້ງຕັ້ງລະຫັດໃໝ່ (ກວດໃນ Spam ນຳ). ຕັ້ງແລ້ວກັບມາເຂົ້າສູ່ລະບົບດ້ວຍລະຫັດໃໝ່.');
+    } catch (e) {
+      const c = e.code || '';
+      msg(c === 'auth/invalid-email' ? 'ອີເມວບໍ່ຖືກຮູບແບບ'
+        : c === 'auth/user-not-found' ? 'ບໍ່ມີບັນຊີສຳລັບອີເມວນີ້'
+        : c === 'auth/too-many-requests' ? 'ຂໍຫຼາຍເທື່ອເກີນໄປ, ລໍສັກຄູ່ແລ້ວລອງໃໝ່'
+        : 'ສົ່ງບໍ່ໄດ້: ' + (c || e.message));
+    } finally { btn.disabled = false; }
+  });
 })();
 </script>
 </body>
