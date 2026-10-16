@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mee Live · ຄວບຄຸມໄລ້ກິລາ</title>
+<link rel="manifest" href="petanque.webmanifest">
+<meta name="theme-color" content="#0c0e13">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mee Live">
+<link rel="apple-touch-icon" href="petanque-icon-192.png">
+<link rel="icon" href="petanque-icon-192.png">
+<link rel="stylesheet" href="fonts/fonts.css?v=1">
+<style>
+  /* ໜ້າດຽວ ຄວບຄຸມທຸກກິລາ: ເລືອກກິລາຢູ່ແຖບເທິງ → ໜ້າຄວບຄຸມ ແລະ ປ້າຍເທິງໄລ້ ປ່ຽນຕາມ */
+  :root { --bg:#0c0e13; --surface:#14171e; --raised:#1b1f28; --line:#272c37; --line2:#353b48; --ink:#eef0f4; --muted:#9097a5; --accent:#ff4d3d; --gold:#ffc21a; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:15px/1.4 'MeeLao','Noto Sans Lao',sans-serif; overflow:hidden; }
+  .top { position:fixed; left:0; right:0; top:0; z-index:5; display:flex; align-items:center; gap:10px;
+    padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px; background:var(--bg); border-bottom:1px solid var(--line); }
+  .brand { font-weight:900; font-size:16px; white-space:nowrap; }
+  .brand b { color:var(--accent); }
+  .tabs { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; flex:1; min-width:0; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab { flex:none; display:inline-flex; align-items:center; gap:6px; min-height:42px; padding:0 16px; border-radius:999px; border:1px solid var(--line2);
+    background:var(--raised); color:inherit; font:700 15px 'MeeLao','Noto Sans Lao',sans-serif; cursor:pointer; }
+  .tab[aria-selected="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .tab i { font-style:normal; font-size:17px; }
+  .onair { flex:none; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); white-space:nowrap; }
+  .onair::before { content:""; width:8px; height:8px; border-radius:50%; background:#e0261b; }
+  .stage { position:fixed; left:0; right:0; bottom:0; top:var(--th, 56px); }
+  .stage iframe { position:absolute; inset:0; width:100%; height:100%; border:0; background:var(--bg); }
+  .stage iframe[hidden] { display:none; }
+  @media (max-width:520px) { .brand { display:none; } .onair span { display:none; } }
+</style>
+</head>
+<body>
+<header class="top" id="top">
+  <div class="brand">Mee <b>Live</b></div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="ເລືອກກິລາ"></nav>
+  <span class="onair" title="ກິລາທີ່ເລືອກ ຈະຂຶ້ນເທິງໄລ້"><span>ຂຶ້ນໄລ້ຕາມທີ່ເລືອກ</span></span>
+</header>
+<main class="stage" id="stage"></main>
+<script>
+(() => {
+  // ເພີ່ມກິລາໃໝ່: ເພີ່ມ 1 ແຖວຢູ່ນີ້ (ໜ້າຄວບຄຸມຂອງກິລານັ້ນ ຕ້ອງຂຽນ meta/sport = id ຕອນເປີດ)
+  const SPORTS = [
+    { id: 'petanque', name: 'ເປຕັ່ງ', icon: '🎯', url: 'petanque.html' },
+    { id: 'boat', name: 'ເຮືອຊ່ວງ', icon: '🚣', url: 'boat.html' },
+  ];
+  const $ = (id) => document.getElementById(id);
+  const frames = {};
+  let cur = null;
+  const fit = () => document.documentElement.style.setProperty('--th', $('top').offsetHeight + 'px');
+  addEventListener('resize', fit);
+
+  function open(id, fromUser) {
+    const sp = SPORTS.find((s) => s.id === id) || SPORTS[0];
+    cur = sp.id;
+    try { localStorage.setItem('mee-live-sport', sp.id); } catch (e) {}
+    history.replaceState(null, '', '?s=' + sp.id);
+    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.id === sp.id)));
+    Object.values(frames).forEach((f) => { f.hidden = true; });
+    let f = frames[sp.id];
+    if (!f) {
+      f = frames[sp.id] = document.createElement('iframe');
+      f.title = 'ຄວບຄຸມ ' + sp.name; f.src = sp.url + '?embed=1'; f.allow = 'clipboard-write';
+      $('stage').appendChild(f);   // ໜ້າທີ່ໂຫຼດໃໝ່ ຈະຕັ້ງຕົນເອງເປັນກິລາທີ່ຂຶ້ນໄລ້ ເອງ
+    } else if (fromUser) {
+      try { f.contentWindow.postMessage({ type: 'mee-activate' }, location.origin); } catch (e) {}
+    }
+    f.hidden = false;
+    document.title = 'Mee Live · ' + sp.name;
+  }
+
+  $('tabs').innerHTML = SPORTS.map((s) => `<button class="tab" role="tab" data-id="${s.id}"><i>${s.icon}</i>${s.name}</button>`).join('');
+  $('tabs').addEventListener('click', (e) => { const t = e.target.closest('.tab'); if (t && t.dataset.id !== cur) open(t.dataset.id, true); });
+  let first = new URLSearchParams(location.search).get('s');
+  if (!first) { try { first = localStorage.getItem('mee-live-sport'); } catch (e) {} }
+  fit(); open(first || 'petanque', false);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('petanque-sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>

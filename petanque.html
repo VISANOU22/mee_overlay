@@ -292,7 +292,7 @@
       <p class="muted" style="margin:0;font-size:13px">ລິ້ງດຽວກັບ Studio. ຖ້າໃສ່ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນ.</p>
     </section>
 
-    <section class="card" id="installCard">
+    <section class="card" id="installCard" data-standalone>
       <h3>ຕິດຕັ້ງເປັນແອັບ</h3>
       <p class="muted" style="margin:0;font-size:13.5px">ເປີດເຕັມຈໍ ບໍ່ມີແຖບ URL, ມີໄອຄອນຢູ່ໜ້າຈໍຫຼັກຄືແອັບທົ່ວໄປ.</p>
       <button class="btn primary" id="installBtn" hidden>ຕິດຕັ້ງແອັບ</button>
@@ -302,7 +302,7 @@
     <section class="card">
       <h3>ອື່ນໆ</h3>
       <button class="btn danger" id="newGame">ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)</button>
-      <div class="grid2"><a class="btn" href="boat.html">ໄປໜ້າເຮືອຊ່ວງ</a><a class="btn" href="index.html">← ກັບ Studio</a></div>
+      <div class="grid2" data-standalone><a class="btn" href="live.html">ໄປໜ້າລວມກິລາ (Mee Live)</a><a class="btn" href="index.html">← ກັບ Studio</a></div>
       <button class="btn" id="out">ອອກຈາກລະບົບ</button>
     </section>
 
@@ -500,6 +500,13 @@
     try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), fallback); } catch (e) { fallback(); }
   };
 
+  const SPORT_ID = 'petanque', SPORT_NAME = 'ເປຕັ່ງ';
+  // ---------- ລິ້ງດຽວ (live.html): ເປີດໜ້ານີ້ ຫຼື ເລືອກແຖບນີ້ → ກິລານີ້ຂຶ້ນໄລ້ (ກິລາອື່ນເຊື່ອງເອງ)
+  const EMBED = window.parent !== window;
+  const activate = () => db.set('meta/sport', SPORT_ID).catch(() => {});
+  addEventListener('message', (e) => { if (e.origin === location.origin && e.data && e.data.type === 'mee-activate' && user) { activate(); toast('ປ່ຽນເທິງໄລ້ເປັນ ' + SPORT_NAME); } });
+  if (EMBED) document.querySelectorAll('[data-standalone]').forEach((n) => { n.hidden = true; });
+
   // ---------- ໜັງສື ແລະ ຮູບ (ໂມດູນໃຊ້ຮ່ວມທຸກກິລາ: extras-panel.js / extras.js)
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const frames = () => [$('pvLive'), $('pv')].filter(Boolean);
@@ -552,7 +559,7 @@
     if (started) return; started = true;
     $('login').hidden = true; $('app').hidden = false;
     db.setUser(user);
-    startExtras();
+    startExtras(); activate();
     $('url').value = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
     // ກ່ອງຕົວຢ່າງ: ຕໍ່ທ້າຍລິ້ງດ້ວຍເວລາ ເພື່ອບໍ່ໃຫ້ browser ໃຊ້ overlay.html ໂຕເກົ່າທີ່ cache ໄວ້
     const pvUrl = () => $('url').value + '&pv=' + Date.now();

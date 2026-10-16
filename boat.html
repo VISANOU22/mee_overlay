@@ -198,7 +198,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
-<script src="boat-bug.js?v=2"></script>
+<script src="boat-bug.js?v=3"></script>
 <script src="mee-editor.js?v=5"></script>
 <script src="extras-panel.js?v=4"></script>
 </head>
@@ -309,7 +309,8 @@
     <section class="card">
       <h3>ອື່ນໆ</h3>
       <button class="btn danger" id="resetAll">ລ້າງທຸກຖ້ຽວ ແລະ ຜົນ</button>
-      <div class="grid2"><a class="btn" href="petanque.html">ໄປໜ້າເປຕັ່ງ</a><button class="btn" id="out">ອອກຈາກລະບົບ</button></div>
+      <a class="btn" href="live.html" data-standalone>ໄປໜ້າລວມກິລາ (Mee Live)</a>
+      <button class="btn" id="out">ອອກຈາກລະບົບ</button>
     </section>
     <div class="done"><button class="btn primary" id="closeSet2">ແລ້ວ ✓ ກັບໄປໜ້າແຂ່ງ</button></div>
   </div>
@@ -461,6 +462,13 @@
   $('openSet').onclick = openSheet; $('closeSet').onclick = closeSheet; $('closeSet2').onclick = closeSheet;
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
 
+  const SPORT_ID = 'boat', SPORT_NAME = 'ເຮືອຊ່ວງ';
+  // ---------- ລິ້ງດຽວ (live.html): ເປີດໜ້ານີ້ ຫຼື ເລືອກແຖບນີ້ → ກິລານີ້ຂຶ້ນໄລ້ (ກິລາອື່ນເຊື່ອງເອງ)
+  const EMBED = window.parent !== window;
+  const activate = () => db.set('meta/sport', SPORT_ID).catch(() => {});
+  addEventListener('message', (e) => { if (e.origin === location.origin && e.data && e.data.type === 'mee-activate' && user) { activate(); toast('ປ່ຽນເທິງໄລ້ເປັນ ' + SPORT_NAME); } });
+  if (EMBED) document.querySelectorAll('[data-standalone]').forEach((n) => { n.hidden = true; });
+
   // ---------- ໜັງສື/ຮູບ + ລາກວາງ (ໂມດູນໃຊ້ຮ່ວມ)
   const frames = () => [$('pvLive'), $('pv')].filter(Boolean);
   let ex = null;
@@ -490,7 +498,7 @@
   function start() {
     if (started) return; started = true;
     $('login').hidden = true; $('app').hidden = false;
-    db.setUser(user); startExtras();
+    db.setUser(user); startExtras(); activate();
     $('url').value = new URL('overlay.html?u=' + encodeURIComponent(user), location.href).href;
     const loadLive = () => { if ($('scrBox').open && !$('pvLive').src) $('pvLive').src = pvUrl(); };
     try { if (localStorage.getItem('bt-scr') === '0') $('scrBox').open = false; } catch (e) {}

@@ -1,9 +1,9 @@
 {
-  "name": "Mee Overlay · ສະກໍເປຕັ່ງ",
-  "short_name": "ສະກໍເປຕັ່ງ",
-  "description": "ຄວບຄຸມສະກໍບອດເປຕັ່ງເທິງໄລ້ສົດ",
+  "name": "Mee Live · ຄວບຄຸມໄລ້ກິລາ",
+  "short_name": "Mee Live",
+  "description": "ຄວບຄຸມປ້າຍກິລາເທິງໄລ້ສົດ: ເປຕັ່ງ, ເຮືອຊ່ວງ",
   "id": "./petanque.html",
-  "start_url": "./petanque.html",
+  "start_url": "./live.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

@@ -178,7 +178,7 @@
     const txt = (k, v) => each(k, (n) => { n.textContent = v; });
     const pop = (n) => { n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); };
     const bug = root.querySelector('.mp-bug'), tv = root.querySelector('.mp-tv'), win = root.querySelector('.mp-win');
-    let theme = 'classic', active = bug, override = null;
+    let theme = 'classic', active = bug, override = null, sport = null;
     // ໃຫ້ໜ້າຄວບຄຸມ (petanque.html) ຍ້າຍ/ປັບຂະໜາດໃນຕົວຢ່າງໄດ້ທັນທີ ຂະນະລາກ (ກ່ອນຂໍ້ມູນກັບມາຈາກ Firebase)
     window.__mpPreview = { set(o) { override = Object.assign(override || {}, o); layout(); } };
 
@@ -212,7 +212,8 @@
     }
 
     function render() {
-      const on = !!S && S.show !== false;
+      // ກິລາທີ່ເລືອກໃນ live.html (meta/sport): ຖ້າເປັນກິລາອື່ນ → ເຊື່ອງສະກໍເປຕັ່ງ
+      const on = !!S && S.show !== false && (!sport || sport === 'petanque');
       theme = S && THEMES.includes(S.theme) ? S.theme : 'classic';
       active = theme === 'tv' ? tv : bug;
       THEMES.forEach((t) => root.classList.toggle('mp-t-' + t, t === theme));
@@ -293,6 +294,7 @@
       Promise.all(['400', '700', '900'].map((w) => document.fonts.load(w + ' 30px MeeLao', 'ກີ້ຂ໋ອບ'))).then(layout, () => {});
     }
     layout();
+    db.watch('meta/sport', (v) => { sport = v || null; render(); });
     return db.watch('petanque', (v) => {
       S = v || null;
       if (override && S && ['fx', 'fy', 'size', 'pos'].every((k) => !(k in override) || S[k] === override[k])) override = null;

@@ -1,6 +1,11 @@
 # Mee Overlay Studio
 
-ລະບົບ overlay ສຳລັບ Live Now (ປຸ່ມ Web). ມີ 2 ໜ້າ:
+ລະບົບ overlay ສຳລັບ Live Now (ປຸ່ມ Web).
+
+**ລິ້ງດຽວສຳລັບຄວບຄຸມທຸກກິລາ: `live.html`** — ເລືອກກິລາຢູ່ແຖບເທິງ; ກິລາທີ່ເລືອກຈະຂຶ້ນໄລ້ (`meta/sport`), ກິລາອື່ນເຊື່ອງເອງ.
+ເພີ່ມກິລາໃໝ່ = ເພີ່ມ 1 ແຖວໃນ `SPORTS` ຂອງ live.html.
+
+ໜ້າອື່ນ:
 
 - `index.html`: Studio ສຳລັບແກ້ໄຂ ແລະ ຄວບຄຸມ live
 - `overlay.html?u=...`: ລິ້ງທີ່ໃສ່ໃນປຸ່ມ Web ຂອງ Live Now

@@ -86,7 +86,7 @@
     document.body.appendChild(root);
     const el = {}; root.querySelectorAll('[data-k]').forEach((n) => { el[n.dataset.k] = n; });
     const bar = root.querySelector('.mb-bar');
-    let S = null, override = null, tickSig = '', rotT = null, lastWin = '';
+    let S = null, override = null, tickSig = '', rotT = null, lastWin = '', sport = null;
     window.__mbPreview = { set(o) { override = Object.assign(override || {}, o); layout(); } };
 
     function fitName(k) {
@@ -97,7 +97,7 @@
     function layout() {
       const W = innerWidth, H = innerHeight, land = W >= H;
       const L = Object.assign({}, S || {}, override || {});
-      const tickOn = !!S && S.tickerOn !== false;
+      const tickOn = !!S && S.tickerOn !== false && (!sport || sport === 'boat');
       const th = Math.round(Math.max(28, H * (land ? .065 : .045)) * (+((S && S.ticker && S.ticker.size)) || 1));
       el.tick.style.height = th + 'px'; el.tick.style.fontSize = Math.round(th * .5) + 'px'; el.tick.style.setProperty('--tl', Math.max(3, Math.round(th * .1)) + 'px');
       const k = Math.min(W * (land ? .78 : .98) / DW * (+L.size || 1), W / DW);
@@ -152,7 +152,9 @@
     }
 
     function render() {
-      const on = !!S && S.show !== false, tickOn = !!S && S.tickerOn !== false;
+      // ກິລາທີ່ເລືອກໃນ live.html (meta/sport): ຖ້າເປັນກິລາອື່ນ → ເຊື່ອງປ້າຍເຮືອຊ່ວງທັງໝົດ
+      const mine = !sport || sport === 'boat';
+      const on = mine && !!S && S.show !== false, tickOn = mine && !!S && S.tickerOn !== false;
       bar.classList.toggle('off', !on); el.tick.classList.toggle('off', !tickOn);
       if (!S) return;
       const th = THEMES[S.theme] || THEMES.green;
@@ -181,6 +183,7 @@
 
     addEventListener('resize', () => { fitName('a'); fitName('b'); layout(); });
     if (document.fonts) document.fonts.ready.then(() => { fitName('a'); fitName('b'); layout(); });
+    db.watch('meta/sport', (v) => { sport = v || null; render(); });
     return db.watch('boat', (v) => {
       S = v || null;
       if (override && S && ['fx', 'fy', 'size'].every((k) => !(k in override) || S[k] === override[k])) override = null;
