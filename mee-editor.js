@@ -35,7 +35,8 @@
     pre.append(catcher, frame, bar, hint);
 
     let sel = null, drag = null, hideT = null;
-    const rank = (n) => (n.closest('.mp-root') ? 100000 : 0) + (parseInt(n.style.zIndex, 10) || 0);
+    // ປ້າຍກິລາ (ບໍ່ແມ່ນ x:…) ຢູ່ເທິງໜັງສື/ຮູບ; handler.accept(key) = ໜ້ານີ້ແກ້ອັນໃດໄດ້ແດ່
+    const rank = (n) => (String(n.dataset.edit).startsWith('x:') ? 0 : 100000) + (parseInt(n.style.zIndex, 10) || 0);
     const doc = () => { try { return ifr.contentDocument; } catch (e) { return null; } };
     const nodeOf = (key) => { const d = doc(); return d && d.querySelector('[data-edit="' + key + '"]'); };
     const rectOf = (key) => { const n = nodeOf(key), r = n && n.getBoundingClientRect(); return r && r.width ? r : null; };
@@ -117,7 +118,7 @@
       const b = ifr.getBoundingClientRect();
       // overlay ຕັ້ງ pointer-events:none ທັງໝົດ → ກວດເອງດ້ວຍຂອບເຂດ; ເລືອກອັນທີ່ຢູ່ເທິງສຸດ (ສະກໍ > ໜັງສື/ຮູບ z ສູງ)
       const x = e.clientX - b.left, y = e.clientY - b.top;
-      const hit = Array.from(d.querySelectorAll('[data-edit]')).filter((n) => {
+      const hit = Array.from(d.querySelectorAll('[data-edit]')).filter((n) => !handler.accept || handler.accept(n.dataset.edit)).filter((n) => {
         const r = n.getBoundingClientRect(), cs = d.defaultView.getComputedStyle(n);
         return r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom && cs.display !== 'none' && cs.visibility !== 'hidden' && +cs.opacity > 0.05;
       }).sort((a, c) => rank(c) - rank(a))[0];

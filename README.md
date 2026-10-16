@@ -4,6 +4,7 @@
 
 - `index.html`: Studio ສຳລັບແກ້ໄຂ ແລະ ຄວບຄຸມ live
 - `overlay.html?u=...`: ລິ້ງທີ່ໃສ່ໃນປຸ່ມ Web ຂອງ Live Now
+- `boat.html`: ໜ້າຄວບຄຸມປ້າຍແຂ່ງເຮືອຊ່ວງ (ຖ້ຽວ, ຜົນ, ແຖບລາຍລະອຽດລຸ່ມສຸດ). ປ້າຍຂຶ້ນໃນ `overlay.html` ລິ້ງເດີມ (ໂຄດຢູ່ `boat-bug.js`)
 - `petanque.html`: ໜ້າຄວບຄຸມສະກໍບອດເປຕັ່ງ. ສະກໍຂຶ້ນໃນ `overlay.html` ລິ້ງເດີມ (ໂຄດຢູ່ `petanque-bug.js`)
 
 ຟາຍອື່ນ: `common.js` ແລະ `render.css` (ໃຊ້ຮ່ວມກັນ), `editor.js` (Studio), `config.js` (ຄ່າ Firebase), `database.rules.json` (ກົດຄວາມປອດໄພ)

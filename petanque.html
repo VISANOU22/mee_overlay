@@ -174,7 +174,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
-<script src="mee-editor.js?v=4"></script>
+<script src="mee-editor.js?v=5"></script>
 <script src="extras-panel.js?v=4"></script>
 </head>
 <body>
@@ -302,7 +302,8 @@
     <section class="card">
       <h3>ອື່ນໆ</h3>
       <button class="btn danger" id="newGame">ເລີ່ມເກມໃໝ່ (ລຶບຄະແນນ)</button>
-      <div class="grid2"><a class="btn" href="index.html">← ກັບ Studio</a><button class="btn" id="out">ອອກຈາກລະບົບ</button></div>
+      <div class="grid2"><a class="btn" href="boat.html">ໄປໜ້າເຮືອຊ່ວງ</a><a class="btn" href="index.html">← ກັບ Studio</a></div>
+      <button class="btn" id="out">ອອກຈາກລະບົບ</button>
     </section>
 
     <div class="done"><button class="btn primary" id="closeSet2">ແລ້ວ ✓ ກັບໄປໜ້າແຂ່ງ</button></div>
@@ -511,6 +512,7 @@
   let baseSize = 1;
   const previewBug = (o) => frames().forEach((f) => { try { f.contentWindow.__mpPreview && f.contentWindow.__mpPreview.set(o); } catch (e) {} });
   const editHandler = {
+    accept: (key) => key === 'bug' || key.startsWith('x:'),
     actions(key) {
       if (!key || !key.startsWith('x:') || !ex || !ex.has(key.slice(2))) return [];
       const id = key.slice(2);
