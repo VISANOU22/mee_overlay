@@ -263,7 +263,10 @@
         if (arr.length && emp) emp.remove();
         arr.slice().reverse().forEach((L, i) => {      // ອັນເທິງສຸດ (z ສູງ) ຢູ່ກ່ອນ
           let n = have[L.id]; if (!n) { n = row(L); n.dataset.type = L.type; }
-          fill(n, L, arr.length - 1 - i); ui.list.appendChild(n);
+          fill(n, L, arr.length - 1 - i);
+          // ຍ້າຍສະເພາະຕອນລຳດັບປ່ຽນ — ການຍ້າຍ node ທີ່ກຳລັງພິມ ເຮັດໃຫ້ຊ່ອງພິມຫຼຸດ (ພິມໄດ້ເທື່ອລະໂຕ)
+          const ref = ui.list.children[i];
+          if (ref !== n) ui.list.insertBefore(n, ref || null);
         });
       }
       if (ui.chips) {
