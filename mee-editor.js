@@ -10,6 +10,7 @@
   .me-frame { position:absolute; z-index:3; border:2px dashed #ffc21a; border-radius:6px; cursor:move; touch-action:none;
     background:rgba(255,194,26,.10); box-shadow:0 0 0 1px rgba(0,0,0,.4); }
   .me-frame.drag { background:rgba(255,194,26,.18); }
+  .me-frame.fixed { cursor:default; } .me-frame.fixed .me-rz { display:none; }
   .me-frame .me-rz { position:absolute; right:-3px; bottom:-3px; width:30px; height:30px; border-radius:50%; background:#ffc21a;
     border:3px solid #0c0e13; cursor:nwse-resize; touch-action:none; box-shadow:0 2px 6px rgba(0,0,0,.5); }
   .me-frame .me-rz::after { content:""; position:absolute; inset:7px; border-right:2px solid #1a1404; border-bottom:2px solid #1a1404; }
@@ -79,6 +80,8 @@
     function begin(e, key, mode) {
       const r = rectOf(key); if (!r) return;
       e.preventDefault();
+      if (handler.fixed && handler.fixed(key)) { select(key); frame.classList.add('fixed'); autoHide(4000); return; }
+      frame.classList.remove('fixed');
       try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
       select(key); clearTimeout(hideT); frame.classList.add('drag');
       drag = { key, mode, x0: e.clientX, y0: e.clientY, l: r.left, t: r.top, w: r.width, h: r.height,

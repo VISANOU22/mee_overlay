@@ -14,7 +14,7 @@
   .mb-root { position:absolute; inset:0; pointer-events:none; z-index:48; font-family:'MeeLao','Noto Sans Lao',sans-serif; color:#fff; }
   .mb-root * { box-sizing:border-box; }
   .mb-bar { position:absolute; width:${DW}px; transform-origin:0 0; transition:opacity .4s; filter:drop-shadow(0 8px 18px rgba(0,0,0,.4)); }
-  .mb-bar.off, .mb-tick.off { opacity:0; }
+  .mb-bar.off, .mb-tick.off { opacity:0; visibility:hidden; }
   .mb-top { display:flex; justify-content:center; height:44px; }
   .mb-round { align-self:flex-end; background:var(--c2); color:#1a1404; font-weight:900; font-size:24px; line-height:1.3; padding:4px 26px 2px;
     border-radius:14px 14px 0 0; white-space:nowrap; }
@@ -82,7 +82,7 @@
         <div class="mb-row">${side('a')}<div class="mb-lane a" data-k="la"></div><div class="mb-mid"><div class="mb-logo" data-k="logo"></div></div><div class="mb-lane b" data-k="lb"></div>${side('b')}</div>
         <div class="mb-bot"><div class="mb-cat" data-k="cat"></div></div>
       </div>
-      <div class="mb-tick off" data-k="tick"><div class="mb-tlab" data-k="tlab"></div><div class="mb-tview" data-k="tview"></div></div>`;
+      <div class="mb-tick off" data-k="tick" data-edit="boattick"><div class="mb-tlab" data-k="tlab"></div><div class="mb-tview" data-k="tview"></div></div>`;
     document.body.appendChild(root);
     const el = {}; root.querySelectorAll('[data-k]').forEach((n) => { el[n.dataset.k] = n; });
     const bar = root.querySelector('.mb-bar');
@@ -169,7 +169,7 @@
       el.la.textContent = flip ? 'ຊ້າຍ' : 'ຂວາ'; el.lb.textContent = flip ? 'ຂວາ' : 'ຊ້າຍ';
       const lanes = S.lanes !== false; el.la.style.display = el.lb.style.display = lanes ? '' : 'none';
       el.cat.textContent = h.cat || S.cat || '';
-      const rd = [h.round || S.round || '', heats.length > 1 || S.showHeatNo ? 'ຖ້ຽວທີ ' + (i + 1) : ''].filter(Boolean).join(' · ');
+      const rd = [h.round || S.round || '', heats.length > 1 || S.showHeatNo ? 'ລ່ອງທີ ' + (i + 1) : ''].filter(Boolean).join(' · ');
       el.round.textContent = rd;
       el.logo.classList.toggle('img', !!S.logo); el.logo.style.backgroundImage = bg(S.logo); el.logo.textContent = S.logo ? '' : (S.logoText || 'VS');
       const w = h.w === 'r' || h.w === 'l' ? h.w : '', show = w && S.showWin !== false;

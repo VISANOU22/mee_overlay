@@ -189,6 +189,12 @@
   .hlist .n { font-family:var(--num); font-size:18px; text-align:center; }
   .hlist .x { min-height:36px; padding:0 10px; border-radius:8px; border:1px solid var(--line2); background:var(--surface); color:var(--warn); font-weight:700; }
   .tick textarea { width:100%; min-height:96px; resize:vertical; border-radius:10px; border:1px solid var(--line2); background:var(--field); color:inherit; padding:8px 10px; font:600 16px/1.5 var(--lao); }
+  .onair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .onair .tgl.big { min-height:64px; padding:8px 14px; border-radius:12px; background:var(--surface); border:2px solid var(--line2); }
+  .onair .tgl.big + .tgl.big { border-top:2px solid var(--line2); }
+  .onair .tgl.big b { display:block; font-size:16px; } .onair .tgl.big small { display:block; color:var(--muted); font-size:12.5px; font-weight:500; }
+  .onair .tgl.big[aria-pressed="true"] { border-color:var(--ok); background:color-mix(in srgb, var(--ok) 10%, var(--surface)); }
+  @media (max-width:560px) { .onair { grid-template-columns:1fr; } }
   .colors { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .colors input[type=color] { width:52px; height:44px; padding:2px; border-radius:10px; border:1px solid var(--line2); background:var(--field); }
   @media (max-width:560px) { .lanes { grid-template-columns:1fr; } }
@@ -198,8 +204,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
-<script src="boat-bug.js?v=3"></script>
-<script src="mee-editor.js?v=5"></script>
+<script src="boat-bug.js?v=4"></script>
+<script src="mee-editor.js?v=6"></script>
 <script src="extras-panel.js?v=4"></script>
 </head>
 <body>
@@ -219,8 +225,6 @@
 <main class="live" id="app" hidden>
   <header class="bar">
     <div class="ttl"><b>ເຮືອຊ່ວງ</b><small><span class="dot" id="netDot"></span><span id="netTxt">ກຳລັງເຊື່ອມ…</span></small></div>
-    <button class="btn onbtn" id="tgShow" aria-pressed="true">ປ້າຍ: ເປີດ</button>
-    <button class="btn onbtn" id="tgTick" aria-pressed="true">ແຖບລຸ່ມ: ເປີດ</button>
     <button class="btn gear" id="openSet" aria-label="ຕັ້ງຄ່າ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 9h.1a2 2 0 1 1 0 4h-.1z"/></svg></button>
   </header>
 
@@ -231,11 +235,15 @@
   </details>
 
   <div class="ctl">
+    <section class="onair">
+      <button class="tgl big" id="tgShow" aria-pressed="true"><span><b>ປ້າຍຄູ່ແຂ່ງ</b><small>ຊື່ທີມ · ຂວາ/ຊ້າຍ · ປະເພດເຮືອ</small></span><span class="sw"></span></button>
+      <button class="tgl big" id="tgTick" aria-pressed="true"><span><b>ແຖບລາຍລະອຽດລຸ່ມຈໍ</b><small>ໜັງສືແລ່ນລຸ່ມສຸດ</small></span><span class="sw"></span></button>
+    </section>
     <section class="heat">
       <div class="hnav">
-        <button class="btn" id="hPrev" aria-label="ຖ້ຽວກ່ອນ">‹</button>
-        <div class="t"><span id="hTitle">ຖ້ຽວທີ 1</span><small id="hSub"></small></div>
-        <button class="btn" id="hNext" aria-label="ຖ້ຽວຕໍ່ໄປ">›</button>
+        <button class="btn" id="hPrev" aria-label="ລ່ອງກ່ອນ">‹</button>
+        <div class="t"><span id="hTitle">ລ່ອງທີ 1</span><small id="hSub"></small></div>
+        <button class="btn" id="hNext" aria-label="ລ່ອງຕໍ່ໄປ">›</button>
       </div>
       <div class="lanes">
         <div class="lane" id="laneA"><div class="lb"><span id="lbA">ຂວາ</span><small class="muted">ຊ້າຍຈໍ</small></div>
@@ -249,8 +257,8 @@
       </div>
       <div class="hrow"><input type="text" id="hNote" placeholder="ໝາຍເຫດຜົນ ເຊັ່ນ ນຳ ½ ລຳ (ບໍ່ໃສ່ກໍໄດ້)" maxlength="30">
         <button class="btn" id="hSwap">⇄ ສະລັບຂ້າງ</button><button class="btn" id="hClear">ລ້າງຜົນ</button></div>
-      <div class="hrow2"><input type="text" id="hCat" placeholder="ປະເພດເຮືອ (ຖ້ຽວນີ້)" maxlength="40"><input type="text" id="hRound" placeholder="ຮອບ (ຖ້ຽວນີ້)" maxlength="40"></div>
-      <div class="hrow2"><button class="btn primary" id="hAdd">＋ ເພີ່ມຖ້ຽວໃໝ່</button><button class="btn danger" id="hDel">ລຶບຖ້ຽວນີ້</button></div>
+      <div class="hrow2"><input type="text" id="hCat" placeholder="ປະເພດເຮືອ (ລ່ອງນີ້)" maxlength="40"><input type="text" id="hRound" placeholder="ຮອບ (ລ່ອງນີ້)" maxlength="40"></div>
+      <div class="hrow2"><button class="btn primary" id="hAdd">＋ ເພີ່ມລ່ອງໃໝ່</button><button class="btn danger" id="hDel">ລຶບລ່ອງນີ້</button></div>
     </section>
 
     <section class="card tick">
@@ -262,7 +270,16 @@
         <label class="field"><span class="lab">ປ່ຽນແຖວທຸກ (ວິນາທີ)</span><input type="range" min="2" max="15" id="tSecs"></label></div>
     </section>
 
-    <details class="hist" id="hlBox"><summary>ລາຍການຖ້ຽວທັງໝົດ <span class="muted" id="hlCount"></span></summary><ul class="hlist" id="hlist"></ul></details>
+    <details class="hist" id="exBox"><summary>🖼️ ໜັງສື ແລະ ຮູບ ເທິງໄລ້ <span class="muted" id="exCount"></span></summary>
+      <div style="padding:0 12px 12px;display:grid;gap:10px">
+        <div class="grid2" style="grid-template-columns:1fr 1fr"><button class="btn primary" id="exAddT" type="button">＋ ໜັງສື</button><label class="btn primary" for="exUp">＋ ຮູບ / ໂລໂກ້</label></div>
+        <input type="file" id="exUp" accept="image/*" hidden>
+        <p class="muted" style="margin:0;font-size:13px">ຍ້າຍ/ຂະຫຍາຍ: ແຕະໃນກ່ອງໜ້າຈໍໄລ້ແລ້ວລາກ. ກົດຊື່ໃນລາຍການເພື່ອແກ້ສີ, ຟອນ, ເອັບເຟັກ. ໃຊ້ຮ່ວມທຸກກິລາ.</p>
+        <div class="xp-list" id="exList"></div>
+        <div id="exImpWrap" class="field" hidden><span class="lab">ນຳເຂົ້າຈາກ Studio ເກົ່າ</span><div id="exImp"></div></div>
+      </div>
+    </details>
+    <details class="hist" id="hlBox"><summary>ລາຍການລ່ອງທັງໝົດ <span class="muted" id="hlCount"></span></summary><ul class="hlist" id="hlist"></ul></details>
   </div>
 </main>
 
@@ -273,7 +290,7 @@
       <h3><span class="n">1</span>ງານແຂ່ງ</h3>
       <div class="field"><label class="lab" for="fRound">ຮອບ (ຄ່າເລີ່ມຕົ້ນ ຂຶ້ນເທິງແຖບ)</label><input type="text" id="fRound" maxlength="40" placeholder="ເຊັ່ນ ຮອບຄັດເລືອກ"></div>
       <div class="field"><label class="lab" for="fCat">ປະເພດເຮືອ (ຄ່າເລີ່ມຕົ້ນ ຂຶ້ນລຸ່ມແຖບ)</label><input type="text" id="fCat" maxlength="40" placeholder="ເຊັ່ນ ເຮືອປະເພດ 30 ສີພາຍ"></div>
-      <div><button class="tgl" id="tgHeatNo" aria-pressed="true">ສະແດງ "ຖ້ຽວທີ"<span class="sw"></span></button>
+      <div><button class="tgl" id="tgHeatNo" aria-pressed="true">ສະແດງ "ລ່ອງທີ"<span class="sw"></span></button>
         <button class="tgl" id="tgWin" aria-pressed="true">ສະແດງປ້າຍຜູ້ຊະນະ<span class="sw"></span></button></div>
     </section>
 
@@ -292,23 +309,15 @@
     </section>
 
     <section class="card" data-standalone>
-      <h3><span class="n">3</span>ໜັງສື ແລະ ຮູບ ເທິງໄລ້</h3>
-      <div class="grid2" style="grid-template-columns:1fr 1fr"><button class="btn" id="exAddT" type="button">＋ ໜັງສື</button><label class="btn" for="exUp">＋ ຮູບ / ໂລໂກ້</label></div>
-      <input type="file" id="exUp" accept="image/*" hidden>
-      <p class="muted" style="margin:0;font-size:13px">ໃຊ້ຮ່ວມກັບທຸກກິລາ. ແຕະໃນກ່ອງຕົວຢ່າງເພື່ອຍ້າຍ, ຂະຫຍາຍ, ເຊື່ອງ ຫຼື ລຶບ.</p>
-      <div class="xp-list" id="exList"></div>
-      <div id="exImpWrap" class="field" hidden><span class="lab">ນຳເຂົ້າຈາກ Studio ເກົ່າ</span><div id="exImp"></div></div>
-    </section>
-
     <section class="card" data-standalone>
-      <h3><span class="n">4</span>ລິ້ງ Web ຂອງ Live Now</h3>
+      <h3><span class="n">3</span>ລິ້ງ Web ຂອງ Live Now</h3>
       <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
       <p class="muted" style="margin:0;font-size:13px">ລິ້ງດຽວກັບເປຕັ່ງ ແລະ Studio. ໃສ່ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນ — ເປີດ/ປິດປ້າຍເຮືອຊ່ວງຢູ່ໜ້ານີ້.</p>
     </section>
 
     <section class="card">
       <h3>ອື່ນໆ</h3>
-      <button class="btn danger" id="resetAll">ລ້າງທຸກຖ້ຽວ ແລະ ຜົນ</button>
+      <button class="btn danger" id="resetAll">ລ້າງທຸກລ່ອງ ແລະ ຜົນ</button>
       <a class="btn" href="live.html" data-standalone>ໄປໜ້າລວມກິລາ (Mee Live)</a>
       <button class="btn" id="out" data-standalone>ອອກຈາກລະບົບ</button>
     </section>
@@ -350,9 +359,9 @@
 
   function render() {
     const h = H(), n = S.heats.length;
-    tog('tgShow', S.show !== false, 'ປ້າຍ: '); tog('tgTick', S.tickerOn !== false, 'ແຖບລຸ່ມ: ');
+    tog('tgShow', S.show !== false); tog('tgTick', S.tickerOn !== false);
     $('scrOff').hidden = S.show !== false;
-    $('hTitle').textContent = 'ຖ້ຽວທີ ' + (S.cur + 1) + ' / ' + n;
+    $('hTitle').textContent = 'ລ່ອງທີ ' + (S.cur + 1) + ' / ' + n;
     $('hSub').textContent = [h.round || S.round, h.cat || S.cat].filter(Boolean).join(' · ');
     $('hPrev').disabled = S.cur <= 0; $('hNext').disabled = S.cur >= n - 1;
     ['A', 'B'].forEach((side) => {
@@ -363,11 +372,11 @@
       $('lane' + side).querySelector('.win').textContent = h.w === k ? '🏆 ຊະນະແລ້ວ (ກົດເພື່ອຍົກເລີກ)' : '🏆 ' + laneName(k) + ' ຊະນະ';
     });
     setVal($('hNote'), h.note || ''); setVal($('hCat'), h.cat || ''); setVal($('hRound'), h.round || '');
-    $('hCat').placeholder = 'ປະເພດເຮືອ ຖ້ຽວນີ້ (ຄ່າເລີ່ມ: ' + (S.cat || '—') + ')';
-    $('hRound').placeholder = 'ຮອບ ຖ້ຽວນີ້ (ຄ່າເລີ່ມ: ' + (S.round || '—') + ')';
+    $('hCat').placeholder = 'ປະເພດເຮືອ ລ່ອງນີ້ (ຄ່າເລີ່ມ: ' + (S.cat || '—') + ')';
+    $('hRound').placeholder = 'ຮອບ ລ່ອງນີ້ (ຄ່າເລີ່ມ: ' + (S.round || '—') + ')';
     $('hDel').disabled = n <= 1;
-    // ລາຍການຖ້ຽວ
-    $('hlCount').textContent = n + ' ຖ້ຽວ';
+    // ລາຍການລ່ອງ
+    $('hlCount').textContent = n + ' ລ່ອງ';
     $('hlist').innerHTML = S.heats.map((x, i) => `<li class="${i === S.cur ? 'cur' : ''}"><span class="n">${i + 1}</span>
       <button class="go" data-go="${i}">${esc(x.r.name || '—')} <span class="muted">vs</span> ${esc(x.l.name || '—')}
       <small>${x.w ? '🏆 ' + esc(x[x.w].name || laneName(x.w)) + (x.note ? ' · ' + esc(x.note) : '') : 'ຍັງບໍ່ມີຜົນ'}${x.cat ? ' · ' + esc(x.cat) : ''}</small></button>
@@ -387,7 +396,7 @@
     setVal($('lgText'), S.logoText == null ? 'VS' : S.logoText);
   }
 
-  // ---------- ຖ້ຽວປັດຈຸບັນ
+  // ---------- ລ່ອງປັດຈຸບັນ
   document.addEventListener('input', (e) => {
     const i = e.target; if (!S) return;
     if (i.dataset.f && i.dataset.s) { H()[laneOf(i.dataset.s)][i.dataset.f] = i.value; saveSoon(); renderList(); return; }
@@ -408,13 +417,13 @@
   $('hSwap').onclick = () => { const h = H(), r = h.r; h.r = h.l; h.l = r; if (h.w) h.w = h.w === 'r' ? 'l' : 'r'; save(); render(); toast('ສະລັບເລນແລ້ວ'); };
   const go = (i) => { S.cur = clamp(i, 0, S.heats.length - 1); save(); render(); };
   $('hPrev').onclick = () => go(S.cur - 1); $('hNext').onclick = () => go(S.cur + 1);
-  $('hAdd').onclick = () => { S.heats.splice(S.cur + 1, 0, newHeat()); S.cur++; save(); render(); toast('ເພີ່ມຖ້ຽວທີ ' + (S.cur + 1)); setTimeout(() => document.querySelector('[data-s="A"][data-f="name"]').focus(), 50); };
+  $('hAdd').onclick = () => { S.heats.splice(S.cur + 1, 0, newHeat()); S.cur++; save(); render(); toast('ເພີ່ມລ່ອງທີ ' + (S.cur + 1)); setTimeout(() => document.querySelector('[data-s="A"][data-f="name"]').focus(), 50); };
   let delArm = false;
   $('hDel').onclick = () => {
     if (S.heats.length <= 1) return;
-    if (!delArm) { delArm = true; $('hDel').textContent = 'ກົດອີກເທື່ອ ເພື່ອລຶບ'; setTimeout(() => { delArm = false; $('hDel').textContent = 'ລຶບຖ້ຽວນີ້'; }, 3000); return; }
-    delArm = false; $('hDel').textContent = 'ລຶບຖ້ຽວນີ້';
-    S.heats.splice(S.cur, 1); S.cur = clamp(S.cur, 0, S.heats.length - 1); save(); render(); toast('ລຶບຖ້ຽວແລ້ວ');
+    if (!delArm) { delArm = true; $('hDel').textContent = 'ກົດອີກເທື່ອ ເພື່ອລຶບ'; setTimeout(() => { delArm = false; $('hDel').textContent = 'ລຶບລ່ອງນີ້'; }, 3000); return; }
+    delArm = false; $('hDel').textContent = 'ລຶບລ່ອງນີ້';
+    S.heats.splice(S.cur, 1); S.cur = clamp(S.cur, 0, S.heats.length - 1); save(); render(); toast('ລຶບລ່ອງແລ້ວ');
   };
   $('hlist').addEventListener('click', (e) => {
     const g = e.target.closest('[data-go]'); if (g) { go(+g.dataset.go); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -423,7 +432,7 @@
     const i = +r.dataset.rm; S.heats.splice(i, 1); if (S.cur >= i && S.cur > 0) S.cur--; save(); render();
   });
   $('tgShow').onclick = () => { S.show = S.show === false; save(); render(); toast(S.show ? 'ປ້າຍຂຶ້ນເທິງໄລ້ແລ້ວ' : 'ເຊື່ອງປ້າຍແລ້ວ'); };
-  $('tgTick').onclick = () => { S.tickerOn = S.tickerOn === false; save(); render(); };
+  $('tgTick').onclick = () => { S.tickerOn = S.tickerOn === false; save(); render(); toast(S.tickerOn ? 'ແຖບລາຍລະອຽດຂຶ້ນແລ້ວ' : 'ເຊື່ອງແຖບລາຍລະອຽດແລ້ວ'); };
   const onSeg = (id, fn) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; fn(b.dataset.v); save(); render(); });
   onSeg('segM', (v) => { S.ticker.mode = v; });
   onSeg('segT', (v) => { S.theme = v; S.c1 = ''; S.c2 = ''; });
@@ -449,8 +458,8 @@
   $('lgRm').onclick = () => { S.logo = ''; save(); render(); };
   let rsArm = false;
   $('resetAll').onclick = () => {
-    if (!rsArm) { rsArm = true; $('resetAll').textContent = 'ກົດອີກເທື່ອ ເພື່ອລ້າງທັງໝົດ'; setTimeout(() => { rsArm = false; $('resetAll').textContent = 'ລ້າງທຸກຖ້ຽວ ແລະ ຜົນ'; }, 4000); return; }
-    rsArm = false; $('resetAll').textContent = 'ລ້າງທຸກຖ້ຽວ ແລະ ຜົນ';
+    if (!rsArm) { rsArm = true; $('resetAll').textContent = 'ກົດອີກເທື່ອ ເພື່ອລ້າງທັງໝົດ'; setTimeout(() => { rsArm = false; $('resetAll').textContent = 'ລ້າງທຸກລ່ອງ ແລະ ຜົນ'; }, 4000); return; }
+    rsArm = false; $('resetAll').textContent = 'ລ້າງທຸກລ່ອງ ແລະ ຜົນ';
     S.heats = [newHeat()]; S.cur = 0; save(); render(); toast('ລ້າງແລ້ວ');
   };
   $('copy').onclick = () => { const u = $('url').value; try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), () => { $('url').select(); }); } catch (e) { $('url').select(); } };
@@ -477,8 +486,11 @@
   let baseSize = 1;
   const previewBoat = (o) => frames().forEach((f) => { try { f.contentWindow.__mbPreview && f.contentWindow.__mbPreview.set(o); } catch (e) {} });
   const editHandler = {
-    accept: (key) => key === 'boat' || key.startsWith('x:'),
+    accept: (key) => key === 'boat' || key === 'boattick' || key.startsWith('x:'),
+    fixed: (key) => key === 'boattick',
     actions(key) {
+      if (key === 'boat') return [{ label: 'ເຊື່ອງປ້າຍ', run: () => { S.show = false; save(); render(); toast('ເຊື່ອງປ້າຍແລ້ວ — ເປີດຄືນຢູ່ປຸ່ມ "ປ້າຍຄູ່ແຂ່ງ"'); } }];
+      if (key === 'boattick') return [{ label: 'ເຊື່ອງແຖບລຸ່ມ', run: () => { S.tickerOn = false; save(); render(); toast('ເຊື່ອງແຖບລາຍລະອຽດແລ້ວ'); } }];
       if (!key || !key.startsWith('x:') || !ex || !ex.has(key.slice(2))) return [];
       const id = key.slice(2);
       return [{ label: 'ເຊື່ອງ', run: () => ex.hide(id) }, { label: 'ລຶບ', cls: 'del', confirm: 'ກົດອີກເທື່ອເພື່ອລຶບ', run: () => ex.remove(id) }];
@@ -493,6 +505,8 @@
     },
   };
   frames().forEach((f) => MeeEditor.attach(f, editHandler));
+  new MutationObserver(() => { const n = $('exList').querySelectorAll('.xp-it').length; $('exCount').textContent = n ? n + ' ອັນ' : ''; }).observe($('exList'), { childList: true });
+
 
   // ---------- ເລີ່ມ
   function start() {

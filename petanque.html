@@ -174,7 +174,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="config.js?v=3"></script>
 <script src="common.js?v=3"></script>
-<script src="mee-editor.js?v=5"></script>
+<script src="mee-editor.js?v=6"></script>
 <script src="extras-panel.js?v=4"></script>
 </head>
 <body>
@@ -234,6 +234,15 @@
     <button class="btn" id="undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>ຍົກເລີກຮອບລ່າສຸດ</button>
   </div>
 
+  <details class="hist" id="exBox"><summary>🖼️ ໜັງສື ແລະ ຮູບ ເທິງໄລ້ <span class="muted" id="exCount"></span></summary>
+      <div style="padding:0 12px 12px;display:grid;gap:10px">
+        <div class="grid2" style="grid-template-columns:1fr 1fr"><button class="btn primary" id="exAddT" type="button">＋ ໜັງສື</button><label class="btn primary" for="exUp">＋ ຮູບ / ໂລໂກ້</label></div>
+        <input type="file" id="exUp" accept="image/*" hidden>
+        <p class="muted" style="margin:0;font-size:13px">ຍ້າຍ/ຂະຫຍາຍ: ແຕະໃນກ່ອງໜ້າຈໍໄລ້ແລ້ວລາກ. ກົດຊື່ໃນລາຍການເພື່ອແກ້ສີ, ຟອນ, ເອັບເຟັກ. ໃຊ້ຮ່ວມທຸກກິລາ.</p>
+        <div class="xp-list" id="exList"></div>
+        <div id="exImpWrap" class="field" hidden><span class="lab">ນຳເຂົ້າຈາກ Studio ເກົ່າ</span><div id="exImp"></div></div>
+      </div>
+    </details>
   <details class="hist" id="histBox"><summary>ປະຫວັດແຕ່ລະຮອບ <span class="muted" id="hc"></span></summary><ul id="hist"></ul></details>
   </div>
 </main>
@@ -278,16 +287,8 @@
     </section>
 
     <section class="card" data-standalone>
-      <h3><span class="n">4</span>ໜັງສື ແລະ ຮູບ ເທິງໄລ້</h3>
-      <div class="grid2" style="grid-template-columns:1fr 1fr"><button class="btn" id="exAddT" type="button">＋ ໜັງສື</button><label class="btn" for="exUp">＋ ຮູບ / ໂລໂກ້</label></div>
-      <input type="file" id="exUp" accept="image/*" hidden>
-      <p class="muted" style="margin:0;font-size:13px">ຍ້າຍ ແລະ ປັບຂະໜາດ: ແຕະທີ່ໜັງສື ຫຼື ຮູບ ໃນກ່ອງຕົວຢ່າງຂ້າງເທິງ ແລ້ວລາກ, ດຶງຈຸດເຫຼືອງເພື່ອປັບຂະໜາດ. ເປີດ/ປິດດ່ວນໄດ້ຢູ່ໜ້າຫຼັກ (ໃຕ້ກ່ອງໜ້າຈໍໄລ້).</p>
-      <div class="xp-list" id="exList"></div>
-      <div id="exImpWrap" class="field" hidden><span class="lab">ນຳເຂົ້າຈາກ Studio ເກົ່າ (ເລືອກໜ້າຈໍ ແລ້ວກົດນຳເຂົ້າ)</span><div id="exImp"></div></div>
-    </section>
-
     <section class="card" data-standalone>
-      <h3><span class="n">5</span>ລິ້ງ Web ຂອງ Live Now</h3>
+      <h3><span class="n">4</span>ລິ້ງ Web ຂອງ Live Now</h3>
       <div class="link"><input type="text" id="url" readonly><button class="btn" id="copy">ກັອບປີ້</button></div>
       <p class="muted" style="margin:0;font-size:13px">ລິ້ງດຽວກັບ Studio. ຖ້າໃສ່ໄວ້ໃນ Live Now ແລ້ວ ບໍ່ຕ້ອງປ່ຽນ.</p>
     </section>
@@ -536,6 +537,8 @@
     },
   };
   frames().forEach((f) => MeeEditor.attach(f, editHandler));
+  new MutationObserver(() => { const n = $('exList').querySelectorAll('.xp-it').length; $('exCount').textContent = n ? n + ' ອັນ' : ''; }).observe($('exList'), { childList: true });
+
 
   // ---------- ຕິດຕັ້ງເປັນແອັບ (PWA)
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;

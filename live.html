@@ -300,9 +300,9 @@
       return `<b>${esc((t[0] || {}).name || 'ທີມ A')} ${sc[0]} – ${sc[1]} ${esc((t[1] || {}).name || 'ທີມ B')}</b><br>ເຊັດທີ ${sets + 1} · ຮອບທີ ${list(S.ends).length + 1}`;
     },
     boat(S) {
-      if (!S) return 'ຍັງບໍ່ໄດ້ຕັ້ງຖ້ຽວ';
+      if (!S) return 'ຍັງບໍ່ໄດ້ຕັ້ງລ່ອງ';
       const hs = list(S.heats), i = Math.min(hs.length - 1, +S.cur || 0), h = hs[i] || {};
-      return `<b>${esc((h.r || {}).name || '—')} vs ${esc((h.l || {}).name || '—')}</b><br>ຖ້ຽວທີ ${i + 1} / ${hs.length || 1}${h.w ? ' · ມີຜົນແລ້ວ' : ''}`;
+      return `<b>${esc((h.r || {}).name || '—')} vs ${esc((h.l || {}).name || '—')}</b><br>ລ່ອງທີ ${i + 1} / ${hs.length || 1}${h.w ? ' · ມີຜົນແລ້ວ' : ''}`;
     },
   };
   function renderHome() {
@@ -318,7 +318,7 @@
   function route() {
     const id = location.hash.slice(1);
     const sp = SPORTS.find((s) => s.id === id && !s.soon), pg = PAGES[id];
-    if (!sp && !pg) { cur = null; $('view').hidden = true; $('home').hidden = false; document.title = 'Mee Live'; renderHome(); return; }
+    if (!sp && !pg) { fromHome = false; cur = null; $('view').hidden = true; $('home').hidden = false; document.title = 'Mee Live'; renderHome(); return; }
     cur = id; $('home').hidden = true; $('view').hidden = false;
     $('vTitle').textContent = sp ? sp.icon + ' ' + sp.name : '🖼️ ' + pg.name;
     Object.values(frames).forEach((f) => { f.hidden = true; });
@@ -329,8 +329,10 @@
     try { if (sp) localStorage.setItem('mee-live-sport', id); } catch (e) {}
     renderHome();
   }
-  document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) location.hash = b.dataset.open; });
-  $('back').onclick = () => { if (history.length > 1 && location.hash) history.back(); else location.hash = ''; };
+  // ກັບໜ້າຫຼັກ: ຖ້າເຂົ້າມາຈາກໜ້າຫຼັກ → history.back(); ຖ້າເປີດກົງເຂົ້າກິລາ (reload) → ລ້າງ #hash
+  let fromHome = false;
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) { fromHome = true; location.hash = b.dataset.open; } });
+  $('back').onclick = () => { if (fromHome) history.back(); else location.hash = ''; };
   addEventListener('hashchange', route);
 
   $('copy').onclick = () => { const u = $('url').value; try { navigator.clipboard.writeText(u).then(() => toast('ກັອບປີ້ລິ້ງແລ້ວ'), () => $('url').select()); } catch (e) { $('url').select(); } };
