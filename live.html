@@ -323,7 +323,7 @@
     $('vTitle').textContent = sp ? sp.icon + ' ' + sp.name : '🖼️ ' + pg.name;
     Object.values(frames).forEach((f) => { f.hidden = true; });
     let f = frames[id];
-    if (!f) { f = frames[id] = document.createElement('iframe'); f.title = $('vTitle').textContent; f.src = (sp || pg).url + '?embed=1'; f.allow = 'clipboard-write'; $('vbody').appendChild(f); }
+    if (!f) { f = frames[id] = document.createElement('iframe'); f.title = $('vTitle').textContent; f.src = (sp || pg).url + '?embed=1&t=' + Date.now();   // ໂຫຼດໂຕລ່າສຸດສະເໝີ (ບໍ່ໃຊ້ cache) f.allow = 'clipboard-write'; $('vbody').appendChild(f); }
     else if (sp) { try { f.contentWindow.postMessage({ type: 'mee-activate' }, location.origin); } catch (e) {} }
     f.hidden = false; document.title = 'Mee Live · ' + (sp || pg).name;
     try { if (sp) localStorage.setItem('mee-live-sport', id); } catch (e) {}
