@@ -314,6 +314,9 @@
 
     // ---------- ລາກວາງ (ເອີ້ນຈາກ MeeEditor): fx/fy ສັດສ່ວນຂອງກ່ອງຕົວຢ່າງ → px ໃນຈໍ 1920×1080
     return {
+      has: (id) => !!items[id],
+      hide(id) { edit(id, (x) => { x.visible = false; }); toast('ເຊື່ອງແລ້ວ (ເປີດຄືນໄດ້ຢູ່ປຸ່ມລຸ່ມກ່ອງໜ້າຈໍໄລ້)'); },
+      remove(id) { delete items[id]; db.remove(path(id)).then(() => toast('ລຶບແລ້ວ')); render(); },
       start(id) { if (items[id]) base[id] = clone(Object.assign({}, items[id], { id })); },
       change(id, p, final, live, ifr) {
         const b = base[id]; if (!b) return;

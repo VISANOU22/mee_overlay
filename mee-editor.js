@@ -13,6 +13,10 @@
   .me-frame .me-rz { position:absolute; right:-3px; bottom:-3px; width:30px; height:30px; border-radius:50%; background:#ffc21a;
     border:3px solid #0c0e13; cursor:nwse-resize; touch-action:none; box-shadow:0 2px 6px rgba(0,0,0,.5); }
   .me-frame .me-rz::after { content:""; position:absolute; inset:7px; border-right:2px solid #1a1404; border-bottom:2px solid #1a1404; }
+  .me-bar { position:absolute; z-index:4; display:flex; gap:6px; transform:translateY(-100%); padding-bottom:6px; }
+  .me-bar button { min-height:34px; padding:0 12px; border-radius:9px; border:0; font:700 13.5px 'MeeLao','Noto Sans Lao',sans-serif;
+    background:#0c0e13; color:#fff; box-shadow:0 2px 8px rgba(0,0,0,.5); }
+  .me-bar button.del { background:#e0261b; }
   .me-hint { position:absolute; right:6px; top:6px; z-index:1; font-size:12px; color:#fff; background:rgba(0,0,0,.6);
     padding:2px 8px; border-radius:6px; pointer-events:none; transition:opacity .3s; }
   .me-hint.dim { opacity:0; }`;
@@ -27,7 +31,8 @@
     const frame = document.createElement('div'); frame.className = 'me-frame'; frame.hidden = true;
     frame.innerHTML = '<span class="me-rz" title="ປັບຂະໜາດ"></span>';
     const hint = document.createElement('span'); hint.className = 'me-hint'; hint.textContent = 'ແຕະສະກໍ, ໜັງສື ຫຼື ຮູບ ເພື່ອຍ້າຍ / ປັບຂະໜາດ';
-    pre.append(catcher, frame, hint);
+    const bar = document.createElement('div'); bar.className = 'me-bar'; bar.hidden = true;
+    pre.append(catcher, frame, bar, hint);
 
     let sel = null, drag = null, hideT = null;
     const rank = (n) => (n.closest('.mp-root') ? 100000 : 0) + (parseInt(n.style.zIndex, 10) || 0);
@@ -41,10 +46,33 @@
       if (!r) { deselect(); return; }
       Object.assign(frame.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
       frame.hidden = false;
+      placeBar(r);
+    }
+    // ປຸ່ມດ່ວນເທິງກອບ (ເຊັ່ນ ເຊື່ອງ / ລຶບ) — handler.actions(key) → [{ label, cls, run }]
+    let barKey = null;
+    function placeBar(r) {
+      const acts = handler.actions ? handler.actions(sel) || [] : [];
+      if (!acts.length) { bar.hidden = true; return; }
+      if (barKey !== sel) {
+        barKey = sel; bar.innerHTML = '';
+        acts.forEach((a) => {
+          const b = document.createElement('button'); b.type = 'button'; b.textContent = a.label; if (a.cls) b.className = a.cls;
+          b.addEventListener('pointerdown', (e) => e.stopPropagation());
+          b.addEventListener('click', (e) => {
+            e.stopPropagation(); clearTimeout(hideT);
+            if (a.confirm && !b.dataset.arm) { b.dataset.arm = 1; const t = b.textContent; b.textContent = a.confirm; setTimeout(() => { delete b.dataset.arm; b.textContent = t; }, 3000); autoHide(4000); return; }
+            a.run(); deselect();
+          });
+          bar.appendChild(b);
+        });
+      }
+      const top = Math.max(40, r.top);
+      Object.assign(bar.style, { left: Math.max(0, Math.min(r.left, ifr.clientWidth - 170)) + 'px', top: top + 'px' });
+      bar.hidden = false;
     }
     function select(key) { sel = key; clearTimeout(hideT); hint.classList.add('dim'); place(); }
-    function deselect() { sel = null; frame.hidden = true; clearTimeout(hideT); hint.classList.remove('dim'); }
-    const autoHide = () => { clearTimeout(hideT); hideT = setTimeout(deselect, 2500); };
+    function deselect() { sel = null; barKey = null; frame.hidden = true; bar.hidden = true; clearTimeout(hideT); hint.classList.remove('dim'); }
+    const autoHide = (ms) => { clearTimeout(hideT); hideT = setTimeout(deselect, ms || (handler.actions && handler.actions(sel) && handler.actions(sel).length ? 4000 : 2500)); };
     setInterval(place, 300);
 
     function begin(e, key, mode) {
@@ -96,6 +124,7 @@
       if (!hit) { deselect(); return; }
       begin(e, hit.dataset.edit, 'move');
     });
+    bar.addEventListener('pointerenter', () => clearTimeout(hideT));
     frame.addEventListener('pointerdown', (e) => { if (sel) begin(e, sel, e.target.closest('.me-rz') ? 'size' : 'move'); });
     [catcher, frame].forEach((n) => {
       n.addEventListener('pointermove', move);
